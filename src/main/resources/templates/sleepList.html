@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Sleep List</title>
+</head>
+<body>
+<h2>Your Sleep Entries</h2>
+<div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+<table border="1">
+    <thead>
+    <tr>
+        <th>
+            <a th:href="@{/sleep/list(sort='date', dir=${currentSort == 'date' and currentDir == 'asc' ? 'desc' : 'asc'})}">
+                Date
+            </a>
+            <span th:if="${currentSort == 'date'}" th:text="${currentDir == 'asc' ? '↑' : '↓'}"></span>
+        </th>
+        <th>Start Time</th>
+        <th>End Time</th>
+        <th>
+            <a th:href="@{/sleep/list(sort='quality', dir=${currentSort == 'quality' and currentDir == 'asc' ? 'desc' : 'asc'})}">
+                Quality
+            </a>
+            <span th:if="${currentSort == 'quality'}" th:text="${currentDir == 'asc' ? '↑' : '↓'}"></span>
+        </th>
+        <th>Notes</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="entry : ${sleepEntries}">
+        <td th:text="${entry.date}"></td>
+        <td th:text="${entry.startTime}"></td>
+        <td th:text="${entry.endTime}"></td>
+        <td th:text="${entry.quality}"></td>
+        <td th:text="${entry.notes}"></td>
+    </tr>
+    </tbody>
+</table>
+
+<div>
+    <span th:text="'Page ' + ${sleepEntries.number + 1} + ' of ' + ${sleepEntries.totalPages}"></span>
+</div>
+
+<!-- Pagination controls -->
+<div>
+    <ul>
+        <!-- Previous page link, disabled if first page -->
+        <li th:classappend="${sleepEntries.first} ? 'disabled'">
+            <a th:href="@{/sleep/list(page=${sleepEntries.number - 1}, size=${sleepEntries.size})}"
+               th:if="${!sleepEntries.first}">Previous</a>
+            <span th:if="${sleepEntries.first}">Previous</span>
+        </li>
+
+        <!-- Page numbers -->
+        <li th:each="i : ${#numbers.sequence(0, sleepEntries.totalPages - 1)}"
+            th:classappend="${i == sleepEntries.number} ? 'active'">
+            <a th:href="@{/sleep/list(page=${i}, size=${sleepEntries.size})}"
+               th:text="${i + 1}">1</a>
+        </li>
+
+        <!-- Next page link, disabled if last page -->
+        <li th:classappend="${sleepEntries.last} ? 'disabled'">
+            <a th:href="@{/sleep/list(page=${sleepEntries.number + 1}, size=${sleepEntries.size})}"
+               th:if="${!sleepEntries.last}">Next</a>
+            <span th:if="${sleepEntries.last}">Next</span>
+        </li>
+    </ul>
+</div>
+
+</body>
+</html>
+

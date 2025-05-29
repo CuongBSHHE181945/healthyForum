@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Sleep Entry Form</title>
+    <style>
+        body { font-family: Arial; background: #f9f9f9; padding: 20px; }
+        .container { background: #fff; padding: 20px; border-radius: 10px; max-width: 500px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        label { display: block; margin-top: 15px; font-weight: bold; }
+        input, select, textarea { width: 100%; padding: 8px; margin-top: 5px; border-radius: 5px; border: 1px solid #ccc; }
+        button { margin-top: 20px; background-color: #28a745; color: white; border: none; padding: 10px; border-radius: 5px; font-size: 16px; cursor: pointer; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Log Your Sleep</h2>
+    <form action="#" th:action="@{/sleep/form/submit}" th:object="${sleepEntry}" method="post">
+        <!--<input type="hidden" th:field="*{sleepEntry.user}" />-->
+
+        <label for="date">Date</label>
+        <input type="date" id="date" th:field="*{date}" required />
+
+        <label for="startTime">Start Time</label>
+        <input type="time" id="startTime" th:field="*{startTime}" required />
+
+        <label for="endTime">End Time</label>
+        <input type="time" id="endTime" th:field="*{endTime}" required />
+
+        <label for="quality">Sleep Quality (1-10)</label>
+        <select id="quality" th:field="*{quality}" required>
+            <option th:value="10">-- Select --</option>
+            <option th:each="i : ${#numbers.sequence(1,10)}" th:value="${i}" th:text="${i}"></option>
+        </select>
+
+        <label for="notes">Notes</label>
+        <textarea id="notes" rows="3" th:field="*{notes}" placeholder="Optional..."></textarea>
+
+        <button type="submit">Submit</button>
+    </form>
+</div>
+</body>
+</html>
