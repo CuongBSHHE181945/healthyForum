@@ -5,10 +5,12 @@ import com.healthyForum.model.SleepEntry;
 import com.healthyForum.model.User;
 import com.healthyForum.repository.SleepRepository;
 import com.healthyForum.repository.UserRepository;
+import com.healthyForum.service.DateValidate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -21,6 +23,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.security.Principal;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Controller
@@ -38,6 +43,8 @@ public class SleepController {
     public String showSleepList(
             @RequestParam(defaultValue = "date") String sort,
             @RequestParam(defaultValue = "asc") String dir,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             Model model,
             Pageable pageable,
             Principal principal
@@ -49,7 +56,15 @@ public class SleepController {
         Sort sortObj = Sort.by(direction, sort);
         PageRequest pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sortObj);
 
-        Page<SleepEntry> sleepEntries = sleepRepository.findByUser(user, pageRequest);
+        Page<SleepEntry> sleepEntries;
+
+        if(DateValidate.hasValidDateRange(startDate, endDate)){
+            sleepEntries = sleepRepository.findByUserAndDateBetween(user, startDate, endDate, pageRequest);
+        } else {
+            if (startDate != null && endDate != null)
+                model.addAttribute("errorMessage", "Invalid date range");
+            sleepEntries = sleepRepository.findByUser(user, pageRequest);
+        }
 
         model.addAttribute("sleepEntries", sleepEntries);
         model.addAttribute("currentSort", sort);
@@ -84,6 +99,14 @@ public class SleepController {
         return "sleepForm";
     }
 
+    @GetMapping("/edit/{sleepId}")
+    public String editSleepEntry(@PathVariable Long sleepId, Model model) {
+        SleepEntry sleepEntry = sleepRepository.findById(sleepId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Entry not found"));
+        model.addAttribute("sleepEntry", sleepEntry);
+        return "sleepForm"; // refers to templates/editSleepEntry.html
+    }
+
     @PostMapping
     public ResponseEntity<Void> createSleepEntry(@RequestBody SleepEntry newSleepEntryRequest,
                                                  UriComponentsBuilder ucb,
@@ -116,12 +139,36 @@ public class SleepController {
         User user = userRepository.findByUsername(principal.getName())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        sleepEntry.setUser(user);
-        sleepRepository.save(sleepEntry);
+        // ❌ Reject future dates
+        if (DateValidate.dateIsInFuture(sleepEntry.getDate())) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Sleep date cannot be in the future.");
+            return "redirect:/sleep/form";
+        }
 
-        // Add flash attribute for success message
+        // ✅ Duration validation
+        if (DateValidate.timeCalMin(sleepEntry.getStartTime(),sleepEntry.getEndTime(), sleepEntry.getDate()) > 960) { // e.g., more than 16 hours
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Are you sure you slept that long?");
+            return "redirect:/sleep/form";
+        }
+
+        if (sleepEntry.getSleepId() == null) {
+            // Create new entry
+            sleepEntry.setUser(user);
+            sleepRepository.save(sleepEntry);
+        } else {
+            // Update existing entry — only update allowed fields
+            SleepEntry existingEntry = sleepRepository.findById(sleepEntry.getSleepId())
+                    .orElseThrow(() -> new RuntimeException("Sleep entry not found"));
+
+            // Only allow updating editable fields
+            existingEntry.setQuality(sleepEntry.getQuality());
+            existingEntry.setNotes(sleepEntry.getNotes());
+
+            sleepRepository.save(existingEntry);
+        }
+
         redirectAttributes.addFlashAttribute("successMessage", "Entry saved successfully!");
-
         return "redirect:/sleep/list";
     }
 
