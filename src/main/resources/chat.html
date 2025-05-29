@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Healthy Forum Chat</title>
+    <link rel="stylesheet" href="/chating.css/style.css">
+</head>
+<body>
+
+<header>Healthy Forum Messaging</header>
+
+<div class="container">
+    <div class="message-list">
+        <!-- Example messages -->
+        <div class="message sender">
+            Hello! How are you?
+            <div class="message-time">10:05 AM</div>
+        </div>
+        <div class="message recipient">
+            I'm good, thank you!
+            <div class="message-time">10:06 AM</div>
+        </div>
+    </div>
+
+    <form class="send-form" th:action="@{/messages/send}" method="post">
+        <input type="text" name="content" placeholder="Type your message..." />
+        <button type="submit">Send</button>
+    </form>
+</div>
+
+</body>
+</html>

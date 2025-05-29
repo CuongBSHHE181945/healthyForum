@@ -1,4 +1,4 @@
-package com.healthyForum;
+package com.healthyForum.Controller;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -9,5 +9,4 @@ public class HealthyForumApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(HealthyForumApplication.class, args);
 	}
-
 }

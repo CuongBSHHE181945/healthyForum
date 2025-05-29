@@ -1,8 +1,8 @@
-package com.healthyForum;
+package com.healthyForum.Model;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
-@Entity
+@jakarta.persistence.Entity
 @Table(name = "messages")
 public class Message {
     @Id
