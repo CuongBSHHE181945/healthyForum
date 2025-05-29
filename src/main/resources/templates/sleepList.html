@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Sleep List</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <link rel="stylesheet" th:href="@{/css/sleepList.css}">
+</head>
+<body>
+<h2>Your Sleep Entries</h2>
+<div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+<div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+
+<a href="/sleep/form" class="btn btn-secondary">New sleep entry</a>
+
+<form th:action="@{/sleep/list}" method="get" class="filter-form">
+    <label>From:
+        <input type="date" name="startDate" th:value="${startDate}" required />
+    </label>
+    <label>To:
+        <input type="date" name="endDate" th:value="${endDate}" required />
+    </label>
+    <input type="hidden" name="sort" th:value="${currentSort}">
+    <input type="hidden" name="dir" th:value="${currentDir}">
+    <button type="submit">Filter</button>
+</form>
+
+<table>
+    <thead>
+    <tr>
+        <th>
+            <a th:href="@{/sleep/list(sort='date', dir=${currentSort == 'date' and currentDir == 'asc' ? 'desc' : 'asc'})}">
+                Date
+                <span th:if="${currentSort == 'date'}" th:text="${currentDir == 'asc' ? '↑' : '↓'}"></span>
+            </a>
+        </th>
+        <th>Start Time</th>
+        <th>End Time</th>
+        <th>
+            <a th:href="@{/sleep/list(sort='quality', dir=${currentSort == 'quality' and currentDir == 'asc' ? 'desc' : 'asc'})}">
+                Quality
+                <span th:if="${currentSort == 'quality'}" th:text="${currentDir == 'asc' ? '↑' : '↓'}"></span>
+            </a>
+        </th>
+        <th>Notes</th>
+        <th>Edit</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="entry : ${sleepEntries}">
+        <td th:text="${entry.date}"></td>
+        <td th:text="${entry.startTime}"></td>
+        <td th:text="${entry.endTime}"></td>
+        <td th:text="${entry.quality}"></td>
+        <td th:text="${entry.notes}"></td>
+        <td><a th:href="@{/sleep/edit/{id}(id=${entry.sleepId})}">Edit</a></td>
+    </tr>
+    </tbody>
+</table>
+
+<div class="page-info">
+    <span th:text="'Page ' + ${sleepEntries.number + 1} + ' of ' + ${sleepEntries.totalPages}"></span>
+</div>
+
+<!-- Pagination controls -->
+<div class="pagination">
+    <!-- Previous page link, disabled if first page -->
+    <li th:classappend="${sleepEntries.first} ? 'disabled'">
+        <a th:href="@{/sleep/list(page=${sleepEntries.number - 1}, size=${sleepEntries.size})}"
+           th:if="${!sleepEntries.first}">Previous</a>
+        <span th:if="${sleepEntries.first}">Previous</span>
+    </li>
+
+    <!-- Page numbers -->
+    <li th:each="i : ${#numbers.sequence(0, sleepEntries.totalPages - 1)}"
+        th:classappend="${i == sleepEntries.number} ? 'active'">
+        <a th:href="@{/sleep/list(page=${i}, size=${sleepEntries.size})}"
+           th:text="${i + 1}">1</a>
+    </li>
+
+    <!-- Next page link, disabled if last page -->
+    <li th:classappend="${sleepEntries.last} ? 'disabled'">
+        <a th:href="@{/sleep/list(page=${sleepEntries.number + 1}, size=${sleepEntries.size})}"
+           th:if="${!sleepEntries.last}">Next</a>
+        <span th:if="${sleepEntries.last}">Next</span>
+    </li>
+</div>
+
+</body>
+</html>
+
