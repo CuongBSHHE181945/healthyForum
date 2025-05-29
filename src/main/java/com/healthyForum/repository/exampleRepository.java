@@ -1,4 +1,4 @@
-package com.healthyForum.Repository;
+package com.healthyForum.repository;
 
 public interface exampleRepository {
 }

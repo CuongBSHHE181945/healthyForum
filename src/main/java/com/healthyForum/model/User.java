@@ -1,4 +1,4 @@
-package com.healthyForum.Entities;
+package com.healthyForum.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -8,15 +8,16 @@ import lombok.Data;
 
 @Entity
 @Data
-@Table(name = "meal_planner")
-public class mealPLanner {
+@Table(name = "USER")
+public class User {
+
     @Id
     @Column(name = "ID")
     private int id;
 
-    @Column(name = "meal_name")
-    private String mealName;
+    @Column(name = "username")
+    private String username;
 
-    @Column(name="meal_type")
-    private String mealType;
+    @Column(name="password")
+    private String password;
 }
