@@ -1,64 +1,49 @@
 package com.healthyForum.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import java.time.LocalDate;
-import java.util.List;
+
+import java.util.Date;
 
 @Entity
-@Data
 @Table(name = "user")
-public class User {
+public class User{
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long userID;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "username")
     private String username;
 
-    @Column(nullable = false)
+    @Column(name="password")
     private String password;
 
-    @Column(nullable = false)
+    @Column(name="fullname")
     private String fullname;
 
-    @Column(nullable = false, unique = true)
+    @Column(name="email")
     private String email;
 
-    @Column(nullable = false)
-    private String gender;
+    @Column(name="gender")
+    private boolean gender;
 
-    @Column(nullable = false)
-    private LocalDate dob;
+    @Column(name="dob")
+    private Date dob;
 
-    @Column(nullable = false)
+    @Column(name="address")
     private String address;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<SleepEntry> sleepEntries;
 
     public User() {
     }
 
-    // Getters and setters...
-    public User(Long userID, String username, String password, String fullname, String gender, String email, LocalDate dob, String address) {
-        this.userID = userID;
+    public User(String username, String password, String fullname, String email, boolean gender, Date dob, String address) {
         this.username = username;
         this.password = password;
         this.fullname = fullname;
-        this.gender = gender;
         this.email = email;
+        this.gender = gender;
         this.dob = dob;
         this.address = address;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
     }
 
     public Long getUserID() {
@@ -67,6 +52,14 @@ public class User {
 
     public void setUserID(Long userID) {
         this.userID = userID;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getPassword() {
@@ -93,20 +86,20 @@ public class User {
         this.email = email;
     }
 
-    public LocalDate getDob() {
-        return dob;
-    }
-
-    public void setDob(LocalDate dob) {
-        this.dob = dob;
-    }
-
-    public String getGender() {
+    public boolean isGender() {
         return gender;
     }
 
-    public void setGender(String gender) {
+    public void setGender(boolean gender) {
         this.gender = gender;
+    }
+
+    public Date getDob() {
+        return dob;
+    }
+
+    public void setDob(Date dob) {
+        this.dob = dob;
     }
 
     public String getAddress() {

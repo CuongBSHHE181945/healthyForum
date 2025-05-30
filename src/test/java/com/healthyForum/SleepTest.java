@@ -1,6 +1,5 @@
 package com.healthyForum;
 
-import com.healthyForum.model.SleepEntry;
 import com.healthyForum.model.User;
 import com.healthyForum.repository.UserRepository;
 import com.jayway.jsonpath.DocumentContext;
@@ -17,7 +16,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import java.net.URI;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
