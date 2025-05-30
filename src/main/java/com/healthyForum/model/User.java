@@ -1,23 +1,39 @@
-package com.healthyForum.model;
+    package com.healthyForum.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.Data;
+    import jakarta.persistence.*;
+    import lombok.Data;
 
-@Entity
-@Data
-@Table(name = "USER")
-public class User {
+    import java.time.LocalDate;
 
-    @Id
-    @Column(name = "ID")
-    private int id;
+    @Entity
+    @Data
+    @Table(name = "USER")
+    public class User {
 
-    @Column(name = "username")
-    private String username;
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        private Long userID;
 
-    @Column(name="password")
-    private String password;
-}
+        @Column(nullable = false, unique = true)
+        private String username;
+
+        @Column(nullable = false)
+        private String password;
+
+        @Column(nullable = false)
+        private String fullname;
+
+        @Column(nullable = false, unique = true)
+        private String email;
+
+        @Column(nullable = false)
+        private String gender;
+
+        @Column(nullable = false)
+        private LocalDate dob;
+
+        @Column(nullable = false)
+        private String address;
+
+        // Getters and setters...
+    }
