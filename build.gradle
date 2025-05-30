@@ -26,6 +26,7 @@ repositories {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+
 	implementation 'mysql:mysql-connector-java:8.0.33'
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -39,6 +40,15 @@ dependencies {
 
 	testCompileOnly("org.projectlombok:lombok:1.18.38")
 	testAnnotationProcessor("org.projectlombok:lombok:1.18.38")
+  
+  // Validation API
+  implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
+
+	// Hibernate Validator (provides runtime implementation)
+	implementation 'org.hibernate.validator:hibernate-validator:8.0.1.Final'
+
+	// Optional but useful:
+	implementation 'org.glassfish:jakarta.el:4.0.2' // EL processor required by validator
 }
 
 tasks.named('test') {
