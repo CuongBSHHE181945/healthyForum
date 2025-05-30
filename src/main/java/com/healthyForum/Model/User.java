@@ -13,11 +13,20 @@ public class User {
 
     @Id
     @Column(name = "ID")
-    private int id;
+    private Long id;
 
     @Column(name = "username")
     private String username;
 
     @Column(name="password")
     private String password;
+
+    public User() {
+    }
+
+    public User(Long id, String username, String password) {
+        this.id = id;
+        this.username = username;
+        this.password = password;
+    }
 }

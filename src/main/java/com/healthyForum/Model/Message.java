@@ -8,38 +8,52 @@ public class Message {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 
-    private Long messageId;
-    private Long senderId;
-    private Long receiverId;
+    private Long Id;
+
+    @ManyToOne
+    @JoinColumn(name = "sender_Id")
+    private User sender;
+
+    @ManyToOne
+    @JoinColumn(name = "receiver_Id")
+    private User receiver;
 
     @Column(columnDefinition = "TEXT")
-
     private String content;
     private LocalDateTime timestamp = LocalDateTime.now();
     private Boolean isRead = false;
 
-    public Long getMessageId() {
-        return messageId;
+    public Message(){
     }
 
-    public void setMessageId(Long messageId) {
-        messageId = messageId;
+    public Message(User sender, User receiver, String content) {
+        this.sender = sender;
+        this.receiver = receiver;
+        this.content = content;
     }
 
-    public Long getSenderId() {
-        return senderId;
+    public Long getId() {
+        return Id;
     }
 
-    public void setSenderId(Long senderId) {
-        this.senderId = senderId;
+    public void setId(Long id) {
+        id = id;
     }
 
-    public Long getReceiverId() {
-        return receiverId;
+    public User getSender() {
+        return sender;
     }
 
-    public void setReceiverId(Long receiverId) {
-        this.receiverId = receiverId;
+    public void setSenderId(User sender) {
+        this.sender = sender;
+    }
+
+    public User getReceiver() {
+        return receiver;
+    }
+
+    public void setReceiver(User receiver) {
+        this.receiver = receiver;
     }
 
     public LocalDateTime getTimestamp() {

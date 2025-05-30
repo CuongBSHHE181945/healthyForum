@@ -5,7 +5,7 @@ import java.util.List;
 
 
 public interface MessageRepository extends JpaRepository<Message, Long>{
-    List<Message> findByEntity(Long senderId, Long receiverId, Long receiverId2, Long senderId2);
+    List<Message> findBySender_IdAndReceiver_IdOrReceiver_IdAndSender_IdOrderByTimestampAsc(Long senderId, Long receiverId, Long receiverId2, Long senderId2);
 
-    long countByReceiverIdAndIsReadFalse(Long receiverId);
+    long countByReceiver_IdAndIsReadFalse(Long receiverId);
 }

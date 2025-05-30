@@ -11,17 +11,19 @@ public class MessageServiceImpl implements MessageService{
     private final MessageRepository messageRepository;
 
     public MessageServiceImpl(MessageRepository messageRepository) {
+
         this.messageRepository = messageRepository;
     }
 
     @Override
     public Message sendMessage(Message message) {
+
         return messageRepository.save(message);
     }
 
     @Override
     public List<Message> getConversation(Long userId1, Long userId2) {
-        return messageRepository.findByEntity(userId1, userId2, userId1, userId2);
+        return messageRepository.findBySender_IdAndReceiver_IdOrReceiver_IdAndSender_IdOrderByTimestampAsc(userId1, userId2, userId1, userId2);
     }
 
     @Override
@@ -42,6 +44,6 @@ public class MessageServiceImpl implements MessageService{
 
     @Override
     public long countUnreadMessages(Long userId) {
-        return messageRepository.countByReceiverIdAndIsReadFalse(userId);
+        return messageRepository.countByReceiver_IdAndIsReadFalse(userId);
     }
 }

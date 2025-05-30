@@ -1,4 +1,4 @@
-package com.healthyForum.Controller;
+package com.healthyForum;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
