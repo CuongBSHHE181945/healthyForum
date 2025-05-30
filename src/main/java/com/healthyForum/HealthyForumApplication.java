@@ -13,5 +13,4 @@ public class HealthyForumApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(HealthyForumApplication.class, args);
 	}
-
 }
