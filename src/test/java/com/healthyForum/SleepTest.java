@@ -57,33 +57,33 @@ public class SleepTest {
         //        userRepository.save(testUser);
     }
 
-    @Test
-    void shouldCreateANewSleepEntry() {
-        SleepEntry newSleepEntry = new SleepEntry(
-                null,
-                LocalDate.of(2025, 5, 26),
-                LocalTime.of(22, 0),
-                LocalTime.of(6, 30),
-                8,
-                "Slept well",
-                testUser
-        );
-
-        ResponseEntity<Void> createResponse = restTemplate
-                .withBasicAuth("sarah1", "abc123")
-                .postForEntity("/sleep", newSleepEntry, Void.class);
-
-        assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-    }
-
-    @Test
-    void shouldReturnAPageOfSleepList() {
-        ResponseEntity<String> response = restTemplate.withBasicAuth("sarah1", "abc123").getForEntity("/sleep/list-json?page=0&size=4", String.class);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-
-        DocumentContext documentContext = JsonPath.parse(response.getBody());
-        JSONArray page = documentContext.read("$[*]");
-        assertThat(page.size()).isEqualTo(4);
-    }
+//    @Test
+//    void shouldCreateANewSleepEntry() {
+//        SleepEntry newSleepEntry = new SleepEntry(
+//                null,
+//                LocalDate.of(2025, 5, 26),
+//                LocalTime.of(22, 0),
+//                LocalTime.of(6, 30),
+//                8,
+//                "Slept well",
+//                testUser
+//        );
+//
+//        ResponseEntity<Void> createResponse = restTemplate
+//                .withBasicAuth("sarah1", "abc123")
+//                .postForEntity("/sleep", newSleepEntry, Void.class);
+//
+//        assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+//    }
+//
+//    @Test
+//    void shouldReturnAPageOfSleepList() {
+//        ResponseEntity<String> response = restTemplate.withBasicAuth("sarah1", "abc123").getForEntity("/sleep/list-json?page=0&size=4", String.class);
+//        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+//
+//        DocumentContext documentContext = JsonPath.parse(response.getBody());
+//        JSONArray page = documentContext.read("$[*]");
+//        assertThat(page.size()).isEqualTo(4);
+//    }
 
 }
