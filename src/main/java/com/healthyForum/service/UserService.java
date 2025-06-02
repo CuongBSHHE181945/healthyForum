@@ -8,4 +8,8 @@ import java.util.List;
 @Service
 public interface UserService {
        public List<User> getAllUsers();
+       void suspendUser(Long userId);
+       void unsuspendUser(Long userId);
+
+
 }

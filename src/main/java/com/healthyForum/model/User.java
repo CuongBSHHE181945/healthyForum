@@ -33,10 +33,16 @@ public class User{
     @Column(name="address")
     private String address;
 
+    @Column(name = "suspended", nullable = false)
+    private boolean suspended = false; // Set default value
+
+
     public User() {
     }
 
-    public User(String username, String password, String fullname, String email, boolean gender, Date dob, String address) {
+
+    public User(Long userID, String username, String password, String fullname, String email, boolean gender, Date dob, String address, boolean suspended) {
+        this.userID = userID;
         this.username = username;
         this.password = password;
         this.fullname = fullname;
@@ -44,6 +50,7 @@ public class User{
         this.gender = gender;
         this.dob = dob;
         this.address = address;
+        this.suspended = suspended;
     }
 
     public Long getUserID() {
@@ -108,5 +115,13 @@ public class User{
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public boolean isSuspended() {
+        return suspended;
+    }
+
+    public void setSuspended(boolean suspended) {
+        this.suspended = suspended;
     }
 }
