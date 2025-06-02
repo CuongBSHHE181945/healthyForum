@@ -1,12 +1,13 @@
-package com.healthyForum.Service;
+package com.healthyForum.service;
 
-import com.healthyForum.Model.Message;
+import com.healthyForum.model.Message;
+
+import java.security.Principal;
 import java.util.List;
 
 public interface MessageService {
     Message sendMessage(Message message);
-    List<Message> getConversation(Long userId1, Long userId2);
+    List<Message> getConversation(Long receiverId, Principal principal);
+    long countUnreadMessages(Long receiverId);
     Message markMessageAsRead(Long messageId);
-    void deleteMessage(Long messageId);
-    long countUnreadMessages(Long userId);
 }

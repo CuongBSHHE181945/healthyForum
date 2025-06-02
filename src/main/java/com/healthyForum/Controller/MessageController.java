@@ -1,55 +1,72 @@
-package com.healthyForum.Controller;
+package com.healthyForum.controller;
 
-import com.healthyForum.Model.Message;
-import com.healthyForum.Service.MessageServiceImpl;
+import com.healthyForum.model.Message;
+import com.healthyForum.model.User;
+import com.healthyForum.repository.UserRepository;
+import com.healthyForum.service.MessageServiceImpl;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
-@RestController
-@RequestMapping("/api/messages")
+@Controller
+@RequestMapping("/messages")
 public class MessageController {
 
     private final MessageServiceImpl messageServiceImpl;
+    private final UserRepository userRepository;
 
-    public MessageController(MessageServiceImpl messageServiceImpl) {
+    public MessageController(MessageServiceImpl messageServiceImpl, UserRepository userRepository) {
         this.messageServiceImpl = messageServiceImpl;
+        this.userRepository = userRepository;
     }
 
-    // ✅ Send a message
+    @GetMapping
+    public String showMessagePage() {
+        return "Messaging";
+    }
+
+//    @PostMapping
+//    public ResponseEntity<Message> sendMessage(@RequestBody Message message, Principal principal) {
+//        String email = principal.getName();
+//        User sender = userRepository.findByEmail(email)
+//                .orElseThrow(() -> new RuntimeException("User not found: " + email));
+//        message.setSender(sender);
+//
+//        Message saved = messageServiceImpl.sendMessage(message);
+//        return ResponseEntity.ok(saved);
+//    }
+
     @PostMapping
     public ResponseEntity<Message> sendMessage(@RequestBody Message message) {
+        // Fake "logged-in" user
+        User sender = userRepository.findByEmail("alice@example.com")
+                .orElseThrow(() -> new RuntimeException("Fake user not found"));
+
+        User receiver = userRepository.findById(message.getReceiver().getUserID())
+                .orElseThrow(() -> new RuntimeException("Receiver not found"));
+
+        message.setSender(sender);
+        message.setReceiver(receiver);
+
         Message saved = messageServiceImpl.sendMessage(message);
         return ResponseEntity.ok(saved);
     }
 
-    // ✅ Get all messages between two users
-    @GetMapping("/{senderId}/{receiverId}")
-    public ResponseEntity<List<Message>> getConversation(@PathVariable Long senderId,
-                                                         @PathVariable Long receiverId) {
-        List<Message> messages = messageServiceImpl.getConversation(senderId, receiverId);
-        return ResponseEntity.ok(messages);
+    @GetMapping("/{receiverId}")
+    public ResponseEntity<List<Message>> getConversation(@PathVariable Long receiverId, Principal principal) {
+        return ResponseEntity.ok(messageServiceImpl.getConversation(receiverId, principal));
     }
 
-    // ✅ Mark a message as read
+    @GetMapping("/unread/count/{receiverId}")
+    public ResponseEntity<Long> countUnreadMessages(@PathVariable Long receiverId) {
+        return ResponseEntity.ok(messageServiceImpl.countUnreadMessages(receiverId));
+    }
+
     @PutMapping("/{messageId}/read")
     public ResponseEntity<Message> markAsRead(@PathVariable Long messageId) {
-        Message updated = messageServiceImpl.markMessageAsRead(messageId);
-        return ResponseEntity.ok(updated);
-    }
-
-    // ✅ Delete a message by ID
-    @DeleteMapping("/{messageId}")
-    public ResponseEntity<Void> deleteMessage(@PathVariable Long messageId) {
-        messageServiceImpl.deleteMessage(messageId);
-        return ResponseEntity.noContent().build();
-    }
-
-    // ✅ Get count of unread messages for a user
-    @GetMapping("/unread/{userId}")
-    public ResponseEntity<Long> countUnreadMessages(@PathVariable Long userId) {
-        long count = messageServiceImpl.countUnreadMessages(userId);
-        return ResponseEntity.ok(count);
+        return ResponseEntity.ok(messageServiceImpl.markMessageAsRead(messageId));
     }
 }

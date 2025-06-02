@@ -28,5 +28,13 @@ public class User {
         this.id = id;
         this.username = username;
         this.password = password;
+<<<<<<< HEAD
+=======
+        this.fullname = fullname;
+        this.gender = gender;
+        this.email = email;
+        this.dob = dob;
+        this.address = address;
+>>>>>>> 4a45bbaf385129bb891531ff49c0b6b9e85ad48c
     }
 }

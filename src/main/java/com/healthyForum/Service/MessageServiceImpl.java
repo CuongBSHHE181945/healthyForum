@@ -1,49 +1,59 @@
-package com.healthyForum.Service;
+package com.healthyForum.service;
 
-import com.healthyForum.Model.Message;
-import com.healthyForum.Repository.MessageRepository;
+import com.healthyForum.model.Message;
+import com.healthyForum.model.User;
+import com.healthyForum.repository.MessageRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import com.healthyForum.repository.UserRepository;
+
+
+import java.security.Principal;
 import java.util.List;
 
 @Service
-public class MessageServiceImpl implements MessageService{
+public class MessageServiceImpl implements MessageService {
 
     private final MessageRepository messageRepository;
+    private final UserRepository userRepository;
 
-    public MessageServiceImpl(MessageRepository messageRepository) {
-
+    public MessageServiceImpl(MessageRepository messageRepository, UserRepository userRepository) {
         this.messageRepository = messageRepository;
+        this.userRepository = userRepository;
     }
 
     @Override
     public Message sendMessage(Message message) {
-
         return messageRepository.save(message);
     }
 
     @Override
-    public List<Message> getConversation(Long userId1, Long userId2) {
-        return messageRepository.findBySender_IdAndReceiver_IdOrReceiver_IdAndSender_IdOrderByTimestampAsc(userId1, userId2, userId1, userId2);
-    }
+    public List<Message> getConversation(Long receiverId, Principal principal) {
+        String email = principal.getName();
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found: " + email));
 
-    @Override
-    public Message markMessageAsRead(Long messageId) {
-        Message message = messageRepository.findById(messageId)
-                .orElseThrow(() -> new IllegalArgumentException("Message not found with id: " + messageId));
-        message.setRead(true);
-        return messageRepository.save(message);
-    }
+        List<Message> messages = messageRepository.getConversation(currentUser.getUserID(), receiverId);
 
-    @Override
-    public void deleteMessage(Long messageId) {
-        if (!messageRepository.existsById(messageId)) {
-            throw new IllegalArgumentException("Message not found with id: " + messageId);
+        // Gắn cờ isSender
+        for (Message message : messages) {
+            boolean isSender = message.getSender().getUserID().equals(currentUser.getUserID());
+            message.setIsSender(isSender);
         }
-        messageRepository.deleteById(messageId);
+
+        return messages;
+    }
+
+
+    @Override
+    public long countUnreadMessages(Long receiverId) {
+        return messageRepository.countUnreadMessages(receiverId);
     }
 
     @Override
-    public long countUnreadMessages(Long userId) {
-        return messageRepository.countByReceiver_IdAndIsReadFalse(userId);
+    @Transactional
+    public Message markMessageAsRead(Long messageId) {
+        messageRepository.markMessageAsRead(messageId);
+        return messageRepository.findById(messageId).orElse(null);
     }
 }
