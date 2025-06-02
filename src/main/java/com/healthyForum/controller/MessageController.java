@@ -31,7 +31,7 @@ public class MessageController {
 //    @PostMapping
 //    public ResponseEntity<Message> sendMessage(@RequestBody Message message, Principal principal) {
 //        String email = principal.getName();
-//        User sender = userRepository.findByEmail(email)
+//        User sender = userRepository.findByEmail("alice@example.com")
 //                .orElseThrow(() -> new RuntimeException("User not found: " + email));
 //        message.setSender(sender);
 //
@@ -55,11 +55,19 @@ public class MessageController {
         return ResponseEntity.ok(saved);
     }
 
-    @GetMapping("/{receiverId}")
-    public ResponseEntity<List<Message>> getConversation(@PathVariable Long receiverId, Principal principal) {
-        return ResponseEntity.ok(messageServiceImpl.getConversation(receiverId, principal));
-    }
+//    @GetMapping("/{receiverId}")
+//    public ResponseEntity<List<Message>> getConversation(@PathVariable Long receiverId, Principal principal) {
+//        return ResponseEntity.ok(messageServiceImpl.getConversation(receiverId, principal));
+//    }
 
+    @GetMapping("/{receiverId}")
+    public ResponseEntity<List<Message>> getConversation(@PathVariable Long receiverId) {
+        // Fake logged-in user
+        Principal fakePrincipal = () -> "alice@example.com";
+
+        List<Message> messages = messageServiceImpl.getConversation(receiverId, fakePrincipal);
+        return ResponseEntity.ok(messages);
+    }
     @GetMapping("/unread/count/{receiverId}")
     public ResponseEntity<Long> countUnreadMessages(@PathVariable Long receiverId) {
         return ResponseEntity.ok(messageServiceImpl.countUnreadMessages(receiverId));

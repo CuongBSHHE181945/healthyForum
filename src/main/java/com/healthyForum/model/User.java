@@ -52,5 +52,4 @@ public class User {
         this.dob = dob;
         this.address = address;
     }
-
 }
