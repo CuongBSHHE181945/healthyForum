@@ -51,12 +51,10 @@ public class User {
         this.gender = gender;
         this.dob = dob;
         this.address = address;
-    }
         this.email = email;
         this.dob = dob;
         this.address = address;
     }
-}
 
     public void setSuspended(boolean suspended) {
         this.suspended = suspended;
