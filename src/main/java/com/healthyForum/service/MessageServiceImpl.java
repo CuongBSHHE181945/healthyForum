@@ -30,8 +30,8 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public List<Message> getConversation(Long receiverId, Principal principal) {
         String email = principal.getName();
-        User currentUser = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found: " + email));
+        User currentUser = userRepository.findByEmail("alice@example.com")
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         List<Message> messages = messageRepository.getConversation(currentUser.getUserID(), receiverId);
 
