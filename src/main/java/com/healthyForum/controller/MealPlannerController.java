@@ -33,21 +33,19 @@ public class MealPlannerController {
         MealPlanner mealPlanner = new MealPlanner();
         mealPlanner.setMealDate(LocalDate.now());
 
+        //Create ONE empty ingredient
         List<MealIngredient> ingredients = new ArrayList<>();
-        for (int i = 0; i < 4; i++) {
-            MealIngredient ingredient = new MealIngredient();
-            ingredient.setMealPlanner(mealPlanner);
-            ingredients.add(ingredient);
-        }
+        MealIngredient ingredient = new MealIngredient();
+        ingredient.setMealPlanner(mealPlanner);
+        ingredients.add(ingredient);
         mealPlanner.setIngredients(ingredients);
 
         model.addAttribute("mealPlanner", mealPlanner);
         model.addAttribute("mealTypes", List.of("Breakfast", "Lunch", "Dinner", "Snack"));
-        model.addAttribute("formAction", "/meal-planner/save"); // ✅ ADD THIS
+        model.addAttribute("formAction", "/meal-planner/save");
         return "meal-planner/create";
     }
 
-    // Handle form submission
     @PostMapping("/save")
     public String saveMealPlan(@Valid @ModelAttribute MealPlanner mealPlanner,
                                BindingResult result,
@@ -57,18 +55,25 @@ public class MealPlannerController {
             return "meal-planner/create";
         }
 
+        // ✅ Enforce today only
+        if (!mealPlanner.getMealDate().equals(LocalDate.now())) {
+            model.addAttribute("mealTypes", List.of("Breakfast", "Lunch", "Dinner", "Snack"));
+            model.addAttribute("ingredientError", "Meal date must be today.");
+            return "meal-planner/create";
+        }
+
         User user = userRepository.findById(1L)
                 .orElseThrow(() -> new RuntimeException("User with ID 1 not found"));
-        mealPlanner.setUser(user); // critical line
+        mealPlanner.setUser(user);
 
-// ✅ Remove blank rows
+//Remove blank rows
         if (mealPlanner.getIngredients() != null) {
             mealPlanner.getIngredients().removeIf(ing ->
                     (ing.getIngredientName() == null || ing.getIngredientName().isBlank())
                             || ing.getIngredientQuantity() == null);
         }
 
-        // ❗ Reject form if no valid ingredients left
+        //Reject form if no valid ingredients left
         if (mealPlanner.getIngredients() == null || mealPlanner.getIngredients().isEmpty()) {
             model.addAttribute("mealTypes", List.of("Breakfast", "Lunch", "Dinner", "Snack"));
             model.addAttribute("ingredientError", "At least one ingredient is required.");
