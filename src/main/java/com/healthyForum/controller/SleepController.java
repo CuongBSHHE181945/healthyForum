@@ -42,7 +42,7 @@ public class SleepController {
     @GetMapping("/list")
     public String showSleepList(
             @RequestParam(defaultValue = "date") String sort,
-            @RequestParam(defaultValue = "asc") String dir,
+            @RequestParam(defaultValue = "desc") String dir,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             Model model,
