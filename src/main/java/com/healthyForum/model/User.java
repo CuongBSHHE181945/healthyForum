@@ -3,7 +3,7 @@ package com.healthyForum.model;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Date;
 
 @Entity
 @Data
@@ -35,8 +35,8 @@ public class User {
     @Column(nullable = false)
     private String address;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<SleepEntry> sleepEntries;
+    @Column(name = "suspended", nullable = false)
+    private boolean suspended = false; // Set default value
 
     public User() {
     }
@@ -47,9 +47,18 @@ public class User {
         this.username = username;
         this.password = password;
         this.fullname = fullname;
+        this.email = email;
         this.gender = gender;
+        this.dob = dob;
+        this.address = address;
+    }
         this.email = email;
         this.dob = dob;
         this.address = address;
+    }
+}
+
+    public void setSuspended(boolean suspended) {
+        this.suspended = suspended;
     }
 }
