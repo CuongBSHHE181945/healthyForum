@@ -30,7 +30,13 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable()) // Disable CSRF for API use (e.g. with Postman or TestRestTemplate)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/sleep/**").authenticated()
+
                         .anyRequest().permitAll()
+
+                )
+                .anonymous(anon -> anon
+                        .principal("alice123")  // gán email cố định cho người dùng ảo
+                        .authorities("ROLE_USER")
                 )
                 .httpBasic(Customizer.withDefaults()); // Enables HTTP Basic Authentication (used in your test)
 

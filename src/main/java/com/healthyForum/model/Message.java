@@ -1,4 +1,5 @@
-package com.healthyForum.Model;
+package com.healthyForum.model;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -12,16 +13,21 @@ public class Message {
 
     @ManyToOne
     @JoinColumn(name = "sender_Id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "sleepEntries"})
     private User sender;
 
     @ManyToOne
     @JoinColumn(name = "receiver_Id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "sleepEntries"})
     private User receiver;
 
     @Column(columnDefinition = "TEXT")
     private String content;
     private LocalDateTime timestamp = LocalDateTime.now();
     private Boolean isRead = false;
+
+    @Transient
+    private boolean isSender;
 
     public Message(){
     }
@@ -37,14 +43,14 @@ public class Message {
     }
 
     public void setId(Long id) {
-        id = id;
+        this.Id = id;
     }
 
     public User getSender() {
         return sender;
     }
 
-    public void setSenderId(User sender) {
+    public void setSender(User sender) {
         this.sender = sender;
     }
 
@@ -79,4 +85,8 @@ public class Message {
     public void setRead(Boolean read) {
         isRead = read;
     }
+
+    public boolean isSender() { return isSender; }
+
+    public void setIsSender(boolean isSender) { this.isSender = isSender; }
 }
