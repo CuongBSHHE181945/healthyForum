@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/admin")
@@ -38,10 +39,16 @@ public class ManageController {
         return "admin_reports";
     }
 
+
     @GetMapping("/feedbacks")
     public String getFeedbacks(Model model) {
-        model.addAttribute("feedbacks", feedbackService.getAllFeedback());
-        return "admin_feedbacks";
+        try {
+            model.addAttribute("feedbacks", feedbackService.getAllFeedback());
+            return "admin_feedbacks";
+        } catch (Exception e) {
+            model.addAttribute("error", "Error loading feedbacks: " + e.getMessage());
+            return "admin_feedbacks";
+        }
     }
 
     @GetMapping("/blogs")
@@ -73,6 +80,7 @@ public class ManageController {
     }
 
     // In src/main/java/com/healthyForum/controller/ManageController.java
+
 
     @PostMapping("/feedbacks/respond/{id}")
     public String respondFeedback(@PathVariable Long id, @RequestParam String response) {
