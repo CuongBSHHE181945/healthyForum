@@ -5,7 +5,7 @@ import com.healthyForum.model.SleepEntry;
 import com.healthyForum.model.User;
 import com.healthyForum.repository.SleepRepository;
 import com.healthyForum.repository.UserRepository;
-import com.healthyForum.service.DateValidate;
+import com.healthyForum.util.DateValidate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -14,7 +14,6 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.ConcurrentModel;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -24,12 +23,10 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 import java.security.Principal;
 import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Controller
-@RequestMapping("/sleep")
+@RequestMapping("/sleepTracker")
 public class SleepController {
     private final SleepRepository sleepRepository;
     private final UserRepository userRepository;
@@ -69,7 +66,7 @@ public class SleepController {
         model.addAttribute("sleepEntries", sleepEntries);
         model.addAttribute("currentSort", sort);
         model.addAttribute("currentDir", dir);
-        return "sleepList"; // refers to templates/sleepList.html
+        return "sleepTracker/sleepList"; // refers to templates/sleepList.html
     }
 
     //test mapping
@@ -96,7 +93,7 @@ public class SleepController {
 //        sleepEntry.setUser(user);
 //
         model.addAttribute("sleepEntry", sleepEntry);
-        return "sleepForm";
+        return "sleepTracker/sleepForm";
     }
 
     @GetMapping("/edit/{sleepId}")
@@ -104,7 +101,7 @@ public class SleepController {
         SleepEntry sleepEntry = sleepRepository.findById(sleepId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Entry not found"));
         model.addAttribute("sleepEntry", sleepEntry);
-        return "sleepForm"; // refers to templates/editSleepEntry.html
+        return "sleepTracker/sleepForm"; // refers to templates/editSleepEntry.html
     }
 
     @PostMapping
@@ -129,7 +126,7 @@ public class SleepController {
         SleepEntry saved = sleepRepository.save(sleepEntryToSave);
 
         // Build URI for newly created entry
-        URI location = ucb.path("/sleep/{id}").buildAndExpand(saved.getSleepId()).toUri();
+        URI location = ucb.path("/sleepTracker/sleep/{id}").buildAndExpand(saved.getSleepId()).toUri();
 
         return ResponseEntity.created(location).build();
     }
@@ -142,14 +139,14 @@ public class SleepController {
         // ❌ Reject future dates
         if (DateValidate.dateIsInFuture(sleepEntry.getDate())) {
             redirectAttributes.addFlashAttribute("errorMessage", "Sleep date cannot be in the future.");
-            return "redirect:/sleep/form";
+            return "redirect:/sleepTracker/form";
         }
 
         // ✅ Duration validation
         if (DateValidate.timeCalMin(sleepEntry.getStartTime(),sleepEntry.getEndTime(), sleepEntry.getDate()) > 960) { // e.g., more than 16 hours
             redirectAttributes.addFlashAttribute("errorMessage",
                     "Are you sure you slept that long?");
-            return "redirect:/sleep/form";
+            return "redirect:/sleepTracker/form";
         }
 
         if (sleepEntry.getSleepId() == null) {
@@ -169,7 +166,7 @@ public class SleepController {
         }
 
         redirectAttributes.addFlashAttribute("successMessage", "Entry saved successfully!");
-        return "redirect:/sleep/list";
+        return "redirect:/sleepTracker/list";
     }
 
 //    public static void main(String[] args) {

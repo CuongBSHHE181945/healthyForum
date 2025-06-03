@@ -1,4 +1,4 @@
-package com.healthyForum.util;
+package com.healthyForum.config;
 
 import com.healthyForum.repository.UserRepository;
 import com.healthyForum.model.User;
@@ -8,7 +8,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -29,7 +28,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable()) // Disable CSRF for API use (e.g. with Postman or TestRestTemplate)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/sleep/**").authenticated()
+                        .requestMatchers("/sleepTracker/**").authenticated()
 
                         .anyRequest().permitAll()
 
