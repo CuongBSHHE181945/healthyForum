@@ -64,19 +64,22 @@ CREATE TABLE IF NOT EXISTS `meal_ingredient` (
 -- Create Feedback table
 CREATE TABLE IF NOT EXISTS `feedback` (
     `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
-    `username` VARCHAR(255),
-    `message` TEXT,
-    `submitted_at` DATETIME,
-    `response` TEXT
+    `userID` BIGINT NOT NULL,
+    `message` TEXT NOT NULL,
+    `submitted_at` DATETIME NOT NULL,
+    `response` TEXT,
+    FOREIGN KEY (`userID`) REFERENCES `user`(`userID`)
 );
 
 -- Create Report table
 CREATE TABLE IF NOT EXISTS `report` (
     `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
-    `title` VARCHAR(255),
-    `content` TEXT,
-    `created_at` DATETIME,
-    `response` TEXT
+    `title` VARCHAR(255) NOT NULL,
+    `content` TEXT NOT NULL,
+    `userID` BIGINT NOT NULL,
+    `created_at` DATETIME NOT NULL,
+    `response` TEXT,
+    FOREIGN KEY (`userID`) REFERENCES `user`(`userID`)
 );
 
 -- Create Blog table
@@ -112,7 +115,7 @@ INSERT INTO `user` (`username`, `password`, `fullname`, `email`, `gender`, `dob`
 ('sarah1', '$2a$10$Zzs1kf5WAviVMIvbUSvsVen.uHWUTjb8Qn.bnKEI21jcBqphZEtPO', 'Sarah Smith', 'sarah@example.com', 'Female', '1990-01-01', '123 Wellness St.', 0, 2),
 ('alice123', '$2a$10$DdACFbPlEnoLMoNRT58rRezj9Mnchy.CVolTbxrOZmo7m4AwSalra', 'Alice Johnson', 'alice@example.com', 'Female', '1995-06-12', '123 Main St', 0, 2),
 ('bob456', '$2a$10$6ODmXZxJge8dvXWKSpE5RuU66tMP7guAROmGoYW2D1ABxw//YJq5u', 'Bob Smith', 'bob@example.com', 'Male', '1990-03-08', '456 Park Ave', 0, 2),
-('carol789', '$2a$10$4FjsyuABAig4nZTibDZXR.vMgFXmg55ubtdlre2efd17lqQdVqhwS', 'Carol Davis', 'carol@example.com', 'Female', '1988-11-22', '789 Elm Rd', 0, 2);
+('carol789', '$2a$10$4FjsyuABAig4nZTibDZXR.vMgFXmg55ubtdlre2efd17lqQdVqhwS', 'Carol Davis', 'carol@example.com', 'Female', '1988-11-22', '789 Elm Rd', 0, 2),
 ('admin1', '$2a$10$Qw8kZx3gqeeUXnIfwRS4l.9gHBvXwIBIsPNrKV86Xqx94H/46oQwe', 'Alice Admin', 'alice@admin.com', 1, '1990-01-01', '123 Admin St', 0, 1),
 ('mod1', '$2a$10$fWIBxuIsvVpJ3s0jSBG.1.bN5Jb3Dq0yWRySyZxzkXN01H.WMlCZO', 'Bob Mod', 'bob@mod.com', 1, '1992-02-02', '456 Mod Ave', 0, 2),
 ('user1', '$2a$10$9Y1AT//cDf.3AwoibVN6/ul8rGxUo.RAhGyElbLulcUblxN.O8mHK', 'Charlie User', 'charlie@user.com', 0, '1995-03-03', '789 User Rd', 0, 2),
@@ -142,17 +145,17 @@ INSERT INTO `blog` (`title`, `content`, `created_at`, `author_username`, `suspen
 ('Mental Health Matters', 'Meditation helps reduce stress.', NOW(), 'user1', TRUE);
 
 -- Insert sample feedbacks
-INSERT INTO `feedback` (`username`, `message`, `submitted_at`, `response`) VALUES
-('alice', 'Great site, very helpful!', '2024-06-01 10:15:00', NULL),
-('bob', 'I found a bug in the forum.', '2024-06-02 14:30:00', NULL);
+INSERT INTO `feedback` (`userID`, `message`, `submitted_at`, `response`) VALUES
+(2, 'Great site, very helpful!', '2024-06-01 10:15:00', NULL),
+(3, 'I found a bug in the forum.', '2024-06-02 14:30:00', NULL);
 
 -- Insert sample reports
-INSERT INTO `report` (`title`, `content`, `created_at`, `response`) VALUES
-('Spam Post', 'User xyz is posting spam links.', '2024-06-03 09:00:00', NULL),
-('Inappropriate Content', 'There is an offensive comment in thread 123.', '2024-06-03 16:45:00', NULL);
+INSERT INTO `report` (`title`, `content`, `userID`, `created_at`, `response`) VALUES
+('Spam Post', 'User xyz is posting spam links.', 1, '2024-06-03 09:00:00', NULL),
+('Inappropriate Content', 'There is an offensive comment in thread 123.', 2, '2024-06-03 16:45:00', NULL);
 
---Insert sample messages
-INSERT INTO messages (sender_id, receiver_id, content, is_read) VALUES
+-- Insert sample messages
+INSERT INTO `messages` (`sender_Id`, `receiver_Id`, `content`, `is_read`) VALUES
 (1, 2, 'Hi Bob, how are you?', FALSE),
 (2, 1, 'Hi Alice, I am good. You?', TRUE),
 (1, 3, 'Hey Charlie, long time no see!', FALSE),

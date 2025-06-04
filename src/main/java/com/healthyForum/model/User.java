@@ -12,6 +12,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "userID")
     private Long userID;
 
     @Column(nullable = false, unique = true)
@@ -49,9 +50,6 @@ public class User {
         this.fullname = fullname;
         this.email = email;
         this.gender = gender;
-        this.dob = dob;
-        this.address = address;
-        this.email = email;
         this.dob = dob;
         this.address = address;
     }
