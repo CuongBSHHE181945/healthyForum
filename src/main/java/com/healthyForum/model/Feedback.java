@@ -7,28 +7,33 @@ import java.util.Date;
 @Table(name = "feedback")
 public class Feedback {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String username;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_id", nullable = false)  // Changed from userID to user_id
+    private User user;
+
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String message;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(nullable = false)
     private Date submittedAt;
 
-    @Column(name = "response")
+    @Column(columnDefinition = "TEXT")
     private String response;
 
     public Feedback() {
-
     }
 
-    public Feedback(Long id, String username, String message, Date submittedAt, String response) {
-        this.id = id;
-        this.username = username;
+    public Feedback(User user, String message) {
+        this.user = user;
         this.message = message;
-        this.submittedAt = submittedAt;
-        this.response = response;
+        this.submittedAt = new Date();
     }
 
+    // Getters and setters
     public Long getId() {
         return id;
     }
@@ -37,12 +42,12 @@ public class Feedback {
         this.id = id;
     }
 
-    public String getUsername() {
-        return username;
+    public User getUser() {
+        return user;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public String getMessage() {
@@ -68,6 +73,4 @@ public class Feedback {
     public void setResponse(String response) {
         this.response = response;
     }
-
-    // Getters and setters
 }

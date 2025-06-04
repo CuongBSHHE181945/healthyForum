@@ -1,5 +1,5 @@
 package com.healthyForum.model;
-
+import com.healthyForum.model.User;
 import jakarta.persistence.*;
 import java.util.Date;
 
@@ -7,26 +7,39 @@ import java.util.Date;
 @Table(name = "report")
 public class Report {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String title;
-    private String content;
-    private Date createdAt;
 
-    @Column(name = "response")
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String content;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
     private String response;
 
-    public Report() {
+    @Column(nullable = false)
+    private Date createdAt;
 
+    @PrePersist
+    protected void onCreate() {
+        createdAt = new Date();
     }
 
-    public Report(Long id, String title, String content, Date createdAt, String response) {
+    public Report() {
+    }
+
+    public Report(Long id, String title, String content, User user, String response, Date createdAt) {
         this.id = id;
         this.title = title;
         this.content = content;
-        this.createdAt = createdAt;
+        this.user = user;
         this.response = response;
+        this.createdAt = createdAt;
     }
 
     public Long getId() {
@@ -53,12 +66,12 @@ public class Report {
         this.content = content;
     }
 
-    public Date getCreatedAt() {
-        return createdAt;
+    public User getUser() {
+        return user;
     }
 
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public String getResponse() {
@@ -69,5 +82,11 @@ public class Report {
         this.response = response;
     }
 
-    // Getters and setters
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
 }
