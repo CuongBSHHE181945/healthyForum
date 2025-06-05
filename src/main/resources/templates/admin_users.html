@@ -89,8 +89,8 @@
                             <td th:text="${user.username}"></td>
                             <td th:text="${user.fullname}"></td>
                             <td th:text="${user.email}"></td>
-                            <td th:text="${user.gender} ? 'Male' : 'Female'"></td>
-                            <td th:text="${#dates.format(user.dob, 'MM/dd/yyyy')}"></td>
+                            <td th:text="${user.gender}"></td>
+                            <td th:text="${#temporals.format(user.dob, 'MM/dd/yyyy')}"></td>
                             <td th:text="${user.address}"></td>
                             <td>
                                 <span th:text="${user.suspended} ? 'Suspended' : 'Active'"></span>
