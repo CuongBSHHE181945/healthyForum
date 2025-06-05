@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS `user` (
     `password` VARCHAR(255) NOT NULL,
     `fullname` VARCHAR(255),
     `email` VARCHAR(255),
-    `gender` BOOLEAN NOT NULL,
+    `gender` VARCHAR(255),
     `dob` DATE,
     `address` VARCHAR(255),
     `suspended` BOOLEAN NOT NULL DEFAULT FALSE,
