@@ -24,20 +24,22 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable()) // Disable CSRF for API use (e.g. with Postman or TestRestTemplate)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/sleepTracker/**").authenticated()
-
-                        .anyRequest().permitAll()
-
+                        .requestMatchers("/login").permitAll()
+                        .anyRequest().authenticated()
                 )
-                .anonymous(anon -> anon
-                        .principal("alice123")  // gán email cố định cho người dùng ảo
-                        .authorities("ROLE_USER")
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .defaultSuccessUrl("/home", true)
+                        .permitAll()
                 )
-                .httpBasic(Customizer.withDefaults()); // Enables HTTP Basic Authentication (used in your test)
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login?logout")
+                        .permitAll()
+                );
 
         return http.build();
     }
@@ -50,7 +52,7 @@ public class SecurityConfig {
             return org.springframework.security.core.userdetails.User
                     .withUsername(user.getUsername())
                     .password(user.getPassword()) // Already encoded
-                    .roles("USER") // Default role
+                    .roles(user.getRole().getRoleName()) // Default role
                     .build();
         };
     }
