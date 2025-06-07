@@ -107,8 +107,8 @@ CREATE TABLE IF NOT EXISTS `messages` (
 
 -- Insert initial roles
 INSERT INTO `role` (`role_name`) VALUES 
-('Admin'), 
-('User');
+('ADMIN'), 
+('USER');
 
 -- Insert sample users
 INSERT INTO `user` (`username`, `password`, `fullname`, `email`, `gender`, `dob`, `address`, `suspended`, `role_id`) VALUES
