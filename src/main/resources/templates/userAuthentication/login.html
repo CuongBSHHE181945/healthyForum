@@ -1,14 +1,117 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <title>Login</title>
+  <title>Đăng Nhập - Healthy Forum</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .login-container {
+      background-color: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      width: 400px;
+      max-width: 90%;
+    }
+    .login-title {
+      text-align: center;
+      color: #333;
+      margin-bottom: 30px;
+      font-size: 24px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-control {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    .btn-login {
+      width: 100%;
+      padding: 12px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .btn-login:hover {
+      background-color: #0056b3;
+    }
+    .alert {
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+      font-weight: bold;
+      text-align: center;
+      animation: fadeIn 0.5s;
+    }
+    .alert-danger {
+      color: #721c24;
+      background-color: #f8d7da;
+      border: 2px solid #f5c6cb;
+    }
+    .alert-success {
+      color: #155724;
+      background-color: #d4edda;
+      border: 2px solid #c3e6cb;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .forum-header {
+      text-align: center;
+      margin-bottom: 10px;
+      color: #007bff;
+      font-size: 18px;
+    }
+  </style>
 </head>
 <body>
-<h2>Login</h2>
-<form th:action="@{/login}" method="post">
-  <div><input type="text" name="username" placeholder="Username"/></div>
-  <div><input type="password" name="password" placeholder="Password"/></div>
-  <div><input type="submit" value="Login"/></div>
-</form>
+<div class="login-container">
+  <div class="forum-header"> Healthy Forum</div>
+  <h2 class="login-title">Đăng Nhập</h2>
+
+  <!-- Hiển thị thông báo lỗi -->
+  <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+
+  <!-- Hiển thị thông báo thành công -->
+  <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+
+  <form th:action="@{/login}" method="post">
+    <div class="form-group">
+      <input type="text" name="username" class="form-control"
+             placeholder="Tên đăng nhập" required/>
+    </div>
+    <div class="form-group">
+      <input type="password" name="password" class="form-control"
+             placeholder="Mật khẩu" required/>
+    </div>
+    <div class="form-group">
+      <button type="submit" class="btn-login">Đăng Nhập</button>
+    </div>
+  </form>
+
+  <div style="text-align: center; margin-top: 15px; color: #666; font-size: 12px;">
+    © 2024 Healthy Forum - Chăm sóc sức khỏe của bạn
+  </div>
+</div>
 </body>
 </html>
