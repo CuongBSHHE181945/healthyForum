@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h2>🎖 Badge Detail</h2>
+
+<div class="badge-detail">
+    <img th:src="@{${unlocked} ? ${badge.icon} : ${badge.lockedIcon}}" class="badge-icon-large" />
+    <h3 th:text="${badge.name}"></h3>
+    <p th:text="${badge.description}"></p>
+
+    <div th:if="${unlocked}">
+        <p><strong>Status:</strong> ✅ Unlocked</p>
+        <p><strong>Earned At:</strong> <span th:text="${earnedAt}"></span></p>
+    </div>
+    <div th:if="${!unlocked}">
+        <p><strong>Status:</strong> 🔒 Locked</p>
+    </div>
+
+    <h4>🔍 Requirements:</h4>
+    <ul>
+        <li th:each="req : ${requirements}">
+            <span th:text="'Source Type: ' + ${req.sourceType.name} + ', Source ID: ' + ${req.sourceId} + ', Value: ' + ${req.value}"></span>
+        </li>
+    </ul>
+</div>
+
+<a href="/user-profile">⬅ Back to Profile</a>
+
+<style>
+    .badge-detail {
+        max-width: 500px;
+        margin: auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        text-align: center;
+    }
+    .badge-icon-large {
+        width: 120px;
+        height: 120px;
+    }
+</style>
+</body>
+</html>

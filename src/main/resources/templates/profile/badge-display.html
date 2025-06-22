@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Select Displayed Badges</title>
+    <style>
+        .badge-icon { width: 64px; height: 64px; margin: 10px; }
+        .badge-container { display: inline-block; text-align: center; margin: 10px; }
+    </style>
+</head>
+<body>
+
+<h2>Select badges to display on your profile</h2>
+
+<form th:action="@{badge-display}" method="post">
+    <div>
+        <div th:each="userBadge : ${userBadges}" class="badge-container">
+            <img th:src="@{${userBadge.badge.icon}}" th:alt="${userBadge.badge.name}" class="badge-icon"/>
+            <div>
+                <input type="checkbox" name="displayedBadgeIds"
+                       th:value="${userBadge.badge.id}"
+                       th:checked="${userBadge.displayed}"/> Display
+            </div>
+        </div>
+    </div>
+    <br/>
+    <button type="submit">💾 Save Display</button>
+</form>
+
+</body>
+</html>

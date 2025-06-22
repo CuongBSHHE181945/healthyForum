@@ -1,4 +1,4 @@
-package com.healthyForum.controller;
+package com.healthyForum.controller.authentication;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;

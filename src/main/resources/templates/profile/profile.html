@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+<h2>🎖 Displayed Badges</h2>
+<div id="display-zone" class="drop-zone">
+  <div th:each="badge : ${displayedBadges}">
+    <a th:href="@{'/badge/' + ${badge.id}}">
+      <img th:src="@{${badge.icon}}" class="badge-icon" />
+    </a>
+  </div>
+</div>
+<a href="/badge-display">⚙️ Edit Displayed Badges</a>
+<h3>Unlocked Badges</h3>
+<div id="unlocked-badges" class="badge-list">
+  <div th:each="badge : ${unlockedBadges}" class="draggable-badge"
+       draggable="true"
+       th:data-badge-id="${badge.id}"
+       th:title="${badge.name}">
+    <a th:href="@{'/badge/' + ${badge.id}}">
+      <img th:src="@{${badge.icon}}" class="badge-icon"/>
+    </a>
+  </div>
+</div>
+
+<h3>Locked Badges</h3>
+<div id="locked-badges" class="badge-list locked">
+  <div th:each="badge : ${lockedBadges}">
+    <a th:href="@{'/badge/' + ${badge.id}}">
+      <img th:src="@{${badge.lockedIcon}}" class="badge-icon grayscale"/>
+    </a>
+  </div>
+</div>
+
+<!--<script>-->
+<!--  document.querySelectorAll('.draggable-badge').forEach(badge => {-->
+<!--      badge.addEventListener('dragstart', e => {-->
+<!--          e.dataTransfer.setData('badgeId', badge.dataset.badgeId);-->
+<!--      });-->
+<!--  });-->
+
+<!--  const dropZone = document.getElementById('display-zone');-->
+<!--  dropZone.addEventListener('dragover', e => e.preventDefault());-->
+<!--  dropZone.addEventListener('drop', e => {-->
+<!--      e.preventDefault();-->
+<!--      const badgeId = e.dataTransfer.getData('badgeId');-->
+
+<!--      fetch('/profile/display-badge', {-->
+<!--          method: 'POST',-->
+<!--          headers: {-->
+<!--              'Content-Type': 'application/x-www-form-urlencoded'-->
+<!--          },-->
+<!--          body: `badgeId=${badgeId}`-->
+<!--      }).then(() => location.reload());-->
+<!--  });-->
+<!--</script>-->
+
+<style>
+  .badge-icon {
+      width: 64px;
+      height: 64px;
+      margin: 5px;
+  }
+  .grayscale {
+      filter: grayscale(100%);
+  }
+  .drop-zone {
+      border: 2px dashed #ccc;
+      padding: 10px;
+      min-height: 80px;
+      display: flex;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+  }
+  .badge-list {
+      display: flex;
+      flex-wrap: wrap;
+  }
+</style>
+
+</body>
+</html>
