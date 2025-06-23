@@ -13,10 +13,17 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import com.healthyForum.service.EmailService;
+import jakarta.servlet.http.HttpServletRequest;
+import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Controller
 @RequestMapping("/register")
 public class RegisterController {
+
+    private static final Logger logger = LoggerFactory.getLogger(RegisterController.class);
 
     @Autowired
     private UserRepository userRepository;
@@ -30,6 +37,9 @@ public class RegisterController {
     @Autowired
     private AuthenticationManager authenticationManager;
 
+    @Autowired
+    private EmailService emailService;
+
     @GetMapping
     public String register(Model model){
         User user = new User();
@@ -39,9 +49,14 @@ public class RegisterController {
     }
 
     @PostMapping
-    public String register(@ModelAttribute User user, RedirectAttributes redirectAttributes){
+    public String register(@ModelAttribute User user, RedirectAttributes redirectAttributes, HttpServletRequest request) {
         if (userRepository.findByUsername(user.getUsername()).isPresent()) {
-            redirectAttributes.addFlashAttribute("registerErrMsg", "Username already exist");
+            redirectAttributes.addFlashAttribute("registerErrMsg", "Username already exists");
+            return "redirect:/register";
+        }
+
+        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+            redirectAttributes.addFlashAttribute("registerErrMsg", "Email is already in use");
             return "redirect:/register";
         }
 
@@ -49,22 +64,31 @@ public class RegisterController {
                 .orElseThrow(() -> new RuntimeException("Role 'USER' not found"));
         user.setRole(userRole);
         user.setSuspended(false);
+        user.setProvider("local"); // For local registration
 
-        // 1. Save the raw password before encoding
-        String rawPassword = user.getPassword();
+        // Encode password before saving
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-        // 2. Encode and save to DB
-        user.setPassword(passwordEncoder.encode(rawPassword));
+        // Generate verification code
+        String verificationCode = UUID.randomUUID().toString();
+        user.setVerificationCode(verificationCode);
+        user.setEnabled(false); // Disable account until verified
+
         userRepository.save(user);
+        logger.info("User {} saved successfully. Attempting to send verification email.", user.getUsername());
 
-        // ✅ Authenticate the user manually
-        UsernamePasswordAuthenticationToken authToken =
-                new UsernamePasswordAuthenticationToken(user.getUsername(), rawPassword);
-        Authentication authentication = authenticationManager.authenticate(authToken);
+        // Send verification email
+        try {
+            emailService.sendVerificationEmail(user, request);
+            logger.info("Verification email sent successfully to {}.", user.getEmail());
+        } catch (Exception e) {
+            // Log the exception and show a generic error
+            logger.error("Error sending verification email for user {}", user.getUsername(), e);
+            redirectAttributes.addFlashAttribute("registerErrMsg", "Error sending verification email. Please try again later.");
+            return "redirect:/register";
+        }
 
-        // Set authentication in security context
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        return "redirect:/home";
+        redirectAttributes.addFlashAttribute("registerSuccessMsg", "Registration successful! Please check your email to verify your account.");
+        return "redirect:/login";
     }
 }

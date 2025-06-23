@@ -8,6 +8,12 @@
 <body>
 <div class="container">
   <h2>Login</h2>
+
+  <div th:if="${registerSuccessMsg}" class="alert alert-success" th:text="${registerSuccessMsg}"></div>
+  <div th:if="${verificationSuccess}" class="alert alert-success" th:text="${verificationSuccess}"></div>
+  <div th:if="${verificationError}" class="alert alert-danger" th:text="${verificationError}"></div>
+  <div th:if="${registerErrMsg}" class="alert alert-danger" th:text="${registerErrMsg}"></div>
+
   <form th:action="@{/login}" method="post">
     <div class="form-group">
       <label for="username">Username</label>
@@ -24,6 +30,12 @@
       <a th:href="@{/register}" class="btn btn-secondary">Register</a>
     </div>
   </form>
+  <div class="text-center mt-3">
+    <a th:href="@{/forgot-password}">Forgot your password?</a>
+  </div>
+  <div class="oauth-buttons">
+    <a th:href="@{/oauth2/authorization/google}" class="btn btn-google">Login with Google</a>
+  </div>
 </div>
 </body>
 </html>

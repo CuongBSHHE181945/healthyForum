@@ -79,4 +79,21 @@ h2 {
 
 .btn-secondary:hover {
     background-color: #7f8c8d;
+}
+
+.oauth-buttons {
+    margin-top: 1rem;
+    text-align: center;
+}
+
+.btn-google {
+    background-color: #4285F4;
+    color: white;
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.btn-google:hover {
+    background-color: #357ae8;
 } 

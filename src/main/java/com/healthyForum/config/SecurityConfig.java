@@ -2,6 +2,7 @@ package com.healthyForum.config;
 
 import com.healthyForum.repository.UserRepository;
 import com.healthyForum.model.User;
+import com.healthyForum.service.oauth.CustomOAuth2UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,9 +19,11 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     private final UserRepository userRepository;
+    private final CustomOAuth2UserService customOAuth2UserService;
 
-    public SecurityConfig(UserRepository userRepository) {
+    public SecurityConfig(UserRepository userRepository, CustomOAuth2UserService customOAuth2UserService) {
         this.userRepository = userRepository;
+        this.customOAuth2UserService = customOAuth2UserService;
     }
 
     @Bean
@@ -28,12 +31,23 @@ public class SecurityConfig {
         http
                 .securityContext(context -> context.requireExplicitSave(false)) // allow auto save of security context
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login","/register").permitAll()
+                        .requestMatchers(
+                                "/login", "/register", "/", "/home", "/verify",
+                                "/forgot-password", "/reset-password",
+                                "/css/**", "/js/**", "/images/**"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
-                        .defaultSuccessUrl("/home", true)
+                        .defaultSuccessUrl("/", true)
+                )
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/login")
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOAuth2UserService)
+                        )
+                        .defaultSuccessUrl("/", true)
                 )
                 //default logout by spring
                 .logout(logout -> logout
@@ -53,6 +67,7 @@ public class SecurityConfig {
                     .withUsername(user.getUsername())
                     .password(user.getPassword()) // Already encoded
                     .roles(user.getRole().getRoleName()) // Default role
+                    .disabled(!user.isEnabled())
                     .build();
         };
     }

@@ -18,7 +18,7 @@ public class User {
     @Column(nullable = false, unique = true)
     private String username;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String password;
 
     @Column(nullable = false)
@@ -27,26 +27,41 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String gender;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private LocalDate dob;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String address;
+
+    @Column(name = "provider", nullable = false)
+    private String provider;
 
     @Column(name = "suspended", nullable = false)
     private boolean suspended = false; // Set default value
+
+    @Column(name = "verification_code", length = 64)
+    private String verificationCode;
+
+    @Column(name = "enabled")
+    private boolean enabled = false;
 
     @ManyToOne
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
 
+    @Column(name = "reset_password_token", length = 64)
+    private String resetPasswordToken;
+
+    @Column(name = "reset_token_expiry")
+    private java.time.LocalDateTime resetTokenExpiry;
+
     public User() {
     }
 
-    public User(Long userID, Role role, boolean suspended, String address, LocalDate dob, String gender, String email, String fullname, String password, String username) {
+    public User(Long userID, Role role, boolean suspended, String address, LocalDate dob, String gender, String email, String fullname, String password, String username, String provider) {
         this.userID = userID;
         this.role = role;
         this.suspended = suspended;
@@ -57,6 +72,8 @@ public class User {
         this.fullname = fullname;
         this.password = password;
         this.username = username;
+        this.provider = provider;
+        this.enabled = false; // Default for new users
     }
 
     public Long getUserID() {
@@ -123,6 +140,14 @@ public class User {
         this.address = address;
     }
 
+    public String getProvider() {
+        return provider;
+    }
+
+    public void setProvider(String provider) {
+        this.provider = provider;
+    }
+
     public boolean isSuspended() {
         return suspended;
     }
@@ -137,5 +162,37 @@ public class User {
 
     public void setRole(Role role) {
         this.role = role;
+    }
+
+    public String getVerificationCode() {
+        return verificationCode;
+    }
+
+    public void setVerificationCode(String verificationCode) {
+        this.verificationCode = verificationCode;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public String getResetPasswordToken() {
+        return resetPasswordToken;
+    }
+
+    public void setResetPasswordToken(String resetPasswordToken) {
+        this.resetPasswordToken = resetPasswordToken;
+    }
+
+    public java.time.LocalDateTime getResetTokenExpiry() {
+        return resetTokenExpiry;
+    }
+
+    public void setResetTokenExpiry(java.time.LocalDateTime resetTokenExpiry) {
+        this.resetTokenExpiry = resetTokenExpiry;
     }
 }
