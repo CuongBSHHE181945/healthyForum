@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Báo Cáo Của Tôi - Healthy Forum</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <style>
+    .report-card {
+      margin-bottom: 1rem;
+    }
+    .report-pending {
+      border-left: 4px solid #dc3545;
+    }
+    .report-resolved {
+      border-left: 4px solid #198754;
+    }
+    .report-rejected {
+      border-left: 4px solid #6c757d;
+    }
+    .card-text {
+      margin-bottom: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+<div class="container py-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="mb-0">Báo Cáo Của Tôi</h1>
+    <div>
+      <a href="/post" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Quay Lại Danh Sách
+      </a>
+    </div>
+  </div>
+
+  <!-- Empty state -->
+  <div th:if="${#lists.isEmpty(reports)}" class="text-center py-5">
+    <i class="bi bi-flag" style="font-size: 4rem; color: #ccc;"></i>
+    <h3 class="mt-3">Bạn chưa có báo cáo nào</h3>
+    <p class="text-muted">Khi bạn báo cáo bài viết hoặc người dùng, báo cáo sẽ xuất hiện tại đây</p>
+    <a href="/post" class="btn btn-primary mt-2">Xem Danh Sách Bài Viết</a>
+  </div>
+
+  <!-- Reports list -->
+  <div th:each="report : ${reports}" th:class="${'card report-card shadow-sm ' +
+                (report.status.name() == 'PENDING' ? 'report-pending' :
+                (report.status.name() == 'RESOLVED' ? 'report-resolved' : 'report-rejected'))}">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h5 class="card-title mb-0">
+          <i th:class="${'bi bi-flag-fill me-2 ' +
+                        (report.status.name() == 'PENDING' ? 'text-danger' :
+                        (report.status.name() == 'RESOLVED' ? 'text-success' : 'text-secondary'))}"></i>
+          <span th:if="${report.reportedPost != null}">Báo cáo bài viết</span>
+          <span th:if="${report.reportedUser != null}">Báo cáo người dùng</span>
+        </h5>
+        <span th:class="${'badge ' +
+                        (report.status.name() == 'PENDING' ? 'bg-danger' :
+                        (report.status.name() == 'RESOLVED' ? 'bg-success' : 'bg-secondary'))}"
+              th:text="${report.status.name() == 'PENDING' ? 'Đang chờ xử lý' :
+                            (report.status.name() == 'RESOLVED' ? 'Đã xử lý' : 'Đã từ chối')}">
+                </span>
+      </div>
+
+      <p class="card-text" th:if="${report.reportedPost != null}">
+        <strong>Bài viết:</strong>
+        <a th:href="@{/post/{id}(id=${report.reportedPost.id})}"
+           th:text="${report.reportedPost.title}"
+           class="text-decoration-none">Tiêu đề bài viết</a>
+      </p>
+
+      <p class="card-text" th:if="${report.reportedUser != null}">
+        <strong>Người dùng:</strong>
+        <span th:text="${report.reportedUser.fullname}">Tên người dùng</span>
+      </p>
+
+      <p class="card-text">
+        <strong>Ngày báo cáo:</strong>
+        <span th:text="${#dates.format(report.createdAt, 'dd/MM/yyyy HH:mm')}">Ngày báo cáo</span>
+      </p>
+
+      <div class="row">
+        <div th:class="${report.resolution != null ? 'col-md-6' : 'col-md-12'}">
+          <div class="alert alert-secondary">
+            <strong>Lý do báo cáo:</strong><br>
+            <span th:text="${report.reason}">Lý do báo cáo</span>
+          </div>
+        </div>
+        <div class="col-md-6" th:if="${report.resolution != null}">
+          <div th:class="${'alert ' + (report.status.name() == 'RESOLVED' ? 'alert-success' : 'alert-secondary')}">
+            <strong th:text="${report.status.name() == 'RESOLVED' ? 'Cách giải quyết:' : 'Lý do từ chối:'}"></strong><br>
+            <span th:text="${report.resolution}">Phản hồi từ quản trị viên</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
