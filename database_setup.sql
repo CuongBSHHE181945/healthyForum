@@ -12,13 +12,18 @@ CREATE TABLE IF NOT EXISTS `role` (
 CREATE TABLE IF NOT EXISTS `user` (
     `userID` BIGINT AUTO_INCREMENT PRIMARY KEY,
     `username` VARCHAR(255) NOT NULL,
-    `password` VARCHAR(255) NOT NULL,
+    `password` VARCHAR(255) NULL,
     `fullname` VARCHAR(255),
     `email` VARCHAR(255),
     `gender` VARCHAR(255),
     `dob` DATE,
     `address` VARCHAR(255),
+    `provider` VARCHAR(255) NOT NULL,
+    `verification_code` VARCHAR(64),
+    `enabled` BOOLEAN NOT NULL DEFAULT FALSE,
     `suspended` BOOLEAN NOT NULL DEFAULT FALSE,
+    `reset_password_token` VARCHAR(64),
+    `reset_token_expiry` DATETIME,
     `role_id` BIGINT,
     CONSTRAINT `fk_user_role` FOREIGN KEY (`role_id`) REFERENCES `role`(`role_id`),
     CONSTRAINT `unique_username` UNIQUE (`username`)
@@ -111,15 +116,15 @@ INSERT INTO `role` (`role_name`) VALUES
 ('USER');
 
 -- Insert sample users
-INSERT INTO `user` (`username`, `password`, `fullname`, `email`, `gender`, `dob`, `address`, `suspended`, `role_id`) VALUES
-('sarah1', '$2a$10$Zzs1kf5WAviVMIvbUSvsVen.uHWUTjb8Qn.bnKEI21jcBqphZEtPO', 'Sarah Smith', 'sarah@example.com', 'Female', '1990-01-01', '123 Wellness St.', 0, 2),
-('alice123', '$2a$10$DdACFbPlEnoLMoNRT58rRezj9Mnchy.CVolTbxrOZmo7m4AwSalra', 'Alice Johnson', 'alice@example.com', 'Female', '1995-06-12', '123 Main St', 0, 2),
-('bob456', '$2a$10$6ODmXZxJge8dvXWKSpE5RuU66tMP7guAROmGoYW2D1ABxw//YJq5u', 'Bob Smith', 'bob@example.com', 'Male', '1990-03-08', '456 Park Ave', 0, 2),
-('carol789', '$2a$10$4FjsyuABAig4nZTibDZXR.vMgFXmg55ubtdlre2efd17lqQdVqhwS', 'Carol Davis', 'carol@example.com', 'Female', '1988-11-22', '789 Elm Rd', 0, 2),
-('admin1', '$2a$10$Qw8kZx3gqeeUXnIfwRS4l.9gHBvXwIBIsPNrKV86Xqx94H/46oQwe', 'Alice Admin', 'alice@admin.com', 1, '1990-01-01', '123 Admin St', 0, 1),
-('mod1', '$2a$10$fWIBxuIsvVpJ3s0jSBG.1.bN5Jb3Dq0yWRySyZxzkXN01H.WMlCZO', 'Bob Mod', 'bob@mod.com', 1, '1992-02-02', '456 Mod Ave', 0, 2),
-('user1', '$2a$10$9Y1AT//cDf.3AwoibVN6/ul8rGxUo.RAhGyElbLulcUblxN.O8mHK', 'Charlie User', 'charlie@user.com', 0, '1995-03-03', '789 User Rd', 0, 2),
-('user2', '$2a$10$7bPNzIfN.fHo1Q7I0j5/OO8KyYNzgt5UQsIemZwFQPMWVt4SZTnNW', 'Dana User', 'dana@user.com', 0, '1998-04-04', '101 User Blvd', 1, 2);
+INSERT INTO `user` (`username`, `password`, `fullname`, `email`, `gender`, `dob`, `address`, `provider`, `enabled`, `suspended`, `role_id`) VALUES
+('sarah1', '$2a$10$Zzs1kf5WAviVMIvbUSvsVen.uHWUTjb8Qn.bnKEI21jcBqphZEtPO', 'Sarah Smith', 'sarah@example.com', 'Female', '1990-01-01', '123 Wellness St.', 'local', TRUE, 0, 2),
+('alice123', '$2a$10$DdACFbPlEnoLMoNRT58rRezj9Mnchy.CVolTbxrOZmo7m4AwSalra', 'Alice Johnson', 'alice@example.com', 'Female', '1995-06-12', '123 Main St', 'local', TRUE, 0, 2),
+('bob456', '$2a$10$6ODmXZxJge8dvXWKSpE5RuU66tMP7guAROmGoYW2D1ABxw//YJq5u', 'Bob Smith', 'bob@example.com', 'Male', '1990-03-08', '456 Park Ave', 'local', TRUE, 0, 2),
+('carol789', '$2a$10$4FjsyuABAig4nZTibDZXR.vMgFXmg55ubtdlre2efd17lqQdVqhwS', 'Carol Davis', 'carol@example.com', 'Female', '1988-11-22', '789 Elm Rd', 'local', TRUE, 0, 2),
+('admin1', '$2a$10$Qw8kZx3gqeeUXnIfwRS4l.9gHBvXwIBIsPNrKV86Xqx94H/46oQwe', 'Alice Admin', 'alice@admin.com', 'Female', '1990-01-01', '123 Admin St', 'local', TRUE, 0, 1),
+('mod1', '$2a$10$fWIBxuIsvVpJ3s0jSBG.1.bN5Jb3Dq0yWRySyZxzkXN01H.WMlCZO', 'Bob Mod', 'bob@mod.com', 'Male', '1992-02-02', '456 Mod Ave', 'local', TRUE, 0, 2),
+('user1', '$2a$10$9Y1AT//cDf.3AwoibVN6/ul8rGxUo.RAhGyElbLulcUblxN.O8mHK', 'Charlie User', 'charlie@user.com', 'Male', '1995-03-03', '789 User Rd', 'local', TRUE, 0, 2),
+('user2', '$2a$10$7bPNzIfN.fHo1Q7I0j5/OO8KyYNzgt5UQsIemZwFQPMWVt4SZTnNW', 'Dana User', 'dana@user.com', 'Female', '1998-04-04', '101 User Blvd', 'local', TRUE, 1, 2);
 
 -- Insert sample sleep entries
 INSERT INTO `sleep_entries` (`date`, `start_time`, `end_time`, `quality`, `notes`, `userID`) VALUES

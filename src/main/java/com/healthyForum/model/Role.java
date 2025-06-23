@@ -14,8 +14,6 @@ public class Role {
 
     @Column(name = "role_name", nullable = false)
     private String roleName;
-    // 🔗 Link to User
-
 
     public Long getRoleID() {
         return roleID;
