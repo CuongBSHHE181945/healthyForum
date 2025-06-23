@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface BadgeRequirementRepository extends JpaRepository<BadgeRequirement, Long> {
     List<BadgeRequirement> findByBadgeId(int badgeId);
+    List<BadgeRequirement> findBySourceTypeNameAndSourceId(String sourceTypeName, int challengeId);
 }

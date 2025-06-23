@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><title>My Challenges</title></head>
+<body>
+<h2 style="text-align:center;">✅ My Active Challenges</h2>
+<table>
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Join Date</th>
+        <th>Status</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="uc : ${myChallenges}">
+        <td th:text="${uc.challenge.name}">Name</td>
+        <td th:text="${uc.challenge.type.name}">Type</td>
+        <td th:text="${uc.joinDate}">Date</td>
+        <td th:text="${uc.status}">ACTIVE</td>
+        <td>
+            <span th:switch="${uc.challenge.type.name}">
+                <span th:case="'PERSONAL'">
+                    <a th:if="${uc.status != 'COMPLETED'}"
+                       th:href="@{'/challenge/progress/' + ${uc.id}}">📅 View Progress</a>
+                    <span th:if="${uc.status == 'COMPLETED'}" style="color:gray;">✅ Completed</span>
+                </span>
+                <span th:case="'PUBLIC'">
+                    <a th:href="@{'/challenge/public/' + ${uc.id}}">🌍 View Event</a>
+                </span>
+            </span>
+        </td>
+    </tr>
+    </tbody>
+</table>
+<a href="/challenge">← Back to All Challenges</a>
+</body>
+</html>

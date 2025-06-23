@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Challenge Progress</title>
+</head>
+<body>
+<h2 th:text="'📅 Progress for: ' + ${userChallenge.challenge.name}"></h2>
+
+<div th:if="${tickMessage}">
+  <p th:text="${tickMessage}" style="color: green; font-weight: bold;"></p>
+</div>
+
+<form th:action="@{'/challenge/tick/' + ${userChallenge.id}}" method="post">
+  <button type="submit"
+          th:disabled="${userChallenge.status == 'COMPLETED'}"
+          th:text="${userChallenge.status == 'COMPLETED'} ? 'Completed 🎉' : 'Tick Today'">
+  </button>
+</form>
+
+<p>Total Days Completed: <strong th:text="${total}"></strong> / <span th:text="${target}"></span></p>
+<p>🔥 Current Streak: <strong th:text="${streak}"></strong> day(s)</p>
+
+<h3>📖 History</h3>
+<ul>
+  <li th:each="log : ${logs}" th:text="${log.date}"></li>
+</ul>
+
+<a href="/challenge/my">← Back to My Challenges</a>
+</body>
+</html>
