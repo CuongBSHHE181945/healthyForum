@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta charset="UTF-8">
     <title>My Profile</title>
     <link rel="stylesheet" th:href="@{/css/styles.css}">
     <link rel="stylesheet" th:href="@{/css/registration.css}">
@@ -32,8 +33,10 @@
 <div class="container">
     <h2>My Profile</h2>
 
-    <!-- Messages from ChangePasswordController -->
-    <div th:if="${param.error}" class="alert alert-danger" th:text="${param.error == 'google_user' ? 'Google users cannot change their password here.' : param.error}"></div>
+    <!-- Flash & error messages -->
+    <div th:if="${param.error}" class="alert alert-danger"
+         th:text="${param.error == 'google_user' ? 'Google users cannot change their password here.' : param.error}">
+    </div>
     <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
 
     <div class="profile-info">
@@ -42,7 +45,6 @@
         <p><strong>Email:</strong> <span th:text="${user.email}"></span></p>
     </div>
 
-    <!-- Conditional Change Password Button -->
     <div th:if="${user.provider == 'local'}" class="button-group" style="margin-top: 2rem;">
         <a th:href="@{/change-password}" class="btn btn-primary">Change Password</a>
     </div>
@@ -57,7 +59,7 @@
     <div id="display-zone" class="drop-zone">
         <div th:each="badge : ${displayedBadges}">
             <a th:href="@{'/badge/' + ${badge.id}}">
-                <img th:src="@{${badge.icon}}" class="badge-icon" />
+                <img th:src="@{${badge.icon}}" class="badge-icon"/>
             </a>
         </div>
     </div>
@@ -65,10 +67,7 @@
 
     <h3>Unlocked Badges</h3>
     <div id="unlocked-badges" class="badge-list">
-        <div th:each="badge : ${unlockedBadges}" class="draggable-badge"
-             draggable="true"
-             th:data-badge-id="${badge.id}"
-             th:title="${badge.name}">
+        <div th:each="badge : ${unlockedBadges}" th:title="${badge.name}">
             <a th:href="@{'/badge/' + ${badge.id}}">
                 <img th:src="@{${badge.icon}}" class="badge-icon"/>
             </a>

@@ -25,15 +25,3 @@ CREATE TABLE user_challenge (
     FOREIGN KEY (challenge_id) REFERENCES challenge(id)
 );
 
--- Insert challenge types
-INSERT INTO challenge_type (id, name) VALUES
-(1, 'PERSONAL'),
-(2, 'PUBLIC');
-
--- Insert challenges
-INSERT INTO challenge (id, name, description, type_id, duration_days) VALUES
-(1, '10,000 Steps Daily', 'Walk at least 10,000 steps every day.', 1, 30),
-(2, 'No Sugar Week', 'Avoid all added sugars for a week.', 1, 7),
-(3, 'Community Clean-Up', 'Join the community clean-up event.', 2, 1),
-(4, 'Hydration Challenge', 'Drink 2 liters of water daily.', 1, 14),
-(5, 'Public Yoga Session', 'Participate in a public yoga session.', 2, 1);

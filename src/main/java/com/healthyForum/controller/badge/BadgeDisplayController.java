@@ -49,6 +49,6 @@ public class BadgeDisplayController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));;
         userBadgeService.updateDisplayedBadges(user.getUserID(), displayedBadgeIds);
         redirectAttributes.addFlashAttribute("success", "Badge display updated!");
-        return "redirect:/user-profile";
+        return "redirect:/profile";
     }
 }

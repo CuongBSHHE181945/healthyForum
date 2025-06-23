@@ -1,6 +1,12 @@
 -- Generated SQL for 30 Challenges and Badges
 -- Challenge: Morning Yoga 7 Days
 -- Insert badge source type
+
+-- Insert challenge types
+INSERT INTO challenge_type (id, name) VALUES
+(1, 'PERSONAL'),
+(2, 'PUBLIC');
+
 INSERT INTO badge_source_type (name) VALUES ('CHALLENGE');
 
 INSERT INTO challenge (id, name, description, type_id, duration_days) VALUES (1, 'Morning Yoga 7 Days', 'Complete the morning yoga 7 days challenge.', 1, 7);
@@ -154,9 +160,6 @@ INSERT INTO badge_requirement (badge_id, source_id, source_type_id) VALUES (30, 
 
 -- Badge System Minimal Test Data
 -- only CHALLENGE source type
-
-
-
 -- Insert user_badge assignments
 INSERT INTO user_badge (userID, badge_id, earned_at) VALUES
 (1, 1, '2024-06-01 10:00:00'),

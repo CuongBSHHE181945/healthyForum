@@ -1,46 +1,78 @@
 package com.healthyForum.controller.profile;
 
 import com.healthyForum.model.User;
+import com.healthyForum.model.badge.Badge;
+import com.healthyForum.model.badge.UserBadge;
 import com.healthyForum.repository.UserRepository;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.oauth2.core.user.OAuth2User;
+import com.healthyForum.service.badge.BadgeService;
+import com.healthyForum.service.badge.UserBadgeService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.security.Principal;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
+@RequestMapping("/profile")
 public class ProfileController {
 
     private final UserRepository userRepository;
+    private final BadgeService badgeService;
+    private final UserBadgeService userBadgeService;
 
-    public ProfileController(UserRepository userRepository) {
+    public ProfileController(UserRepository userRepository, BadgeService badgeService, UserBadgeService userBadgeService) {
         this.userRepository = userRepository;
+        this.badgeService = badgeService;
+        this.userBadgeService = userBadgeService;
     }
 
-    @GetMapping("/profile")
-    public String viewProfile(Model model, @AuthenticationPrincipal Object principal) {
+    @GetMapping
+    public String viewProfile(Model model, Principal principal) {
         if (principal == null) {
             return "redirect:/login";
         }
 
-        String username = null;
-        if (principal instanceof UserDetails) {
-            username = ((UserDetails) principal).getUsername();
-        } else if (principal instanceof OAuth2User) {
-            // For Google users, we stored their email as the username
-            username = ((OAuth2User) principal).getAttribute("email");
-        }
+        String username = principal.getName(); // works for both local and OAuth2 users
 
-        if (username == null) {
-            return "redirect:/login?error=unknown_user";
-        }
-
-        final String finalUsername = username;
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new IllegalArgumentException("Authenticated user not found in database: " + finalUsername));
+                .orElseThrow(() -> new IllegalArgumentException("Authenticated user not found in database: " + username));
+
+        List<UserBadge> allUserBadges = userBadgeService.getAllUnlockedByUser(user.getUserID());
+        List<Badge> unlockedBadges = new ArrayList<>();
+        List<Badge> lockedBadges = badgeService.getAllBadges(); // clone to remove unlocked
+
+        List<Badge> displayedBadges = new ArrayList<>();
+
+        for (UserBadge ub : allUserBadges) {
+            Badge badge = ub.getBadge();
+            unlockedBadges.add(badge);
+            lockedBadges.remove(badge);
+            if (ub.isDisplayed()) {
+                displayedBadges.add(badge);
+            }
+        }
 
         model.addAttribute("user", user);
+        model.addAttribute("displayedBadges", displayedBadges);
+        model.addAttribute("unlockedBadges", unlockedBadges);
+        model.addAttribute("lockedBadges", lockedBadges);
+
+
+
         return "profile/profile";
     }
-} 
+
+//    @PostMapping("display-badge")
+//    @ResponseBody
+//    public ResponseEntity<?> addDisplayedBadge(@RequestParam int badgeId, Principal principal) {
+//        User user = userRepository.findByUsername(principal.getName())
+//                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));;
+//        userBadgeService.setBadgeDisplayed(user.getUserID(), badgeId);
+//        return ResponseEntity.ok().build();
+//    }
+}
