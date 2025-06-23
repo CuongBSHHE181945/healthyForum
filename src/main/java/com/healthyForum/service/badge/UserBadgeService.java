@@ -34,6 +34,10 @@ public class UserBadgeService {
     }
 
     public void updateDisplayedBadges(Long userId, List<Integer> displayedBadgeIds) {
+        if (displayedBadgeIds == null) {
+            displayedBadgeIds = List.of(); // or Collections.emptyList();
+        }
+
         List<UserBadge> userBadges = userBadgeRepository.findByIdUserId(userId);
 
         for (UserBadge badge : userBadges) {

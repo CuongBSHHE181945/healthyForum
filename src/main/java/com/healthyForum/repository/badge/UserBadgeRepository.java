@@ -2,6 +2,7 @@ package com.healthyForum.repository.badge;
 
 import com.healthyForum.model.badge.UserBadge;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -15,4 +16,12 @@ public interface UserBadgeRepository<UserBadgeId> extends JpaRepository<UserBadg
     //    Spring Data requires the full path:
     //    id.userId → idUserId
     //    id.badgeId → idBadgeId
+    @Query("""
+                SELECT DISTINCT br.sourceId
+                FROM UserBadge ub
+                JOIN BadgeRequirement br ON ub.id.badgeId = br.badge.id
+                WHERE ub.id.userId = :userId
+                  AND br.sourceType.name = 'CHALLENGE'
+            """)
+    List<Integer> findChallengeIdsByUserId(Long userId);
 }

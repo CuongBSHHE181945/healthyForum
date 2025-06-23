@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><title>All Challenges</title></head>
+<body>
+<h2 style="text-align: center;">🌟 All Challenges</h2>
+
+<!-- 🔔 Feedback Messages -->
+<div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+<div th:if="${warning}" class="alert alert-warning" th:text="${warning}"></div>
+<div th:if="${info}" class="alert alert-info" th:text="${info}"></div>
+<div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+<table>
+  <thead>
+  <tr>
+    <th>Name</th>
+    <th>Type</th>
+    <th>Description</th>
+    <th>Duration</th>
+    <th>Action</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr th:each="c : ${challenges}">
+    <td>
+      <a th:href="@{'/challenge/' + ${c.id}}" th:text="${c.name}">Name</a>
+      <span th:if="${badgeEarnedIds.contains(c.id)}" style="color: green;">🎖️ Earned</span>
+    </td>
+    <td th:text="${c.type.name}">Type</td>
+    <td th:text="${c.description}">Description</td>
+    <td th:text="${c.durationDays}">7</td>
+    <td>
+      <form th:action="@{'/challenge/join/' + ${c.id}}" method="post">
+        <button type="submit"
+                th:disabled="${joinedIds.contains(c.id)}"
+                th:text="${joinedIds.contains(c.id) ? 'Joined' : 'Join'}"></button>
+      </form>
+    </td>
+  </tr>
+  </tbody>
+</table>
+<a href="/challenge/my">→ View My Active Challenges</a>
+</body>
+</html>

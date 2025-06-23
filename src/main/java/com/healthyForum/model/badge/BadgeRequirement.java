@@ -23,6 +23,6 @@ public class BadgeRequirement {
     @Column(name = "source_id", nullable = false)
     private int sourceId;     // ID of the challenge, goal, etc.
 
-    @Column(name = "value", nullable = false)
+    @Column(name = "value", nullable = true)
     private String value;      // Optional: e.g., target score, steps
 }

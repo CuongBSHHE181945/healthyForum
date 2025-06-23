@@ -15,4 +15,12 @@ public class UserBadgeId implements Serializable {
 
     @Column(name = "badge_id")
     private int badgeId;
+
+    public UserBadgeId() {
+    }
+
+    public UserBadgeId(Long userId, int badgeId) {
+        this.userId = userId;
+        this.badgeId = badgeId;
+    }
 }

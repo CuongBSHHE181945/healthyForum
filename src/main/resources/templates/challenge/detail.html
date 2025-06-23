@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Challenge Detail</title>
+  <style>
+    .container { width: 60%; margin: auto; }
+    .back { margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="back">
+    <a href="/challenge">← Back to list</a>
+  </div>
+  <h2 th:text="${challenge.name}">Challenge Name</h2>
+  <p><strong>Type:</strong> <span th:text="${challenge.type.name}"></span></p>
+  <p><strong>Duration:</strong> <span th:text="${challenge.durationDays}"></span> days</p>
+  <p><strong>Description:</strong></p>
+  <p th:text="${challenge.description}">Challenge description goes here</p>
+
+  <form th:action="@{'/challenge/join/' + ${challenge.id}}" method="post">
+    <button type="submit"
+            th:disabled="${joinedIds.contains(challenge.id)}"
+            th:text="${joinedIds.contains(challenge.id) ? 'Joined' : 'Join'}"></button>
+  </form>
+</div>
+</body>
+</html>
