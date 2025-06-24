@@ -1,11 +1,11 @@
 package com.healthyForum.config;
 
+import com.healthyForum.handler.CustomAuthenticationSuccessHandler;
 import com.healthyForum.repository.UserRepository;
 import com.healthyForum.model.User;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -18,26 +18,33 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     private final UserRepository userRepository;
+    private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
 
-    public SecurityConfig(UserRepository userRepository) {
+    public SecurityConfig(UserRepository userRepository,
+                          CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler) {
         this.userRepository = userRepository;
+        this.customAuthenticationSuccessHandler = customAuthenticationSuccessHandler;
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable()) // Disable CSRF for API use (e.g. with Postman or TestRestTemplate)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/sleepTracker/**").authenticated()
-
-                        .anyRequest().permitAll()
-
+                        .requestMatchers("/login", "/css/**", "/js/**", "/images/**").permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .anyRequest().authenticated()
                 )
-                .anonymous(anon -> anon
-                        .principal("alice123")  // gán email cố định cho người dùng ảo
-                        .authorities("ROLE_USER")
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .successHandler(customAuthenticationSuccessHandler) // Sử dụng custom handler
+                        .failureUrl("/login?error=true")
+                        .permitAll()
                 )
-                .httpBasic(Customizer.withDefaults()); // Enables HTTP Basic Authentication (used in your test)
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login?logout")
+                        .permitAll()
+                );
 
         return http.build();
     }
@@ -47,10 +54,13 @@ public class SecurityConfig {
         return username -> {
             User user = userRepository.findByUsername(username)
                     .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+            // KHÔNG kiểm tra suspended ở đây - để CustomAuthenticationSuccessHandler xử lý
+
             return org.springframework.security.core.userdetails.User
                     .withUsername(user.getUsername())
                     .password(user.getPassword()) // Already encoded
-                    .roles("USER") // Default role
+                    .roles(user.getRole().getRoleName()) // Role name
                     .build();
         };
     }
@@ -60,7 +70,6 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    // Only needed if you want to use AuthenticationManager elsewhere (optional)
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();

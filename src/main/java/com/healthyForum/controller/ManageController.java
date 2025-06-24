@@ -1,7 +1,8 @@
 package com.healthyForum.controller;
 
-import com.healthyForum.service.BlogService;
-import com.healthyForum.service.FeedbackService;
+import com.healthyForum.model.Post;
+import com.healthyForum.model.Report;
+import com.healthyForum.service.PostService;
 import com.healthyForum.service.ReportService;
 import com.healthyForum.service.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/admin")
@@ -18,44 +21,38 @@ public class ManageController {
     @Autowired
     private ReportService reportService;
     @Autowired
-    private FeedbackService feedbackService;
-    @Autowired
-    private BlogService blogService;
+    private PostService postService;
+
 
     @GetMapping
-    public String adminHome() {
-        return "admin";
+    public String adminHome(Model model) {
+        // Get counts for statistics
+        long userCount = userService.getAllUsers().size();
+        long postCount = postService.getAllPosts().size();
+        long pendingReportCount = reportService.getReportsByStatus(Report.ReportStatus.PENDING).size();
+
+
+        List<Report> recentReports = reportService.getAllReports();
+
+
+        List<com.healthyForum.model.User> recentUsers = userService.getAllUsers();
+
+        // Add data to model
+        model.addAttribute("userCount", userCount);
+        model.addAttribute("postCount", postCount);
+        model.addAttribute("pendingReportCount", pendingReportCount);
+        model.addAttribute("recentReports", recentReports);
+        model.addAttribute("recentUsers", recentUsers);
+
+        return "admin/admin";
     }
 
     @GetMapping("/users")
     public String getUsers(Model model) {
         model.addAttribute("users", userService.getAllUsers());
-        return "admin_users";
+        return "admin/admin_users";
     }
 
-    @GetMapping("/reports")
-    public String getReports(Model model) {
-        model.addAttribute("reports", reportService.getAllReports());
-        return "admin_reports";
-    }
-
-
-    @GetMapping("/feedbacks")
-    public String getFeedbacks(Model model) {
-        try {
-            model.addAttribute("feedbacks", feedbackService.getAllFeedback());
-            return "admin_feedbacks";
-        } catch (Exception e) {
-            model.addAttribute("error", "Error loading feedbacks: " + e.getMessage());
-            return "admin_feedbacks";
-        }
-    }
-
-    @GetMapping("/blogs")
-    public String getBlogs(Model model) {
-        model.addAttribute("blogs", blogService.getAllBlogs());
-        return "admin_blogs";
-    }
 
     // Change these mappings from @GetMapping to @PostMapping
 
@@ -79,32 +76,86 @@ public class ManageController {
         }
     }
 
+
     // In src/main/java/com/healthyForum/controller/ManageController.java
 
 
-    @PostMapping("/feedbacks/respond/{id}")
-    public String respondFeedback(@PathVariable Long id, @RequestParam String response) {
-        feedbackService.respondToFeedback(id, response);
-        return "redirect:/admin/feedbacks";
+    @GetMapping("/reports")
+    public String manageReports(Model model) {
+        // Get reports by status
+        List<Report> pendingReports = reportService.getReportsByStatus(Report.ReportStatus.PENDING);
+        List<Report> resolvedReports = reportService.getReportsByStatus(Report.ReportStatus.RESOLVED);
+        List<Report> rejectedReports = reportService.getReportsByStatus(Report.ReportStatus.REJECTED);
+
+        model.addAttribute("pendingReports", pendingReports);
+        model.addAttribute("resolvedReports", resolvedReports);
+        model.addAttribute("rejectedReports", rejectedReports);
+
+        return "admin/admin_reports";
     }
 
-    @PostMapping("/reports/respond/{id}")
-    public String respondReport(@PathVariable Long id, @RequestParam String response) {
-        reportService.respondToReport(id, response);
+    @GetMapping("/reports/all")
+    public String viewAllReports(Model model) {
+        model.addAttribute("allReports", reportService.getAllReports());
+        return "admin/admin_all_reports";
+    }
+
+    @PostMapping("/reports/{id}/resolve")
+    public String resolveReport(@PathVariable Long id,
+                                @RequestParam String resolution,
+                                @RequestParam(value = "banPost", required = false) Boolean banPost,
+                                RedirectAttributes redirectAttributes) {
+
+        Report report = reportService.getReportById(id);
+
+        // Handle post banning if requested
+        if (banPost != null && banPost && report.getReportedPost() != null) {
+            Post bannedPost = postService.banPost(report.getReportedPost().getId());
+            resolution += " (Bài viết đã bị cấm)";
+        }
+
+        // Resolve the report
+        reportService.resolveReport(id, resolution);
+
+        redirectAttributes.addFlashAttribute("success", "Báo cáo đã được xử lý thành công");
         return "redirect:/admin/reports";
     }
 
-    @PostMapping("/blogs/suspend/{id}")
-    public String suspendBlog(@PathVariable Long id) {
-        blogService.suspendBlog(id);
-        return "redirect:/admin/blogs";
+    @PostMapping("/reports/{id}/reject")
+    public String rejectReport(@PathVariable Long id,
+                               @RequestParam String resolution,
+                               RedirectAttributes redirectAttributes) {
+
+        reportService.rejectReport(id, resolution);
+
+        redirectAttributes.addFlashAttribute("success", "Báo cáo đã được từ chối");
+        return "redirect:/admin/reports";
     }
 
-    @PostMapping("/blogs/unsuspend/{id}")
-    public String unsuspendBlog(@PathVariable Long id) {
-        blogService.unsuspendBlog(id);
-        return "redirect:/admin/blogs";
+    @GetMapping("/reports/{id}/ban-post")
+    public String banPostDirectly(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        Report report = reportService.getReportById(id);
+
+        if (report.getReportedPost() != null) {
+            // Ban the post
+            postService.banPost(report.getReportedPost().getId());
+
+            // Also resolve the report with auto-generated resolution
+            String resolution = "Bài viết đã bị cấm do vi phạm quy định cộng đồng.";
+            reportService.resolveReport(id, resolution);
+
+            redirectAttributes.addFlashAttribute("success", "Bài viết đã bị cấm và báo cáo đã được xử lý");
+        } else {
+            redirectAttributes.addFlashAttribute("error", "Không thể thực hiện - báo cáo này không liên quan đến bài viết");
+        }
+
+        return "redirect:/admin/reports";
     }
 
-
+    @GetMapping("/posts/{id}/unban")
+    public String unbanPost(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        postService.unbanPost(id);
+        redirectAttributes.addFlashAttribute("success", "Bài viết đã được bỏ cấm thành công");
+        return "redirect:/admin/posts";
+    }
 }
