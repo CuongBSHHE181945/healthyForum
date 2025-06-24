@@ -1,8 +1,11 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head><title>My Challenges</title></head>
+<head><title>My Challenges</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <link rel="stylesheet" th:href="@{/css/challenge.css}">
+</head>
 <body>
-<h2 style="text-align:center;">✅ My Active Challenges</h2>
+<h2 class="page-title">✅ My Active Challenges</h2>
 <table>
     <thead>
     <tr>
@@ -33,6 +36,6 @@
     </tr>
     </tbody>
 </table>
-<a href="/challenge">← Back to All Challenges</a>
+<a href="/challenge" class="back-link">← Back to All Challenges</a>
 </body>
 </html>

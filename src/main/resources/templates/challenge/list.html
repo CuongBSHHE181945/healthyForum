@@ -1,8 +1,11 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head><title>All Challenges</title></head>
+<head><title>All Challenges</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <link rel="stylesheet" th:href="@{/css/challenge.css}">
+</head>
 <body>
-<h2 style="text-align: center;">🌟 All Challenges</h2>
+<h2 class="page-title">🌟 All Challenges</h2>
 
 <!-- 🔔 Feedback Messages -->
 <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
@@ -39,6 +42,6 @@
   </tr>
   </tbody>
 </table>
-<a href="/challenge/my">→ View My Active Challenges</a>
+<a href="/challenge/my" class="forward-link">→ View My Active Challenges</a>
 </body>
 </html>
