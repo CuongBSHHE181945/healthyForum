@@ -1,140 +1,64 @@
+<!-- src/main/resources/templates/admin.html -->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Dashboard</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" th:href="@{/css/admin-styles.css}">
+  <style>
+    body { min-height: 100vh; background: #f8f9fa; }
+    .sidebar { min-width: 220px; max-width: 220px; background: #343a40; color: #fff; min-height: 100vh; }
+    .sidebar .nav-link { color: #adb5bd; }
+    .sidebar .nav-link.active, .sidebar .nav-link:hover { color: #fff; background: #495057; }
+    .content { margin-left: 220px; padding: 2rem; }
+    @media (max-width: 768px) {
+      .sidebar { min-width: 100%; max-width: 100%; min-height: auto; }
+      .content { margin-left: 0; }
+    }
+  </style>
 </head>
 <body>
-<div>
 <div class="d-flex">
   <!-- Sidebar -->
-  <nav class="admin-sidebar d-flex flex-column">
-    <div class="logo">
-      <span class="logo-text">Healthy Forum</span>
-    </div>
-    <div class="px-3 py-2">
-      <small class="text-uppercase text-muted fw-bold">Quản trị</small>
-    </div>
-    <ul class="nav flex-column mb-auto px-2">
-      <li class="nav-item">
-        <a href="/admin" class="nav-link active">
-          <i class="bi bi-speedometer2"></i> Tổng quan
-        </a>
-      </li>
+  <nav class="sidebar d-flex flex-column p-3">
+    <a href="/admin" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
+      <span class="fs-4">Admin Dashboard</span>
+    </a>
+    <hr>
+    <ul class="nav nav-pills flex-column mb-auto">
       <li class="nav-item">
         <a href="/admin/users" class="nav-link">
-          <i class="bi bi-people"></i> Người dùng
+          <i class="bi bi-people"></i> User Management
         </a>
       </li>
+
       <li class="nav-item">
         <a href="/admin/reports" class="nav-link">
-          <i class="bi bi-flag"></i> Báo cáo
+          <i class="bi bi-file-earmark-text"></i> Reports
         </a>
       </li>
     </ul>
-    <div class="divider"></div>
-    <div class="sidebar-footer">
-      <a href="/" class="btn btn-light btn-sm w-100">
-        <i class="bi bi-house-door"></i> Về trang chủ
-      </a>
+    <hr>
+    <div>
+      <a href="/static" class="btn btn-outline-light btn-sm w-100">Back to Home</a>
     </div>
   </nav>
 
   <!-- Main Content -->
-  <div class="admin-content">
-    <div class="admin-topbar">
-      <h4 class="mb-0">Tổng quan hệ thống</h4>
-      <div>
-        <button class="btn btn-light sidebar-toggle d-lg-none">
-          <i class="bi bi-list"></i>
-        </button>
+  <div class="content flex-grow-1">
+    <nav class="navbar navbar-expand-lg navbar-light bg-white rounded shadow-sm mb-4">
+      <div class="container-fluid">
+        <span class="navbar-brand mb-0 h1">Admin Dashboard</span>
       </div>
-    </div>
-
+    </nav>
     <div th:if="${param.error}" class="alert alert-danger" role="alert">
       <span th:text="${param.error}"></span>
     </div>
-
-    <!-- Stats Row -->
-    <div class="row">
-      <div class="col-xl-3 col-md-6 mb-4">
-        <div class="admin-card stat-card primary h-100">
-          <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center">
-              <div>
-                <div class="text-xs text-uppercase mb-1 text-primary fw-bold">
-                  Người dùng
-                </div>
-                <div class="stat-value" th:text="${userCount}">0</div>
-              </div>
-              <i class="bi bi-people stat-icon text-primary"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-xl-3 col-md-6 mb-4">
-        <div class="admin-card stat-card success h-100">
-          <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center">
-              <div>
-                <div class="text-xs text-uppercase mb-1 text-success fw-bold">
-                  Bài viết
-                </div>
-                <div class="stat-value" th:text="${postCount}">0</div>
-              </div>
-              <i class="bi bi-file-text stat-icon text-success"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-xl-3 col-md-6 mb-4">
-        <div class="admin-card stat-card warning h-100">
-          <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center">
-              <div>
-                <div class="text-xs text-uppercase mb-1 text-warning fw-bold">
-                  Bình luận
-                </div>
-                <div class="stat-value" th:text="${commentCount}">0</div>
-              </div>
-              <i class="bi bi-chat-dots stat-icon text-warning"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-xl-3 col-md-6 mb-4">
-        <div class="admin-card stat-card danger h-100">
-          <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center">
-              <div>
-                <div class="text-xs text-uppercase mb-1 text-danger fw-bold">
-                  Báo cáo đang chờ
-                </div>
-                <div class="stat-value" th:text="${pendingReportCount}">0</div>
-              </div>
-              <i class="bi bi-flag stat-icon text-danger"></i>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div class="text-center mt-5">
+      <h3>Welcome to the Admin Dashboard</h3>
     </div>
   </div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-  // Sidebar toggle for mobile
-  document.querySelector('.sidebar-toggle')?.addEventListener('click', function() {
-    document.querySelector('.admin-sidebar').classList.toggle('show');
-  });
-</script>
-
- </body>
+</div>
+</body>
 </html>

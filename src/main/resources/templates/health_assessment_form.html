@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Health Risk Assessment</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .assessment-form {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .form-section {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+        }
+        .section-icon {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 50%;
+            margin-right: 15px;
+        }
+    </style>
+</head>
+<body class="bg-light">
+<div class="container assessment-form">
+    <div class="text-center mb-4">
+        <h2 class="display-6">Health Risk Assessment</h2>
+        <p class="text-muted">Complete your health assessment to receive personalized recommendations</p>
+    </div>
+
+    <form th:action="@{/health-assessment}" th:object="${assessment}" method="post">
+        <!-- Personal Information Section -->
+        <div class="form-section p-4">
+            <div class="d-flex align-items-center mb-4">
+                <div class="section-icon">
+                    <i class="bi bi-person-circle fs-4 text-primary"></i>
+                </div>
+                <h4 class="mb-0">Personal Information</h4>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <label class="form-label">Age</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
+                        <input type="number" class="form-control" th:field="*{age}" required
+                               min="18" max="120" placeholder="Enter your age"/>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Gender</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-gender-ambiguous"></i></span>
+                        <select class="form-select" th:field="*{gender}" required>
+                            <option value="">Select gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Height (cm)</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-rulers"></i></span>
+                        <input type="number" class="form-control" th:field="*{height}" required
+                               min="120" max="250" placeholder="Enter height"/>
+                        <span class="input-group-text">cm</span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Weight (kg)</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-speedometer2"></i></span>
+                        <input type="number" class="form-control" th:field="*{weight}" required
+                               min="30" max="300" placeholder="Enter weight"/>
+                        <span class="input-group-text">kg</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lifestyle Information Section -->
+        <div class="form-section p-4">
+            <div class="d-flex align-items-center mb-4">
+                <div class="section-icon">
+                    <i class="bi bi-activity fs-4 text-primary"></i>
+                </div>
+                <h4 class="mb-0">Lifestyle Information</h4>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="card border-light bg-light">
+                        <div class="card-body">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" th:field="*{smoker}" id="smokerSwitch"/>
+                                <label class="form-check-label" for="smokerSwitch">
+                                    <i class="bi bi-smoking me-2"></i>Do you smoke?
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Exercise (days per week)</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-bicycle"></i></span>
+                        <input type="number" class="form-control" th:field="*{exerciseDaysPerWeek}"
+                               min="0" max="7" placeholder="Days per week"/>
+                    </div>
+                    <div class="help-text">Recommended: 5 days of exercise per week</div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Sleep Pattern</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-moon"></i></span>
+                        <select class="form-select" th:field="*{sleepPattern}" required>
+                            <option value="">Select sleep pattern</option>
+                            <option value="Good">Good (7-9 hours)</option>
+                            <option value="Fair">Fair (5-7 hours)</option>
+                            <option value="Poor">Poor (< 5 hours)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-primary btn-lg">
+                Get Your Health Assessment
+                <i class="bi bi-arrow-right-circle ms-2"></i>
+            </button>
+        </div>
+    </form>
+</div>
+</body>
+</html>

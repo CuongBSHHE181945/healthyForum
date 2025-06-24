@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Messaging System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f1f1f1;
+            padding: 20px;
+        }
+
+        .chat-box {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .messages {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 15px;
+            background: #fafafa;
+        }
+
+        .message {
+            padding: 8px 12px;
+            margin: 8px 0;
+            border-radius: 20px;
+            max-width: 70%;
+            display: inline-block;
+            clear: both;
+        }
+
+        .sent {
+            background: #dcf8c6;
+            float: right;
+            font-weight: bold;
+        }
+
+        .received {
+            background: #eee;
+            float: left;
+        }
+
+        .input-box {
+            display: flex;
+            gap: 10px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+        }
+
+        button {
+            padding: 10px 16px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #45a049;
+        }
+
+        .receiver-select {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="chat-box">
+    <h2>Chat</h2>
+
+    <div class="receiver-select">
+        <label for="receiverSelect">Select Receiver:</label>
+        <select id="receiverSelect" onchange="changeReceiver()">
+            <option value="2">User B</option>
+            <option value="3">User C</option>
+        </select>
+    </div>
+
+    <div class="messages" id="chatWindow">
+        <!-- Messages will be injected here -->
+    </div>
+
+    <div class="input-box">
+        <input type="text" id="messageInput" placeholder="Type your message...">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+</div>
+
+<script>
+    let receiverId = document.getElementById("receiverSelect").value;
+    const chatWindow = document.getElementById("chatWindow");
+
+    function changeReceiver() {
+        receiverId = document.getElementById("receiverSelect").value;
+        loadMessages();
+    }
+
+    async function loadMessages() {
+        try {
+            const response = await fetch(`/messages/${receiverId}`);
+            if (!response.ok) return;
+
+            const messages = await response.json();
+            chatWindow.innerHTML = "";
+
+            messages.forEach(msg => {
+                const div = document.createElement("div");
+                const isSent = msg.isSender;
+                div.className = "message " + (isSent ? "sent" : "received");
+                div.textContent = msg.content;
+                chatWindow.appendChild(div);
+            });
+
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        } catch (error) {
+            console.error("Error loading messages", error);
+        }
+    }
+
+    async function sendMessage() {
+        const input = document.getElementById("messageInput");
+        const content = input.value.trim();
+        if (!content) return;
+
+        const newMessage = {
+            receiver: { userID: receiverId },
+            content: content
+        };
+
+        try {
+            const response = await fetch("/messages", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(newMessage)
+            });
+
+            if (!response.ok) {
+                alert("Failed to send message");
+                return;
+            }
+
+            const savedMessage = await response.json();
+            const div = document.createElement("div");
+            div.className = "message sent";
+            div.textContent = savedMessage.content;
+            chatWindow.appendChild(div);
+
+            input.value = "";
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+
+        } catch (error) {
+            console.error("Error sending message", error);
+        }
+    }
+
+    loadMessages();
+    setInterval(loadMessage(), 3000);
+</script>
+
+</body>
+</html>

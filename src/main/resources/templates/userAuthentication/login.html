@@ -4,22 +4,10 @@
   <title>Đăng Nhập - Healthy Forum</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
   <style>
-    :root {
-      --primary: #4CAF50;
-      --primary-dark: #388E3C;
-      --secondary: #2196F3;
-      --text-dark: #333;
-      --text-light: #666;
-      --background: #f8f9fa;
-      --white: #fff;
-      --shadow: 0 8px 15px rgba(0,0,0,0.1);
-    }
-
     body {
-      font-family: 'Segoe UI', Roboto, sans-serif;
-      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
       margin: 0;
       padding: 0;
       display: flex;
@@ -27,162 +15,78 @@
       align-items: center;
       min-height: 100vh;
     }
-
     .login-container {
-      background-color: var(--white);
-      padding: 35px;
-      border-radius: 15px;
-      box-shadow: var(--shadow);
+      background-color: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
       width: 400px;
       max-width: 90%;
-      position: relative;
-      overflow: hidden;
     }
-
-    .login-container::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 5px;
-      background: linear-gradient(90deg, var(--primary), var(--secondary));
-    }
-
-    .forum-logo {
-      text-align: center;
-      margin-bottom: 25px;
-    }
-
-    .logo-icon {
-      font-size: 40px;
-      color: var(--primary);
-      margin-bottom: 10px;
-    }
-
-    .forum-name {
-      font-size: 22px;
-      font-weight: 600;
-      color: var(--primary);
-      margin: 0;
-    }
-
     .login-title {
       text-align: center;
-      color: var(--text-dark);
+      color: #333;
       margin-bottom: 30px;
       font-size: 24px;
-      font-weight: 500;
     }
-
     .form-group {
       margin-bottom: 20px;
-      position: relative;
     }
-
     .form-control {
       width: 100%;
-      padding: 12px 12px 12px 40px;
+      padding: 12px;
       border: 1px solid #ddd;
-      border-radius: 8px;
+      border-radius: 5px;
       font-size: 16px;
       box-sizing: border-box;
-      transition: all 0.3s;
     }
-
-    .form-control:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
-      outline: none;
-    }
-
-    .input-icon {
-      position: absolute;
-      left: 12px;
-      top: 14px;
-      color: var(--text-light);
-    }
-
     .btn-login {
       width: 100%;
       padding: 12px;
-      background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+      background-color: #007bff;
       color: white;
       border: none;
-      border-radius: 8px;
+      border-radius: 5px;
       font-size: 16px;
-      font-weight: 600;
       cursor: pointer;
-      transition: all 0.3s;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      transition: background-color 0.3s;
     }
-
     .btn-login:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+      background-color: #0056b3;
     }
-
     .alert {
       padding: 15px;
       margin-bottom: 20px;
-      border-radius: 8px;
-      font-weight: 500;
+      border-radius: 5px;
+      font-weight: bold;
       text-align: center;
       animation: fadeIn 0.5s;
     }
-
     .alert-danger {
       color: #721c24;
       background-color: #f8d7da;
-      border: 1px solid #f5c6cb;
+      border: 2px solid #f5c6cb;
     }
-
     .alert-success {
       color: #155724;
       background-color: #d4edda;
-      border: 1px solid #c3e6cb;
+      border: 2px solid #c3e6cb;
     }
-
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(-10px); }
       to { opacity: 1; transform: translateY(0); }
     }
-
-    .helper-links {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 20px;
-      font-size: 14px;
-    }
-
-    .helper-links a {
-      color: var(--secondary);
-      text-decoration: none;
-      transition: color 0.3s;
-    }
-
-    .helper-links a:hover {
-      color: var(--primary);
-      text-decoration: underline;
-    }
-
-    .copyright {
+    .forum-header {
       text-align: center;
-      margin-top: 25px;
-      color: var(--text-light);
-      font-size: 12px;
-      border-top: 1px solid #eee;
-      padding-top: 15px;
+      margin-bottom: 10px;
+      color: #007bff;
+      font-size: 18px;
     }
   </style>
 </head>
 <body>
 <div class="login-container">
-  <div class="forum-logo">
-    <i class="fas fa-heartbeat logo-icon"></i>
-    <p class="forum-name">Healthy Forum</p>
-  </div>
-
+  <div class="forum-header"> Healthy Forum</div>
   <h2 class="login-title">Đăng Nhập</h2>
 
   <!-- Hiển thị thông báo lỗi -->
@@ -193,12 +97,10 @@
 
   <form th:action="@{/login}" method="post">
     <div class="form-group">
-      <i class="fas fa-user input-icon"></i>
       <input type="text" name="username" class="form-control"
              placeholder="Tên đăng nhập" required/>
     </div>
     <div class="form-group">
-      <i class="fas fa-lock input-icon"></i>
       <input type="password" name="password" class="form-control"
              placeholder="Mật khẩu" required/>
     </div>
@@ -207,12 +109,7 @@
     </div>
   </form>
 
-  <div class="helper-links">
-    <a href="/register">Đăng ký tài khoản</a>
-    <a href="/forgot-password">Quên mật khẩu?</a>
-  </div>
-
-  <div class="copyright">
+  <div style="text-align: center; margin-top: 15px; color: #666; font-size: 12px;">
     © 2024 Healthy Forum - Chăm sóc sức khỏe của bạn
   </div>
 </div>

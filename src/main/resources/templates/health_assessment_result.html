@@ -1,0 +1,90 @@
+<!-- health_assessment_result.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Health Assessment Results</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    .result-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .result-card {
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      margin-bottom: 25px;
+    }
+  </style>
+</head>
+<body class="bg-light">
+<div class="container result-container">
+  <div class="text-center mb-4">
+    <h2 class="display-6">Your Health Assessment Results</h2>
+    <p class="text-muted">Based on the information you provided</p>
+  </div>
+
+  <div class="result-card p-4" th:object="${result}">
+    <div class="row g-4">
+      <!-- Risk Level Section -->
+      <div class="col-12">
+        <div th:class="${'alert ' +
+                    (result.riskLevel == 'High' ? 'alert-danger' :
+                    (result.riskLevel == 'Moderate' ? 'alert-warning' : 'alert-success'))}">
+          <h4 class="alert-heading">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            Risk Level: <span th:text="*{riskLevel}"></span>
+          </h4>
+          <p class="mb-0" th:text="*{healthSuggestions}"></p>
+        </div>
+      </div>
+
+      <!-- Personal Information -->
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header bg-primary text-white">
+            <i class="bi bi-person-circle me-2"></i>Personal Information
+          </div>
+          <div class="card-body">
+            <p><strong>Username:</strong> <span th:text="*{user.username}"></span></p>
+            <p><strong>Age:</strong> <span th:text="*{age}"></span></p>
+            <p><strong>Gender:</strong> <span th:text="*{gender}"></span></p>
+            <p><strong>Height:</strong> <span th:text="*{height}"></span> cm</p>
+            <p><strong>Weight:</strong> <span th:text="*{weight}"></span> kg</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lifestyle Information -->
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header bg-info text-white">
+            <i class="bi bi-activity me-2"></i>Lifestyle Information
+          </div>
+          <div class="card-body">
+            <p><strong>Smoking Status:</strong>
+              <span th:text="*{smoker} ? 'Smoker' : 'Non-smoker'"></span>
+            </p>
+            <p><strong>Exercise:</strong>
+              <span th:text="*{exerciseDaysPerWeek}"></span> days per week
+            </p>
+            <p><strong>Sleep Pattern:</strong> <span th:text="*{sleepPattern}"></span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="d-grid gap-2 mt-4">
+      <a href="/health-assessment" class="btn btn-primary">
+        Take Another Assessment
+      </a>
+      <a href="/health-assessment/history" class="btn btn-outline-secondary">
+        View Assessment History
+      </a>
+    </div>
+  </div>
+</div>
+</body>
+</html>
