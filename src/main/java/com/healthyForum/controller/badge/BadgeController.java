@@ -4,11 +4,13 @@ import com.healthyForum.model.User;
 import com.healthyForum.model.badge.Badge;
 import com.healthyForum.model.badge.BadgeRequirement;
 import com.healthyForum.model.badge.UserBadge;
+import com.healthyForum.model.challenge.Challenge;
 import com.healthyForum.repository.UserRepository;
 import com.healthyForum.repository.badge.BadgeRepository;
 import com.healthyForum.service.badge.BadgeRequirementService;
 import com.healthyForum.service.badge.BadgeService;
 import com.healthyForum.service.badge.UserBadgeService;
+import com.healthyForum.service.challenge.ChallengeService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,6 +21,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,12 +33,14 @@ public class BadgeController {
     private final UserBadgeService userBadgeService;
     private final BadgeRequirementService badgeRequirementService;
     private final UserRepository userRepository;
+    private final ChallengeService challengeService;
 
-    public BadgeController(BadgeService badgeService, UserBadgeService userBadgeService, BadgeRequirementService badgeRequirementService, UserRepository userRepository) {
+    public BadgeController(BadgeService badgeService, UserBadgeService userBadgeService, BadgeRequirementService badgeRequirementService, UserRepository userRepository, ChallengeService challengeService) {
         this.badgeService = badgeService;
         this.userBadgeService = userBadgeService;
         this.badgeRequirementService = badgeRequirementService;
         this.userRepository = userRepository;
+        this.challengeService = challengeService;
     }
 
     @GetMapping("/{id}")
@@ -56,8 +61,21 @@ public class BadgeController {
                 earnedAt = userBadgeOpt.get().getEarnedAt();
             }
 
+        List<String> challengeNames = new ArrayList<>();
+        for (BadgeRequirement req : requirements) {
+            String challengeName = null;
+            if ("CHALLENGE".equalsIgnoreCase(req.getSourceType().getName())) {
+                Challenge challenge = challengeService.getChallengeById(req.getSourceId()).orElse(null);
+                if (challenge != null) {
+                    challengeName = challenge.getName();
+                }
+            }
+            challengeNames.add(challengeName);
+        }
+
         model.addAttribute("badge", badge);
         model.addAttribute("requirements", requirements);
+        model.addAttribute("challengeNames", challengeNames);
         model.addAttribute("unlocked", unlocked);
         model.addAttribute("earnedAt", earnedAt);
 

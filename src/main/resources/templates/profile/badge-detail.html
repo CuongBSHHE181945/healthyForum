@@ -2,7 +2,9 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Badge Detail</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <link rel="stylesheet" th:href="@{/css/profile.css}">
 </head>
 <body>
 <h2>🎖 Badge Detail</h2>
@@ -13,36 +15,19 @@
     <p th:text="${badge.description}"></p>
 
     <div th:if="${unlocked}">
-        <p><strong>Status:</strong> ✅ Unlocked</p>
+        <p><strong>Status:</strong> <span class="unlocked">✅ Unlocked</span></p>
         <p><strong>Earned At:</strong> <span th:text="${earnedAt}"></span></p>
     </div>
     <div th:if="${!unlocked}">
-        <p><strong>Status:</strong> 🔒 Locked</p>
+        <p><strong>Status:</strong> <span class="locked">🔒 Locked</span></p>
     </div>
 
     <h4>🔍 Requirements:</h4>
     <ul>
-        <li th:each="req : ${requirements}">
-            <span th:text="'Source Type: ' + ${req.sourceType.name} + ', Source ID: ' + ${req.sourceId} + ', Value: ' + ${req.value}"></span>
-        </li>
+        <li th:each="challenge : ${challengeNames}" th:if="${challenge} != null" th:text="'Challenge: ' + ${challenge}"></li>
     </ul>
 </div>
 
-<a href="/user-profile">⬅ Back to Profile</a>
-
-<style>
-    .badge-detail {
-        max-width: 500px;
-        margin: auto;
-        padding: 20px;
-        border: 1px solid #ccc;
-        border-radius: 10px;
-        text-align: center;
-    }
-    .badge-icon-large {
-        width: 120px;
-        height: 120px;
-    }
-</style>
+<a href="/profile">⬅ Back to Profile</a>
 </body>
 </html>

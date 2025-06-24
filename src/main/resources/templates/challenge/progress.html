@@ -2,12 +2,14 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <title>Challenge Progress</title>
+  <link rel="stylesheet" th:href="@{/css/styles.css}">
+  <link rel="stylesheet" th:href="@{/css/challenge.css}">
 </head>
 <body>
 <h2 th:text="'📅 Progress for: ' + ${userChallenge.challenge.name}"></h2>
 
 <div th:if="${tickMessage}">
-  <p th:text="${tickMessage}" style="color: green; font-weight: bold;"></p>
+  <p th:text="${tickMessage}"></p>
 </div>
 
 <form th:action="@{'/challenge/tick/' + ${userChallenge.id}}" method="post">
@@ -25,6 +27,6 @@
   <li th:each="log : ${logs}" th:text="${log.date}"></li>
 </ul>
 
-<a href="/challenge/my">← Back to My Challenges</a>
+<a href="/challenge/my" class="back-link">← Back to My Challenges</a>
 </body>
 </html>

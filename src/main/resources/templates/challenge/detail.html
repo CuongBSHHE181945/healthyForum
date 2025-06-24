@@ -2,15 +2,13 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <title>Challenge Detail</title>
-  <style>
-    .container { width: 60%; margin: auto; }
-    .back { margin-bottom: 20px; }
-  </style>
+  <link rel="stylesheet" th:href="@{/css/styles.css}">
+  <link rel="stylesheet" th:href="@{/css/challenge.css}">
 </head>
 <body>
 <div class="container">
   <div class="back">
-    <a href="/challenge">← Back to list</a>
+    <a href="/challenge" class="back-link">← Back to list</a>
   </div>
   <h2 th:text="${challenge.name}">Challenge Name</h2>
   <p><strong>Type:</strong> <span th:text="${challenge.type.name}"></span></p>
