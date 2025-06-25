@@ -1,5 +1,6 @@
 package com.healthyForum.config;
 
+import com.healthyForum.config.CustomAuthenticationSuccessHandler;
 import com.healthyForum.repository.UserRepository;
 import com.healthyForum.model.User;
 import com.healthyForum.service.oauth.CustomOAuth2UserService;
@@ -19,10 +20,14 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     private final UserRepository userRepository;
+    private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
     private final CustomOAuth2UserService customOAuth2UserService;
 
-    public SecurityConfig(UserRepository userRepository, CustomOAuth2UserService customOAuth2UserService) {
+    public SecurityConfig(UserRepository userRepository,
+                          CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler,
+                          CustomOAuth2UserService customOAuth2UserService) {
         this.userRepository = userRepository;
+        this.customAuthenticationSuccessHandler = customAuthenticationSuccessHandler;
         this.customOAuth2UserService = customOAuth2UserService;
     }
 
@@ -31,11 +36,8 @@ public class SecurityConfig {
         http
                 .securityContext(context -> context.requireExplicitSave(false)) // allow auto save of security context
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/login", "/register", "/", "/home", "/verify",
-                                "/forgot-password", "/reset-password",
-                                "/css/**", "/js/**", "/images/**"
-                        ).permitAll()
+                        .requestMatchers("/login","/verify","/register", "/forgot-password").permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
@@ -66,7 +68,7 @@ public class SecurityConfig {
             return org.springframework.security.core.userdetails.User
                     .withUsername(user.getUsername())
                     .password(user.getPassword()) // Already encoded
-                    .roles(user.getRole().getRoleName()) // Default role
+                    .roles(user.getRole().getRoleName()) // Role name
                     .disabled(!user.isEnabled())
                     .build();
         };
