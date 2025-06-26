@@ -102,4 +102,34 @@
 }
 .profile-info p {
     margin: 0.5rem 0;
+}
+
+/* New styles for profile details section */
+.profile-details {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e0e0e0;
+}
+
+.profile-details h3 {
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+.details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.details-grid p {
+    background-color: #f9f9f9;
+    padding: 0.75rem;
+    border-radius: 6px;
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+.details-grid p strong {
+    color: #555;
 } 

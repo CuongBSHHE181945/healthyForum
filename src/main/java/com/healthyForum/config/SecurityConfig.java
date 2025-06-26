@@ -15,6 +15,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import com.healthyForum.config.CustomAuthorizationRequestResolver;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
 
 @Configuration
 public class SecurityConfig {
@@ -32,20 +35,30 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, ClientRegistrationRepository clientRegistrationRepository) throws Exception {
         http
                 .securityContext(context -> context.requireExplicitSave(false)) // allow auto save of security context
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login","/verify","/register", "/forgot-password").permitAll()
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/assets/**").permitAll() // Allow static resources
+                        .requestMatchers("/login","/verify","/register", "/forgot-password", "/reset-password").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
-                        .defaultSuccessUrl("/", true)
+                        .successHandler(customAuthenticationSuccessHandler) // Sử dụng custom handler
+                        .failureUrl("/login?error=true")
+                        .permitAll()
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("/login")
+                        .authorizationEndpoint(authorization -> authorization
+                            .authorizationRequestResolver(
+                                new CustomAuthorizationRequestResolver(
+                                    clientRegistrationRepository, "/oauth2/authorization"
+                                )
+                            )
+                        )
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService)
                         )
@@ -62,8 +75,9 @@ public class SecurityConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return username -> {
-            User user = userRepository.findByUsername(username)
+        return usernameOrEmail -> {
+            User user = userRepository.findByUsername(usernameOrEmail)
+                    .or(() -> userRepository.findByEmail(usernameOrEmail))
                     .orElseThrow(() -> new UsernameNotFoundException("User not found"));
             return org.springframework.security.core.userdetails.User
                     .withUsername(user.getUsername())

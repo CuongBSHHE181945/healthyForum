@@ -1,40 +1,53 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <title>Login</title>
-  <link rel="stylesheet" th:href="@{/css/styles.css}">
-  <link rel="stylesheet" th:href="@{/css/registration.css}">
+  <title>Login - Healthy Forum</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <link rel="stylesheet" th:href="@{/css/login.css}">
 </head>
 <body>
-<div class="container">
-  <h2>Login</h2>
-
-  <div th:if="${registerSuccessMsg}" class="alert alert-success" th:text="${registerSuccessMsg}"></div>
-  <div th:if="${verificationSuccess}" class="alert alert-success" th:text="${verificationSuccess}"></div>
-  <div th:if="${verificationError}" class="alert alert-danger" th:text="${verificationError}"></div>
-  <div th:if="${registerErrMsg}" class="alert alert-danger" th:text="${registerErrMsg}"></div>
-
+<div class="login-container">
+  <div class="forum-logo">
+    <i class="fas fa-heartbeat logo-icon"></i>
+    <p class="forum-name">Healthy Forum</p>
+  </div>
+  <h2 class="login-title">Login</h2>
+  <!-- Display error alert -->
+  <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+  <!-- Display success alert -->
+  <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
   <form th:action="@{/login}" method="post">
     <div class="form-group">
-      <label for="username">Username</label>
-      <input type="text" id="username" name="username" required />
+      <i class="fas fa-user input-icon"></i>
+      <input type="text" name="username" class="form-control" placeholder="Username" required />
     </div>
-
     <div class="form-group">
-      <label for="password">Password</label>
-      <input type="password" id="password" name="password" required />
+      <i class="fas fa-lock input-icon"></i>
+      <input type="password" name="password" class="form-control" placeholder="Password" required />
     </div>
-
-    <div class="button-group">
-      <button type="submit" class="btn btn-primary">Login</button>
-      <a th:href="@{/register}" class="btn btn-secondary">Register</a>
+    <div class="form-group">
+      <button type="submit" class="btn-login">Login</button>
     </div>
   </form>
-  <div class="text-center mt-3">
-    <a th:href="@{/forgot-password}">Forgot your password?</a>
+
+  <div class="divider">
+    <span>OR</span>
   </div>
-  <div class="oauth-buttons">
-    <a th:href="@{/oauth2/authorization/google}" class="btn btn-google">Login with Google</a>
+
+  <div class="social-login">
+    <a th:href="@{/oauth2/authorization/google}" class="btn-google">
+      <i class="fab fa-google"></i> Login with Google
+    </a>
+  </div>
+
+  <div class="helper-links">
+    <a th:href="@{/register}">Create an account</a>
+    <a th:href="@{/forgot-password}">Forgot password?</a>
+  </div>
+  <div class="copyright">
+    © 2024 Healthy Forum - Take care of your health
   </div>
 </div>
 </body>

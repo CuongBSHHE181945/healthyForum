@@ -24,7 +24,24 @@
         <p><strong>Email:</strong> <span th:text="${user.email}"></span></p>
     </div>
 
-    <div th:if="${user.provider == 'local'}" class="button-group" style="margin-top: 2rem;">
+    <div class="button-group" style="margin-bottom: 1.5rem;">
+        <a th:href="@{/profile/edit}" class="btn btn-primary">Edit Profile</a>
+    </div>
+
+    <!-- Personal & Health Information -->
+    <div class="profile-details">
+        <h3>Personal & Health Information</h3>
+        <div class="details-grid">
+            <p><strong>Date of Birth:</strong> <span th:text="${user.dob != null ? #temporals.format(user.dob, 'dd-MM-yyyy') : 'N/A'}"></span></p>
+            <p><strong>Gender:</strong> <span th:text="${user.gender ?: 'N/A'}"></span></p>
+            <p><strong>Address:</strong> <span th:text="${user.address ?: 'N/A'}"></span></p>
+            <!-- Health Assessment Info -->
+            <p><strong>Height:</strong> <span th:text="${healthAssessment != null ? healthAssessment.height + ' cm' : 'N/A'}"></span></p>
+            <p><strong>Weight:</strong> <span th:text="${healthAssessment != null ? healthAssessment.weight + ' kg' : 'N/A'}"></span></p>
+        </div>
+    </div>
+
+    <div th:if="${user.provider == null or user.provider == 'local'}" class="button-group" style="margin-top: 2rem;">
         <a th:href="@{/change-password}" class="btn btn-primary">Change Password</a>
     </div>
 

@@ -56,7 +56,12 @@ public class RegisterController {
         }
 
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            redirectAttributes.addFlashAttribute("registerErrMsg", "Email is already in use");
+            redirectAttributes.addFlashAttribute("registerErrMsg", "This email is already registered. If you signed up with Google, please use 'Login with Google'.");
+            return "redirect:/register";
+        }
+
+        if (!user.getFullname().matches("^[A-Za-z\\s]+$")) {
+            redirectAttributes.addFlashAttribute("registerErrMsg", "Full name must contain only letters and spaces.");
             return "redirect:/register";
         }
 

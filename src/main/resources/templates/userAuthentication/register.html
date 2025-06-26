@@ -2,63 +2,85 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Registration</title>
-    <link rel="stylesheet" th:href="@{/css/styles.css}">
-    <link rel="stylesheet" th:href="@{/css/registration.css}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/login.css}">
 </head>
 <body>
-<div class="container">
-    <h2>Create Account</h2>
+<div class="login-container">
+    <div class="forum-logo">
+        <i class="fas fa-heartbeat logo-icon"></i>
+        <p class="forum-name">Healthy Forum</p>
+    </div>
+    <h2 class="login-title">Create Account</h2>
+    <div th:if="${registerErrMsg}" class="alert alert-danger" th:text="${registerErrMsg}"></div>
     <form th:action="@{/register}" th:object="${user}" method="post">
-
         <div class="form-group">
-            <label for="username">Username</label>
-            <input type="text" id="username" th:field="*{username}" required minlength="3" maxlength="20" />
+            <i class="fas fa-user input-icon"></i>
+            <input type="text" id="username" th:field="*{username}" class="form-control" placeholder="Username" required minlength="3" maxlength="20" />
         </div>
-
         <div class="form-group">
-            <label for="email">Email</label>
-            <input type="email" id="email" th:field="*{email}" required />
+            <i class="fas fa-envelope input-icon"></i>
+            <input type="email" id="email" th:field="*{email}" class="form-control" placeholder="Email" required />
         </div>
-
-        <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" id="password" th:field="*{password}" required minlength="6" />
+        <div class="form-group" style="position:relative;">
+            <i class="fas fa-lock input-icon"></i>
+            <input type="password" id="password" th:field="*{password}" class="form-control" placeholder="Password" required minlength="6" />
+            <i class="fas fa-eye toggle-password" data-target="password" style="position:absolute; right:10px; top:38px; cursor:pointer;"></i>
         </div>
-
-        <div class="form-group">
-            <label for="confirmPassword">Confirm Password</label>
-            <input type="password" id="confirmPassword" name="confirmPassword" required />
+        <div class="form-group" style="position:relative;">
+            <i class="fas fa-lock input-icon"></i>
+            <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" placeholder="Confirm Password" required />
+            <i class="fas fa-eye toggle-password" data-target="confirmPassword" style="position:absolute; right:10px; top:38px; cursor:pointer;"></i>
         </div>
-
         <div class="form-group">
-            <label for="fullName">Full Name</label>
-            <input type="text" id="fullName" th:field="*{fullname}" required />
+            <i class="fas fa-id-card input-icon"></i>
+            <input type="text" id="fullName" th:field="*{fullname}" class="form-control" placeholder="Full Name" required />
         </div>
-
         <div class="form-group">
-            <label for="dob">Date of Birth</label>
-            <input type="date" id="dob" th:field="*{dob}" required />
+            <i class="fas fa-calendar input-icon"></i>
+            <input type="date" id="dob" th:field="*{dob}" class="form-control" placeholder="Date of Birth" required />
         </div>
-
         <div class="form-group">
-            <label for="gender">Gender</label>
-            <select id="gender" th:field="*{gender}" required>
+            <i class="fas fa-venus-mars input-icon"></i>
+            <select id="gender" th:field="*{gender}" class="form-control" required>
                 <option value="" disabled selected>-- Select Gender --</option>
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
             </select>
         </div>
-
         <div class="form-group">
-            <label for="fullName">Address</label>
-            <input type="text" id="address" th:field="*{address}" required />
+            <i class="fas fa-home input-icon"></i>
+            <input type="text" id="address" th:field="*{address}" class="form-control" placeholder="Address" required />
         </div>
-
         <div class="button-group">
-            <button type="submit" class="btn btn-primary">Register</button>
+            <button type="submit" class="btn-login">Register</button>
             <a th:href="@{/login}" class="btn btn-secondary">Back to Login</a>
         </div>
     </form>
+    <div class="helper-links">
+        <a th:href="@{/login}">Already have an account? Login</a>
+    </div>
+    <div class="copyright">
+        © 2024 Healthy Forum - Take care of your health
+    </div>
 </div>
+<script>
+document.querySelectorAll('.toggle-password').forEach(function(eye) {
+    eye.addEventListener('click', function() {
+        const target = document.getElementById(this.getAttribute('data-target'));
+        if (target.type === 'password') {
+            target.type = 'text';
+            this.classList.remove('fa-eye');
+            this.classList.add('fa-eye-slash');
+        } else {
+            target.type = 'password';
+            this.classList.remove('fa-eye-slash');
+            this.classList.add('fa-eye');
+        }
+    });
+});
+</script>
 </body>
 </html> 

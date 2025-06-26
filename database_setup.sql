@@ -25,9 +25,24 @@ CREATE TABLE IF NOT EXISTS `user` (
     `reset_password_token` VARCHAR(64),
     `reset_token_expiry` DATETIME,
     `role_id` BIGINT,
+    `google_id` VARCHAR(255) UNIQUE,
     CONSTRAINT `fk_user_role` FOREIGN KEY (`role_id`) REFERENCES `role`(`role_id`),
     CONSTRAINT `unique_username` UNIQUE (`username`)
 );
+
+-- Create Post table (add created_at, updated_at, banned, visibility)
+CREATE TABLE IF NOT EXISTS `post` (
+    `post_id` BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `user_id` BIGINT NOT NULL,
+    `title` VARCHAR(255) NOT NULL,
+    `content` TEXT NOT NULL,
+    `is_draft` BOOLEAN NOT NULL DEFAULT FALSE,
+    `visibility` VARCHAR(20) NOT NULL DEFAULT 'PUBLIC',
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `banned` BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (`user_id`) REFERENCES `user`(`userID`)
+); 
 
 -- Create Sleep Entries table
 CREATE TABLE IF NOT EXISTS `sleep_entries` (
@@ -78,13 +93,18 @@ CREATE TABLE IF NOT EXISTS `feedback` (
 
 -- Create Report table
 CREATE TABLE IF NOT EXISTS `report` (
-    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
-    `title` VARCHAR(255) NOT NULL,
-    `content` TEXT NOT NULL,
-    `userID` BIGINT NOT NULL,
-    `created_at` DATETIME NOT NULL,
-    `response` TEXT,
-    FOREIGN KEY (`userID`) REFERENCES `user`(`userID`)
+    `report_id` BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `reporter_id` BIGINT NOT NULL,
+    `reported_post_id` BIGINT,
+    `reported_user_id` BIGINT,
+    `reason` TEXT NOT NULL,
+    `status` VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `resolution` TEXT,
+    FOREIGN KEY (`reporter_id`) REFERENCES `user`(`userID`),
+    FOREIGN KEY (`reported_post_id`) REFERENCES `post`(`post_id`),
+    FOREIGN KEY (`reported_user_id`) REFERENCES `user`(`userID`)
 );
 
 -- Create Blog table
@@ -220,11 +240,6 @@ INSERT INTO `blog` (`title`, `content`, `created_at`, `author_username`, `suspen
 INSERT INTO `feedback` (`userID`, `message`, `submitted_at`, `response`) VALUES
 (2, 'Great site, very helpful!', '2024-06-01 10:15:00', NULL),
 (3, 'I found a bug in the forum.', '2024-06-02 14:30:00', NULL);
-
--- Insert sample reports
-INSERT INTO `report` (`title`, `content`, `userID`, `created_at`, `response`) VALUES
-('Spam Post', 'User xyz is posting spam links.', 1, '2024-06-03 09:00:00', NULL),
-('Inappropriate Content', 'There is an offensive comment in thread 123.', 2, '2024-06-03 16:45:00', NULL);
 
 -- Insert sample messages
 INSERT INTO `messages` (`sender_Id`, `receiver_Id`, `content`, `is_read`) VALUES
@@ -403,4 +418,5 @@ INSERT INTO user_badge (userID, badge_id, earned_at) VALUES
 (1, 2, '2024-06-08 10:00:00'),
 (2, 1, '2024-06-02 11:00:00'),
 (2, 3, '2024-06-09 12:00:00'),
-(3, 4, '2024-06-15 09:00:00'); 
+(3, 4, '2024-06-15 09:00:00');
+

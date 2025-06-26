@@ -58,6 +58,9 @@ public class User {
     @Column(name = "reset_token_expiry")
     private java.time.LocalDateTime resetTokenExpiry;
 
+    @Column(name = "google_id", unique = true)
+    private String googleId;
+
     public User() {
     }
 
@@ -194,5 +197,13 @@ public class User {
 
     public void setResetTokenExpiry(java.time.LocalDateTime resetTokenExpiry) {
         this.resetTokenExpiry = resetTokenExpiry;
+    }
+
+    public String getGoogleId() {
+        return googleId;
+    }
+
+    public void setGoogleId(String googleId) {
+        this.googleId = googleId;
     }
 }
