@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface UserChallengeRepository extends JpaRepository<UserChallenge, Integer> {
+    List<UserChallenge> findByUser(User user);
     List<UserChallenge> findByUserAndStatus(User user, String status);
     boolean existsByUserAndChallengeId(User user, int challengeId);
     Optional<UserChallenge> findTopByUserAndChallengeIdOrderByJoinDateDesc(User user, int challengeId);

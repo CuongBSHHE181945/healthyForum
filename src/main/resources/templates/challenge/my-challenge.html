@@ -11,6 +11,7 @@
     <tr>
         <th>Name</th>
         <th>Type</th>
+        <th>Category</th>
         <th>Join Date</th>
         <th>Status</th>
     </tr>
@@ -19,6 +20,7 @@
     <tr th:each="uc : ${myChallenges}">
         <td th:text="${uc.challenge.name}">Name</td>
         <td th:text="${uc.challenge.type.name}">Type</td>
+        <td th:text="${uc.challenge.category.name}"></td>
         <td th:text="${uc.joinDate}">Date</td>
         <td th:text="${uc.status}">ACTIVE</td>
         <td>

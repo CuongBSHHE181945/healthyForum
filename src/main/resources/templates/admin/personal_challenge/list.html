@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Personal Challenges</title>
+    <link rel="stylesheet" th:href="@{/css/admin-styles.css}" href="/css/admin-styles.css">
+</head>
+<body>
+<h2 class="admin-title">Manage Personal Challenges</h2>
+<a href="/admin/personal-challenge/create" class="admin-btn admin-btn-create">+ Create New</a>
+<table class="admin-challenge-table">
+  <tr>
+    <th>Name</th><th>Description</th><th>Duration</th><th>Status</th><th>Actions</th>
+  </tr>
+  <tr th:each="c : ${challenges}">
+    <td th:text="${c.name}"></td>
+    <td th:text="${c.description}"></td>
+    <td th:text="${c.durationDays} + ' days'"></td>
+    <td th:text="${c.status ? 'Active' : 'Inactive'}"></td>
+    <td>
+      <a th:href="@{'/admin/personal-challenge/edit/' + ${c.id}}">Edit</a>
+      <a th:href="@{'/admin/personal-challenge/toggle-status/' + ${c.id}}">Toggle</a>
+      <a th:href="@{'/admin/personal-challenge/delete/' + ${c.id}}" onclick="return confirm('Delete?')">Delete</a>
+    </td>
+  </tr>
+</table>
+</body>
+</html>

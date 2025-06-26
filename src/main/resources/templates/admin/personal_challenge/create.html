@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Personal Challenge</title>
+    <link rel="stylesheet" th:href="@{/css/admin-styles.css}" href="/css/admin-styles.css">
+</head>
+<body>
+
+<a href="/admin/personal-challenge" class="admin-btn admin-btn-back">&larr; Back to Challenge List</a>
+
+<div th:if="${error}" class="admin-error-message">
+    <p th:text="${error}"></p>
+</div>
+
+<form th:action="@{/admin/personal-challenge/create}"
+      method="post"
+      th:object="${challenge}"
+      enctype="multipart/form-data"
+      class="admin-challenge-form">
+
+    <h3>🧩 Challenge Info</h3>
+
+    <label>Name:</label>
+    <input type="text" th:field="*{name}" required><br>
+
+    <label>Description:</label>
+    <textarea th:field="*{description}" required></textarea><br>
+
+    <label>Duration (days):</label>
+    <input type="number" th:field="*{durationDays}" min="1" required><br>
+
+    <!-- Fixed challenge type: Personal (type_id = 1) -->
+    <input type="hidden" name="type.id" value="1">
+
+    <label>Category:</label>
+    <select th:field="*{category.id}" required>
+        <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"></option>
+    </select><br>
+
+    <!-- Optional: challenge is enabled by default -->
+    <input type="hidden" th:field="*{status}" value="true">
+
+    <hr>
+    <h3>🎖 Create New Badge</h3>
+
+    <label>Badge Name:</label>
+    <input type="text" name="badgeName" required><br>
+
+    <label>Badge Description:</label>
+    <textarea name="badgeDescription" required></textarea><br>
+
+    <label>Badge Icon:</label>
+    <input type="file" name="badgeIconFile" accept="image/*" required><br>
+
+    <label>Locked Icon:</label>
+    <input type="file" name="lockedIconFile" accept="image/*" required><br>
+
+    <button type="submit" class="admin-btn">Create Challenge</button>
+</form>
+
+</body>
+</html>

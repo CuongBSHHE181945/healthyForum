@@ -3,6 +3,8 @@ package com.healthyForum.repository.challenge;
 import com.healthyForum.model.challenge.Challenge;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface ChallengeRepository extends JpaRepository<Challenge, Integer> {
+import java.util.List;
 
+public interface ChallengeRepository extends JpaRepository<Challenge, Integer> {
+    List<Challenge> findByType_Id(Integer typeId);
 }

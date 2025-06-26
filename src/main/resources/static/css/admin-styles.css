@@ -293,3 +293,110 @@ body {
         padding: 0.75rem 1rem;
     }
 }
+
+/* --- Admin Personal Challenge Styles --- */
+.admin-error-message {
+  color: #c0392b;
+  background: #fbeee6;
+  border: 1px solid #e17055;
+  padding: 10px 15px;
+  margin-bottom: 20px;
+  font-weight: bold;
+  border-radius: 4px;
+  max-width: 500px;
+}
+
+.admin-challenge-form {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  padding: 24px 32px 16px 32px;
+  border-radius: 8px;
+  max-width: 500px;
+  margin: 0 auto 32px auto;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.admin-challenge-form label {
+  display: block;
+  margin-top: 12px;
+  font-weight: 500;
+}
+.admin-challenge-form input[type="text"],
+.admin-challenge-form input[type="number"],
+.admin-challenge-form textarea,
+.admin-challenge-form select {
+  width: 100%;
+  padding: 7px 10px;
+  margin-top: 4px;
+  margin-bottom: 8px;
+  border: 1px solid #b2bec3;
+  border-radius: 4px;
+  font-size: 1em;
+  box-sizing: border-box;
+}
+.admin-challenge-form button.admin-btn {
+  margin-top: 18px;
+}
+
+.admin-title {
+  text-align: center;
+  margin-top: 24px;
+  margin-bottom: 18px;
+  font-size: 2em;
+  font-weight: 700;
+  color: #0984e3;
+}
+
+.admin-btn {
+  display: inline-block;
+  background: #0984e3;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 18px;
+  font-size: 1em;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+.admin-btn:hover {
+  background: #74b9ff;
+  color: #222;
+}
+.admin-btn-create {
+  margin-bottom: 18px;
+  float: right;
+}
+
+.admin-challenge-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 auto 32px auto;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.admin-challenge-table th, .admin-challenge-table td {
+  border: 1px solid #dfe6e9;
+  padding: 10px 14px;
+  text-align: left;
+}
+.admin-challenge-table th {
+  background: #dff9fb;
+  color: #0984e3;
+  font-weight: 600;
+}
+.admin-challenge-table tr:nth-child(even) {
+  background: #f1f2f6;
+}
+.admin-challenge-table a {
+  color: #0984e3;
+  text-decoration: underline;
+  margin-right: 8px;
+}
+.admin-challenge-table a:hover {
+  color: #d35400;
+}
+
+.admin-btn-back {
+  margin-bottom: 20px;
+}

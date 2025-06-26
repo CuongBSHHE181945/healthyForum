@@ -5,6 +5,7 @@
     <link rel="stylesheet" th:href="@{/css/challenge.css}">
 </head>
 <body>
+<a href="/" class="back-home-btn">← Back to Home</a>
 <h2 class="page-title">🌟 All Challenges</h2>
 
 <!-- 🔔 Feedback Messages -->
@@ -18,6 +19,7 @@
   <tr>
     <th>Name</th>
     <th>Type</th>
+    <th>Category</th>
     <th>Description</th>
     <th>Duration</th>
     <th>Action</th>
@@ -26,12 +28,13 @@
   <tbody>
   <tr th:each="c : ${challenges}">
     <td>
-      <a th:href="@{'/challenge/' + ${c.id}}" th:text="${c.name}">Name</a>
+      <a th:href="@{'/challenge/' + ${c.id}}" th:text="${c.name}"></a>
       <span th:if="${badgeEarnedIds.contains(c.id)}" style="color: green;">🎖️ Earned</span>
     </td>
-    <td th:text="${c.type.name}">Type</td>
-    <td th:text="${c.description}">Description</td>
-    <td th:text="${c.durationDays}">7</td>
+    <td th:text="${c.type.name}"></td>
+    <td th:text="${c.category.name}"></td>
+    <td th:text="${c.description}"></td>
+    <td th:text="${c.durationDays}"></td>
     <td>
       <form th:action="@{'/challenge/join/' + ${c.id}}" method="post">
         <button type="submit"
