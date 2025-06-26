@@ -396,3 +396,7 @@ body {
 .admin-challenge-table a:hover {
   color: #d35400;
 }
+
+.admin-btn-back {
+  margin-bottom: 20px;
+}

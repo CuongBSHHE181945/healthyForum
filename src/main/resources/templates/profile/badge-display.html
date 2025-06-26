@@ -9,7 +9,10 @@
 
 <h2>Select badges to display on your profile</h2>
 
-<form th:action="@{badge-display}" method="post">
+<div th:if="${#lists.isEmpty(userBadges)}">
+    <p>you dont have any badge</p>
+</div>
+<form th:if="${!#lists.isEmpty(userBadges)}" th:action="@{badge-display}" method="post">
     <div>
         <div th:each="userBadge : ${userBadges}" class="badge-container">
             <img th:src="@{${userBadge.badge.icon}}" th:alt="${userBadge.badge.name}" class="badge-icon"/>
@@ -23,6 +26,8 @@
     <br/>
     <button type="submit">💾 Save Display</button>
 </form>
+
+<a th:href="@{/profile}" class="button">Return to Profile</a>
 
 </body>
 </html>
