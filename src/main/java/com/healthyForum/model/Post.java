@@ -1,12 +1,16 @@
 package com.healthyForum.model;
 
+import com.healthyForum.model.Enum.Visibility;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
-@Entity
 @Data
+@Entity
 @Table(name = "post")
 public class Post {
 
@@ -16,13 +20,14 @@ public class Post {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", referencedColumnName = "userID", nullable = false)
     private User user;
 
     @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Lob
+    @Column(nullable = false)
     private String content;
 
     @Column(name = "is_draft", nullable = false)
@@ -32,20 +37,17 @@ public class Post {
     @Column(nullable = false)
     private Visibility visibility = Visibility.PUBLIC;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "created_at", nullable = false)
-    private Date createdAt = new Date();
+    @Column(name = "image_url")
+    private String imageUrl;
 
-    @Temporal(TemporalType.TIMESTAMP)
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
-    private Date updatedAt = new Date();
+    private LocalDateTime updatedAt;
 
-    // Enum for visibility options
-    public enum Visibility {
-        PUBLIC, PRIVATE, FOLLOWERS
-    }
-
-    // Add this field to Post.java
-    @Column(name = "banned", nullable = false)
+    @Column(nullable = false)
     private boolean banned = false;
 }

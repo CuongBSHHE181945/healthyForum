@@ -1,0 +1,17 @@
+<!-- templates/post_detail.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Post Detail</title>
+</head>
+<body>
+<h2 th:text="${post.title}"></h2>
+<p><strong>Author:</strong> <span th:text="${post.user.username}"></span></p>
+<p><strong>Posted on:</strong> <span th:text="${#temporals.format(post.createdAt, 'dd MMM yyyy HH:mm')}"></span></p>
+<hr/>
+<p th:text="${post.content}"></p>
+<a href="/posts">Back to all posts</a>
+</body>
+</html>

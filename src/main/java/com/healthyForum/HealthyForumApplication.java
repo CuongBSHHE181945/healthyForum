@@ -14,4 +14,5 @@ public class HealthyForumApplication {
 		SpringApplication.run(HealthyForumApplication.class, args);
 	}
 
+
 }
