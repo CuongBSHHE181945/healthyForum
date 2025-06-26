@@ -36,13 +36,16 @@ public class SecurityConfig {
         http
                 .securityContext(context -> context.requireExplicitSave(false)) // allow auto save of security context
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/assets/**").permitAll() // Allow static resources
                         .requestMatchers("/login","/verify","/register", "/forgot-password").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
-                        .defaultSuccessUrl("/", true)
+                        .successHandler(customAuthenticationSuccessHandler) // Sử dụng custom handler
+                        .failureUrl("/login?error=true")
+                        .permitAll()
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("/login")

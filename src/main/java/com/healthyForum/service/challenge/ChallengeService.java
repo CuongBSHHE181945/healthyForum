@@ -1,8 +1,12 @@
 package com.healthyForum.service.challenge;
 
 import com.healthyForum.model.User;
+import com.healthyForum.model.badge.*;
 import com.healthyForum.model.challenge.Challenge;
 import com.healthyForum.model.challenge.UserChallenge;
+import com.healthyForum.repository.badge.BadgeRepository;
+import com.healthyForum.repository.badge.BadgeRequirementRepository;
+import com.healthyForum.repository.badge.BadgeSourceTypeRepository;
 import com.healthyForum.repository.badge.UserBadgeRepository;
 import com.healthyForum.repository.challenge.ChallengeRepository;
 import com.healthyForum.repository.challenge.UserChallengeRepository;
@@ -20,15 +24,25 @@ public class ChallengeService {
     private final ChallengeRepository challengeRepo;
     private final UserChallengeRepository userChallengeRepository;
     private final UserBadgeRepository userBadgeRepository;
+    private final BadgeRepository badgeRepository;
+    private final BadgeSourceTypeRepository badgeSourceTypeRepository;
+    private final BadgeRequirementRepository badgeRequirementRepository;
 
-    public ChallengeService(ChallengeRepository challengeRepo, UserChallengeRepository userChallengeRepository, UserBadgeRepository userBadgeRepository) {
+    public ChallengeService(ChallengeRepository challengeRepo, UserChallengeRepository userChallengeRepository, UserBadgeRepository userBadgeRepository, BadgeRepository badgeRepository, BadgeSourceTypeRepository badgeSourceTypeRepository, BadgeRequirementRepository badgeRequirementRepository) {
         this.challengeRepo = challengeRepo;
         this.userChallengeRepository = userChallengeRepository;
         this.userBadgeRepository = userBadgeRepository;
+        this.badgeRepository = badgeRepository;
+        this.badgeSourceTypeRepository = badgeSourceTypeRepository;
+        this.badgeRequirementRepository = badgeRequirementRepository;
     }
 
     public List<Challenge> getAllChallenges() {
         return challengeRepo.findAll();
+    }
+
+    public List<Challenge> getAllPersonalChallenges() {
+        return challengeRepo.findByType_Id(1); // 1 = Personal
     }
 
     public Optional<Challenge> getChallengeById(int id) {
@@ -57,7 +71,7 @@ public class ChallengeService {
     }
 
     public List<UserChallenge> getActiveChallengesForUser(User user) {
-        return userChallengeRepository.findByUserAndStatus(user, "ACTIVE");
+        return userChallengeRepository.findByUser(user);
     }
 
     public List<Integer> getJoinedChallengeIds(User user) {
@@ -75,5 +89,30 @@ public class ChallengeService {
 
     public List<Integer> getBadgeEarnedChallengeIds(User user) {
         return userBadgeRepository.findChallengeIdsByUserId(user.getUserID());
+    }
+
+    public void createChallengeWithBadge(Challenge challenge, Badge badge) {
+        // 1. Save the challenge
+        Challenge savedChallenge = challengeRepo.save(challenge);
+
+        // 2. Save the badge
+        Badge savedBadge = badgeRepository.save(badge);
+        BadgeSourceType personal = badgeSourceTypeRepository.findById(1)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));;
+        // 3. Link badge to challenge
+        BadgeRequirement requirement = new BadgeRequirement();
+        requirement.setBadge(savedBadge);
+        requirement.setSourceType(personal); // Source = CHALLENGE
+        requirement.setSourceId(savedChallenge.getId());
+
+        badgeRequirementRepository.save(requirement);
+    }
+
+    public void updateChallenge(Challenge challenge) {
+        challengeRepo.save(challenge);
+    }
+
+    public void deleteChallenge(int id) {
+        challengeRepo.deleteById(id);
     }
 }

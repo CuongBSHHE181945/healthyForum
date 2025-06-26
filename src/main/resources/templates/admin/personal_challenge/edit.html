@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Personal Challenge</title>
+    <link rel="stylesheet" th:href="@{/css/admin-styles.css}" href="/css/admin-styles.css">
+</head>
+<body>
+<form th:action="@{/admin/personal-challenge/edit}" th:object="${challenge}" method="post" class="admin-challenge-form">
+  <label>Name:</label>
+  <input type="text" th:field="*{name}" required><br>
+
+  <label>Description:</label>
+  <textarea th:field="*{description}" required></textarea><br>
+
+  <label>Duration (days):</label>
+  <input type="number" min="1" th:field="*{durationDays}" required><br>
+
+  <input type="hidden" th:field="*{type.id}">
+
+  <button type="submit" class="admin-btn">Save</button>
+</form>
+
+</body>
+</html>

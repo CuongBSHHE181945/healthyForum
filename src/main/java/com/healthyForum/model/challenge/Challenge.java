@@ -21,7 +21,14 @@ public class Challenge {
     @Column(name = "duration_days", nullable = false)
     private int durationDays;
 
+    @Column(name = "status", nullable = false)
+    private boolean status = true;
+
     @ManyToOne
     @JoinColumn(name = "type_id", nullable = false)
     private ChallengeType type;
+
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private ChallengeCategory category;
 }

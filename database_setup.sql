@@ -29,6 +29,19 @@ CREATE TABLE IF NOT EXISTS `user` (
     CONSTRAINT `unique_username` UNIQUE (`username`)
 );
 
+CREATE TABLE IF NOT EXISTS `post` (
+    `post_id` BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `user_id` BIGINT NOT NULL,
+    `title` VARCHAR(255) NOT NULL,
+    `content` TEXT NOT NULL,
+    `is_draft` BOOLEAN NOT NULL DEFAULT FALSE,
+    `visibility` VARCHAR(20) NOT NULL DEFAULT 'PUBLIC',
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `banned` BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (`user_id`) REFERENCES `user`(`userID`)
+); 
+
 -- Create Sleep Entries table
 CREATE TABLE IF NOT EXISTS `sleep_entries` (
     `sleep_id` BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -78,13 +91,18 @@ CREATE TABLE IF NOT EXISTS `feedback` (
 
 -- Create Report table
 CREATE TABLE IF NOT EXISTS `report` (
-    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
-    `title` VARCHAR(255) NOT NULL,
-    `content` TEXT NOT NULL,
-    `userID` BIGINT NOT NULL,
-    `created_at` DATETIME NOT NULL,
-    `response` TEXT,
-    FOREIGN KEY (`userID`) REFERENCES `user`(`userID`)
+    `report_id` BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `reporter_id` BIGINT NOT NULL,
+    `reported_post_id` BIGINT,
+    `reported_user_id` BIGINT,
+    `reason` TEXT NOT NULL,
+    `status` VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `resolution` TEXT,
+    FOREIGN KEY (`reporter_id`) REFERENCES `user`(`userID`),
+    FOREIGN KEY (`reported_post_id`) REFERENCES `post`(`post_id`),
+    FOREIGN KEY (`reported_user_id`) REFERENCES `user`(`userID`)
 );
 
 -- Create Blog table
@@ -155,14 +173,22 @@ CREATE TABLE challenge_type (
     name VARCHAR(50) UNIQUE NOT NULL -- e.g., PERSONAL, PUBLIC
 );
 
+CREATE TABLE challenge_category (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE
+);
+
 CREATE TABLE challenge (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description TEXT,
+    status BIT DEFAULT 1,
     type_id INT NOT NULL,
+    category_id INT NOT NULL,
     duration_days INT NOT NULL,
 
-    FOREIGN KEY (type_id) REFERENCES challenge_type(id)
+    FOREIGN KEY (type_id) REFERENCES challenge_type(id),
+    FOREIGN KEY (category_id) REFERENCES challenge_category(id)
 );
 
 CREATE TABLE user_challenge (
@@ -221,11 +247,6 @@ INSERT INTO `feedback` (`userID`, `message`, `submitted_at`, `response`) VALUES
 (2, 'Great site, very helpful!', '2024-06-01 10:15:00', NULL),
 (3, 'I found a bug in the forum.', '2024-06-02 14:30:00', NULL);
 
--- Insert sample reports
-INSERT INTO `report` (`title`, `content`, `userID`, `created_at`, `response`) VALUES
-('Spam Post', 'User xyz is posting spam links.', 1, '2024-06-03 09:00:00', NULL),
-('Inappropriate Content', 'There is an offensive comment in thread 123.', 2, '2024-06-03 16:45:00', NULL);
-
 -- Insert sample messages
 INSERT INTO `messages` (`sender_Id`, `receiver_Id`, `content`, `is_read`) VALUES
 (1, 2, 'Hi Bob, how are you?', FALSE),
@@ -244,159 +265,116 @@ INSERT INTO challenge_type (id, name) VALUES
 (1, 'PERSONAL'),
 (2, 'PUBLIC');
 
+--  Insert challenge categories
+INSERT INTO challenge_category (id, name) VALUES
+(1, 'Fitness'),
+(2, 'Mindfulness'),
+(3, 'Diet & Hydration'),
+(4, 'Sleep'),
+(5, 'Digital Wellness'),
+(6, 'Personal Growth');
+
 INSERT INTO badge_source_type (name) VALUES ('CHALLENGE');
 
-INSERT INTO challenge (id, name, description, type_id, duration_days) VALUES (1, 'Morning Yoga 7 Days', 'Complete the morning yoga 7 days challenge.', 1, 7);
-INSERT INTO badge (id, name, description, icon, locked_icon) VALUES (1, 'Yoga Starter', 'Awarded for completing the "Morning Yoga 7 Days" challenge.', '/images/badges/unlocked/yoga.png', '/images/badges/locked/yoga_locked.png');
-INSERT INTO badge_requirement (badge_id, source_id, source_type_id) VALUES (1, 1, 1);
+-- Insert challenges with status and category_id
+INSERT INTO challenge (id, name, description, status, type_id, category_id, duration_days) VALUES
+(1, 'Morning Yoga 7 Days', 'Complete the morning yoga 7 days challenge.', 1, 1, 1, 7),
+(2, '10 Pushups Daily', 'Complete the 10 pushups daily challenge.', 1, 1, 1, 10),
+(3, 'Walk 5,000 Steps', 'Complete the walk 5,000 steps challenge.', 1, 1, 1, 7),
+(4, 'Jump Rope 50x', 'Complete the jump rope 50x challenge.', 1, 1, 1, 5),
+(5, 'Stretch Every Morning', 'Complete the stretch every morning challenge.', 1, 1, 6, 14),
+(6, '5-Min Home Workout', 'Complete the 5-min home workout challenge.', 1, 1, 1, 10),
+(7, 'Daily Gratitude Journal', 'Complete the daily gratitude journal challenge.', 1, 1, 2, 7),
+(8, '5-min Meditation', 'Complete the 5-min meditation challenge.', 1, 1, 2, 10),
+(9, 'No Phone After 10PM', 'Complete the no phone after 10pm challenge.', 1, 1, 5, 7),
+(10, 'Deep Breathing Daily', 'Complete the deep breathing daily challenge.', 1, 1, 2, 5),
+(11, 'Cold Showers Challenge', 'Complete the cold showers challenge.', 1, 1, 4, 5),
+(12, 'Screen-Free Hour', 'Complete the screen-free hour challenge.', 1, 1, 5, 10),
+(13, 'No Sugar Week', 'Complete the no sugar week challenge.', 1, 1, 3, 7),
+(14, 'Fruit Before Noon', 'Complete the fruit before noon challenge.', 1, 1, 3, 10),
+(15, 'Water Tracker', 'Complete the water tracker challenge.', 1, 1, 3, 7),
+(16, 'Eat Salad Daily', 'Complete the eat salad daily challenge.', 1, 1, 3, 10),
+(17, '8 Glasses of Water', 'Complete the 8 glasses of water challenge.', 1, 1, 3, 5),
+(18, 'Cook Healthy Meal', 'Complete the cook healthy meal challenge.', 1, 1, 3, 7),
+(19, 'Sleep Before 11PM', 'Complete the sleep before 11pm challenge.', 1, 1, 4, 7),
+(20, '8H Sleep Daily', 'Complete the 8h sleep daily challenge.', 1, 1, 4, 10),
+(21, 'Wake Up Before 7AM', 'Complete the wake up before 7am challenge.', 1, 1, 4, 5),
+(22, 'No Caffeine After 6PM', 'Complete the no caffeine after 6pm challenge.', 1, 1, 4, 1),
+(23, 'No Screen in Bed', 'Complete the no screen in bed challenge.', 1, 1, 5, 5),
+(24, 'Power Nap Master', 'Complete the power nap master challenge.', 1, 1, 4, 5),
+(25, 'Read 15 Min Daily', 'Complete the read 15 min daily challenge.', 1, 1, 6, 10),
+(26, 'Practice a Hobby', 'Complete the practice a hobby challenge.', 1, 1, 6, 7),
+(27, 'Learn a New Word', 'Complete the learn a new word challenge.', 1, 1, 6, 7),
+(28, 'Write a Daily Journal', 'Complete the write a daily journal challenge.', 1, 1, 6, 10),
+(29, 'Practice Gratitude', 'Complete the practice gratitude challenge.', 1, 1, 2, 7),
+(30, 'Clean Room Daily', 'Complete the clean room daily challenge.', 1, 1, 6, 5);
 
--- Challenge: 10 Pushups Daily
-INSERT INTO challenge (id, name, description, type_id, duration_days) VALUES (2, '10 Pushups Daily', 'Complete the 10 pushups daily challenge.', 1, 10);
-INSERT INTO badge (id, name, description, icon, locked_icon) VALUES (2, 'Push Master', 'Awarded for completing the "10 Pushups Daily" challenge.', '/images/badges/unlocked/pushups.png', '/images/badges/locked/pushups_locked.png');
-INSERT INTO badge_requirement (badge_id, source_id, source_type_id) VALUES (2, 2, 1);
+-- Insert badges with icon and locked_icon
+INSERT INTO badge (id, name, description, icon, locked_icon) VALUES
+(1, 'Yoga Starter', 'Awarded for completing the "Morning Yoga 7 Days" challenge.', '/images/badges/unlocked/yoga.png', '/images/badges/locked/yoga_locked.png'),
+(2, 'Push Master', 'Awarded for completing the "10 Pushups Daily" challenge.', '/images/badges/unlocked/pushups.png', '/images/badges/locked/pushups_locked.png'),
+(3, 'Step Beginner', 'Awarded for completing the "Walk 5,000 Steps" challenge.', '/images/badges/unlocked/steps.png', '/images/badges/locked/steps_locked.png'),
+(4, 'Jumper', 'Awarded for completing the "Jump Rope 50x" challenge.', '/images/badges/unlocked/jump.png', '/images/badges/locked/jump_locked.png'),
+(5, 'Flexible Flow', 'Awarded for completing the "Stretch Every Morning" challenge.', '/images/badges/unlocked/stretch.png', '/images/badges/locked/stretch_locked.png'),
+(6, 'Quick Fit', 'Awarded for completing the "5-Min Home Workout" challenge.', '/images/badges/unlocked/homeworkout.png', '/images/badges/locked/homeworkout_locked.png'),
+(7, 'Grateful Heart', 'Awarded for completing the "Daily Gratitude Journal" challenge.', '/images/badges/unlocked/gratitude.png', '/images/badges/locked/gratitude_locked.png'),
+(8, 'Mindful Soul', 'Awarded for completing the "5-min Meditation" challenge.', '/images/badges/unlocked/meditation.png', '/images/badges/locked/meditation_locked.png'),
+(9, 'Digital Detoxer', 'Awarded for completing the "No Phone After 10PM" challenge.', '/images/badges/unlocked/nophone.png', '/images/badges/locked/nophone_locked.png'),
+(10, 'Calm Spirit', 'Awarded for completing the "Deep Breathing Daily" challenge.', '/images/badges/unlocked/breathing.png', '/images/badges/locked/breathing_locked.png'),
+(11, 'Chill Champ', 'Awarded for completing the "Cold Showers Challenge" challenge.', '/images/badges/unlocked/coldshower.png', '/images/badges/locked/coldshower_locked.png'),
+(12, 'Focus Freak', 'Awarded for completing the "Screen-Free Hour" challenge.', '/images/badges/unlocked/focus.png', '/images/badges/locked/focus_locked.png'),
+(13, 'Sugar-Free', 'Awarded for completing the "No Sugar Week" challenge.', '/images/badges/unlocked/nosugar.png', '/images/badges/locked/nosugar_locked.png'),
+(14, 'Fruit First', 'Awarded for completing the "Fruit Before Noon" challenge.', '/images/badges/unlocked/fruit.png', '/images/badges/locked/fruit_locked.png'),
+(15, 'Hydration Hero', 'Awarded for completing the "Water Tracker" challenge.', '/images/badges/unlocked/water.png', '/images/badges/locked/water_locked.png'),
+(16, 'Green Eater', 'Awarded for completing the "Eat Salad Daily" challenge.', '/images/badges/unlocked/salad.png', '/images/badges/locked/salad_locked.png'),
+(17, 'Aqua Master', 'Awarded for completing the "8 Glasses of Water" challenge.', '/images/badges/unlocked/glasses.png', '/images/badges/locked/glasses_locked.png'),
+(18, 'Kitchen King', 'Awarded for completing the "Cook Healthy Meal" challenge.', '/images/badges/unlocked/meal.png', '/images/badges/locked/meal_locked.png'),
+(19, 'Early Bird', 'Awarded for completing the "Sleep Before 11PM" challenge.', '/images/badges/unlocked/sleep.png', '/images/badges/locked/sleep_locked.png'),
+(20, 'Sleep Champion', 'Awarded for completing the "8H Sleep Daily" challenge.', '/images/badges/unlocked/sleeptime.png', '/images/badges/locked/sleeptime_locked.png'),
+(21, 'Rise & Shine', 'Awarded for completing the "Wake Up Before 7AM" challenge.', '/images/badges/unlocked/sunrise.png', '/images/badges/locked/sunrise_locked.png'),
+(22, 'Sleep Saver', 'Awarded for completing the "No Caffeine After 6PM" challenge.', '/images/badges/unlocked/nocaffeine.png', '/images/badges/locked/nocaffeine_locked.png'),
+(23, 'Eye Rested', 'Awarded for completing the "No Screen in Bed" challenge.', '/images/badges/unlocked/noscreen.png', '/images/badges/locked/noscreen_locked.png'),
+(24, 'Nap Ninja', 'Awarded for completing the "Power Nap Master" challenge.', '/images/badges/unlocked/nap.png', '/images/badges/locked/nap_locked.png'),
+(25, 'Bookworm', 'Awarded for completing the "Read 15 Min Daily" challenge.', '/images/badges/unlocked/read.png', '/images/badges/locked/read_locked.png'),
+(26, 'Hobbyist', 'Awarded for completing the "Practice a Hobby" challenge.', '/images/badges/unlocked/hobby.png', '/images/badges/locked/hobby_locked.png'),
+(27, 'Word Wizar', 'Awarded for completing the "Learn a New Word" challenge.', '/images/badges/unlocked/vocab.png', '/images/badges/locked/vocab_locked.png'),
+(28, 'Thoughtful Writer', 'Awarded for completing the "Write a Daily Journal" challenge.', '/images/badges/unlocked/journal.png', '/images/badges/locked/journal_locked.png'),
+(29, 'Thanks Giver', 'Awarded for completing the "Practice Gratitude" challenge.', '/images/badges/unlocked/thanks.png', '/images/badges/locked/thanks_locked.png'),
+(30, 'Tidy Star', 'Awarded for completing the "Clean Room Daily" challenge.', '/images/badges/unlocked/cleanroom.png', '/images/badges/locked/cleanroom_locked.png');
 
--- Challenge: Walk 5,000 Steps
-INSERT INTO challenge (id, name, description, type_id, duration_days) VALUES (3, 'Walk 5,000 Steps', 'Complete the walk 5,000 steps challenge.', 1, 7);
-INSERT INTO badge (id, name, description, icon, locked_icon) VALUES (3, 'Step Beginner', 'Awarded for completing the "Walk 5,000 Steps" challenge.', '/images/badges/unlocked/steps.png', '/images/badges/locked/steps_locked.png');
-INSERT INTO badge_requirement (badge_id, source_id, source_type_id) VALUES (3, 3, 1);
+-- Insert badge requirements
+INSERT INTO badge_requirement (badge_id, source_id, source_type_id) VALUES
+(1, 1, 1),
+(2, 2, 1),
+(3, 3, 1),
+(4, 4, 1),
+(5, 5, 1),
+(6, 6, 1),
+(7, 7, 1),
+(8, 8, 1),
+(9, 9, 1),
+(10, 10, 1),
+(11, 11, 1),
+(12, 12, 1),
+(13, 13, 1),
+(14, 14, 1),
+(15, 15, 1),
+(16, 16, 1),
+(17, 17, 1),
+(18, 18, 1),
+(19, 19, 1),
+(20, 20, 1),
+(21, 21, 1),
+(22, 22, 1),
+(23, 23, 1),
+(24, 24, 1),
+(25, 25, 1),
+(26, 26, 1),
+(27, 27, 1),
+(28, 28, 1),
+(29, 29, 1),
+(30, 30, 1);
 
--- Challenge: Jump Rope 50x
-INSERT INTO challenge (id, name, description, type_id, duration_days) VALUES (4, 'Jump Rope 50x', 'Complete the jump rope 50x challenge.', 1, 5);
-INSERT INTO badge (id, name, description, icon, locked_icon) VALUES (4, 'Jumper', 'Awarded for completing the "Jump Rope 50x" challenge.', '/images/badges/unlocked/jump.png', '/images/badges/locked/jump_locked.png');
-INSERT INTO badge_requirement (badge_id, source_id, source_type_id) VALUES (4, 4, 1);
-
--- Challenge: Stretch Every Morning
-INSERT INTO challenge (id, name, description, type_id, duration_days) VALUES (5, 'Stretch Every Morning', 'Complete the stretch every morning challenge.', 1, 14);
-INSERT INTO badge (id, name, description, icon, locked_icon) VALUES (5, 'Flexible Flow', 'Awarded for completing the "Stretch Every Morning" challenge.', '/images/badges/unlocked/stretch.png', '/images/badges/locked/stretch_locked.png');
-INSERT INTO badge_requirement (badge_id, source_id, source_type_id) VALUES (5, 5, 1);
-
--- Challenge: 5-Min Home Workout
-INSERT INTO challenge (id, name, description, type_id, duration_days) VALUES (6, '5-Min Home Workout', 'Complete the 5-min home workout challenge.', 1, 10);
-INSERT INTO badge (id, name, description, icon, locked_icon) VALUES (6, 'Quick Fit', 'Awarded for completing the "5-Min Home Workout" challenge.', '/images/badges/unlocked/homeworkout.png', '/images/badges/locked/homeworkout_locked.png');
-INSERT INTO badge_requirement (badge_id, source_id, source_type_id) VALUES (6, 6, 1);
-
--- Challenge: Daily Gratitude Journal
-INSERT INTO challenge (id, name, description, type_id, duration_days) VALUES (7, 'Daily Gratitude Journal', 'Complete the daily gratitude journal challenge.', 1, 7);
-INSERT INTO badge (id, name, description, icon, locked_icon) VALUES (7, 'Grateful Heart', 'Awarded for completing the "Daily Gratitude Journal" challenge.', '/images/badges/unlocked/gratitude.png', '/images/badges/locked/gratitude_locked.png');
-INSERT INTO badge_requirement (badge_id, source_id, source_type_id) VALUES (7, 7, 1);
-
--- Challenge: 5-min Meditation
-INSERT INTO challenge (id, name, description, type_id, duration_days) VALUES (8, '5-min Meditation', 'Complete the 5-min meditation challenge.', 1, 10);
-INSERT INTO badge (id, name, description, icon, locked_icon) VALUES (8, 'Mindful Soul', 'Awarded for completing the "5-min Meditation" challenge.', '/images/badges/unlocked/meditation.png', '/images/badges/locked/meditation_locked.png');
-INSERT INTO badge_requirement (badge_id, source_id, source_type_id) VALUES (8, 8, 1);
-
--- Challenge: No Phone After 10PM
-INSERT INTO challenge (id, name, description, type_id, duration_days) VALUES (9, 'No Phone After 10PM', 'Complete the no phone after 10pm challenge.', 1, 7);
-INSERT INTO badge (id, name, description, icon, locked_icon) VALUES (9, 'Digital Detoxer', 'Awarded for completing the "No Phone After 10PM" challenge.', '/images/badges/unlocked/nophone.png', '/images/badges/locked/nophone_locked.png');
-INSERT INTO badge_requirement (badge_id, source_id, source_type_id) VALUES (9, 9, 1);
-
--- Challenge: Deep Breathing Daily
-INSERT INTO challenge (id, name, description, type_id, duration_days) VALUES (10, 'Deep Breathing Daily', 'Complete the deep breathing daily challenge.', 1, 5);
-INSERT INTO badge (id, name, description, icon, locked_icon) VALUES (10, 'Calm Spirit', 'Awarded for completing the "Deep Breathing Daily" challenge.', '/images/badges/unlocked/breathing.png', '/images/badges/locked/breathing_locked.png');
-INSERT INTO badge_requirement (badge_id, source_id, source_type_id) VALUES (10, 10, 1);
-
--- Challenge: Cold Showers Challenge
-INSERT INTO challenge (id, name, description, type_id, duration_days) VALUES (11, 'Cold Showers Challenge', 'Complete the cold showers challenge challenge.', 1, 5);
-INSERT INTO badge (id, name, description, icon, locked_icon) VALUES (11, 'Chill Champ', 'Awarded for completing the "Cold Showers Challenge" challenge.', '/images/badges/unlocked/coldshower.png', '/images/badges/locked/coldshower_locked.png');
-INSERT INTO badge_requirement (badge_id, source_id, source_type_id) VALUES (11, 11, 1);
-
--- Challenge: Screen-Free Hour
-INSERT INTO challenge (id, name, description, type_id, duration_days) VALUES (12, 'Screen-Free Hour', 'Complete the screen-free hour challenge.', 1, 10);
-INSERT INTO badge (id, name, description, icon, locked_icon) VALUES (12, 'Focus Freak', 'Awarded for completing the "Screen-Free Hour" challenge.', '/images/badges/unlocked/focus.png', '/images/badges/locked/focus_locked.png');
-INSERT INTO badge_requirement (badge_id, source_id, source_type_id) VALUES (12, 12, 1);
-
--- Challenge: No Sugar Week
-INSERT INTO challenge (id, name, description, type_id, duration_days) VALUES (13, 'No Sugar Week', 'Complete the no sugar week challenge.', 1, 7);
-INSERT INTO badge (id, name, description, icon, locked_icon) VALUES (13, 'Sugar-Free', 'Awarded for completing the "No Sugar Week" challenge.', '/images/badges/unlocked/nosugar.png', '/images/badges/locked/nosugar_locked.png');
-INSERT INTO badge_requirement (badge_id, source_id, source_type_id) VALUES (13, 13, 1);
-
--- Challenge: Fruit Before Noon
-INSERT INTO challenge (id, name, description, type_id, duration_days) VALUES (14, 'Fruit Before Noon', 'Complete the fruit before noon challenge.', 1, 10);
-INSERT INTO badge (id, name, description, icon, locked_icon) VALUES (14, 'Fruit First', 'Awarded for completing the "Fruit Before Noon" challenge.', '/images/badges/unlocked/fruit.png', '/images/badges/locked/fruit_locked.png');
-INSERT INTO badge_requirement (badge_id, source_id, source_type_id) VALUES (14, 14, 1);
-
--- Challenge: Water Tracker
-INSERT INTO challenge (id, name, description, type_id, duration_days) VALUES (15, 'Water Tracker', 'Complete the water tracker challenge.', 1, 7);
-INSERT INTO badge (id, name, description, icon, locked_icon) VALUES (15, 'Hydration Hero', 'Awarded for completing the "Water Tracker" challenge.', '/images/badges/unlocked/water.png', '/images/badges/locked/water_locked.png');
-INSERT INTO badge_requirement (badge_id, source_id, source_type_id) VALUES (15, 15, 1);
-
--- Challenge: Eat Salad Daily
-INSERT INTO challenge (id, name, description, type_id, duration_days) VALUES (16, 'Eat Salad Daily', 'Complete the eat salad daily challenge.', 1, 10);
-INSERT INTO badge (id, name, description, icon, locked_icon) VALUES (16, 'Green Eater', 'Awarded for completing the "Eat Salad Daily" challenge.', '/images/badges/unlocked/salad.png', '/images/badges/locked/salad_locked.png');
-INSERT INTO badge_requirement (badge_id, source_id, source_type_id) VALUES (16, 16, 1);
-
--- Challenge: 8 Glasses of Water
-INSERT INTO challenge (id, name, description, type_id, duration_days) VALUES (17, '8 Glasses of Water', 'Complete the 8 glasses of water challenge.', 1, 5);
-INSERT INTO badge (id, name, description, icon, locked_icon) VALUES (17, 'Aqua Master', 'Awarded for completing the "8 Glasses of Water" challenge.', '/images/badges/unlocked/glasses.png', '/images/badges/locked/glasses_locked.png');
-INSERT INTO badge_requirement (badge_id, source_id, source_type_id) VALUES (17, 17, 1);
-
--- Challenge: Cook Healthy Meal
-INSERT INTO challenge (id, name, description, type_id, duration_days) VALUES (18, 'Cook Healthy Meal', 'Complete the cook healthy meal challenge.', 1, 7);
-INSERT INTO badge (id, name, description, icon, locked_icon) VALUES (18, 'Kitchen King', 'Awarded for completing the "Cook Healthy Meal" challenge.', '/images/badges/unlocked/meal.png', '/images/badges/locked/meal_locked.png');
-INSERT INTO badge_requirement (badge_id, source_id, source_type_id) VALUES (18, 18, 1);
-
--- Challenge: Sleep Before 11PM
-INSERT INTO challenge (id, name, description, type_id, duration_days) VALUES (19, 'Sleep Before 11PM', 'Complete the sleep before 11pm challenge.', 1, 7);
-INSERT INTO badge (id, name, description, icon, locked_icon) VALUES (19, 'Early Bird', 'Awarded for completing the "Sleep Before 11PM" challenge.', '/images/badges/unlocked/sleep.png', '/images/badges/locked/sleep_locked.png');
-INSERT INTO badge_requirement (badge_id, source_id, source_type_id) VALUES (19, 19, 1);
-
--- Challenge: 8H Sleep Daily
-INSERT INTO challenge (id, name, description, type_id, duration_days) VALUES (20, '8H Sleep Daily', 'Complete the 8h sleep daily challenge.', 1, 10);
-INSERT INTO badge (id, name, description, icon, locked_icon) VALUES (20, 'Sleep Champion', 'Awarded for completing the "8H Sleep Daily" challenge.', '/images/badges/unlocked/sleeptime.png', '/images/badges/locked/sleeptime_locked.png');
-INSERT INTO badge_requirement (badge_id, source_id, source_type_id) VALUES (20, 20, 1);
-
--- Challenge: Wake Up Before 7AM
-INSERT INTO challenge (id, name, description, type_id, duration_days) VALUES (21, 'Wake Up Before 7AM', 'Complete the wake up before 7am challenge.', 1, 5);
-INSERT INTO badge (id, name, description, icon, locked_icon) VALUES (21, 'Rise & Shine', 'Awarded for completing the "Wake Up Before 7AM" challenge.', '/images/badges/unlocked/sunrise.png', '/images/badges/locked/sunrise_locked.png');
-INSERT INTO badge_requirement (badge_id, source_id, source_type_id) VALUES (21, 21, 1);
-
--- Challenge: No Caffeine After 6PM
-INSERT INTO challenge (id, name, description, type_id, duration_days) VALUES (22, 'No Caffeine After 6PM', 'Complete the no caffeine after 6pm challenge.', 1, 1);
-INSERT INTO badge (id, name, description, icon, locked_icon) VALUES (22, 'Sleep Saver', 'Awarded for completing the "No Caffeine After 6PM" challenge.', '/images/badges/unlocked/nocaffeine.png', '/images/badges/locked/nocaffeine_locked.png');
-INSERT INTO badge_requirement (badge_id, source_id, source_type_id) VALUES (22, 22, 1);
-
--- Challenge: No Screen in Bed
-INSERT INTO challenge (id, name, description, type_id, duration_days) VALUES (23, 'No Screen in Bed', 'Complete the no screen in bed challenge.', 1, 5);
-INSERT INTO badge (id, name, description, icon, locked_icon) VALUES (23, 'Eye Rested', 'Awarded for completing the "No Screen in Bed" challenge.', '/images/badges/unlocked/noscreen.png', '/images/badges/locked/noscreen_locked.png');
-INSERT INTO badge_requirement (badge_id, source_id, source_type_id) VALUES (23, 23, 1);
-
--- Challenge: Power Nap Master
-INSERT INTO challenge (id, name, description, type_id, duration_days) VALUES (24, 'Power Nap Master', 'Complete the power nap master challenge.', 1, 5);
-INSERT INTO badge (id, name, description, icon, locked_icon) VALUES (24, 'Nap Ninja', 'Awarded for completing the "Power Nap Master" challenge.', '/images/badges/unlocked/nap.png', '/images/badges/locked/nap_locked.png');
-INSERT INTO badge_requirement (badge_id, source_id, source_type_id) VALUES (24, 24, 1);
-
--- Challenge: Read 15 Min Daily
-INSERT INTO challenge (id, name, description, type_id, duration_days) VALUES (25, 'Read 15 Min Daily', 'Complete the read 15 min daily challenge.', 1, 10);
-INSERT INTO badge (id, name, description, icon, locked_icon) VALUES (25, 'Bookworm', 'Awarded for completing the "Read 15 Min Daily" challenge.', '/images/badges/unlocked/read.png', '/images/badges/locked/read_locked.png');
-INSERT INTO badge_requirement (badge_id, source_id, source_type_id) VALUES (25, 25, 1);
-
--- Challenge: Practice a Hobby
-INSERT INTO challenge (id, name, description, type_id, duration_days) VALUES (26, 'Practice a Hobby', 'Complete the practice a hobby challenge.', 1, 7);
-INSERT INTO badge (id, name, description, icon, locked_icon) VALUES (26, 'Hobbyist', 'Awarded for completing the "Practice a Hobby" challenge.', '/images/badges/unlocked/hobby.png', '/images/badges/locked/hobby_locked.png');
-INSERT INTO badge_requirement (badge_id, source_id, source_type_id) VALUES (26, 26, 1);
-
--- Challenge: Learn a New Word
-INSERT INTO challenge (id, name, description, type_id, duration_days) VALUES (27, 'Learn a New Word', 'Complete the learn a new word challenge.', 1, 7);
-INSERT INTO badge (id, name, description, icon, locked_icon) VALUES (27, 'Word Wizard', 'Awarded for completing the "Learn a New Word" challenge.', '/images/badges/unlocked/vocab.png', '/images/badges/locked/vocab_locked.png');
-INSERT INTO badge_requirement (badge_id, source_id, source_type_id) VALUES (27, 27, 1);
-
--- Challenge: Write a Daily Journal
-INSERT INTO challenge (id, name, description, type_id, duration_days) VALUES (28, 'Write a Daily Journal', 'Complete the write a daily journal challenge.', 1, 10);
-INSERT INTO badge (id, name, description, icon, locked_icon) VALUES (28, 'Thoughtful Writer', 'Awarded for completing the "Write a Daily Journal" challenge.', '/images/badges/unlocked/journal.png', '/images/badges/locked/journal_locked.png');
-INSERT INTO badge_requirement (badge_id, source_id, source_type_id) VALUES (28, 28, 1);
-
--- Challenge: Practice Gratitude
-INSERT INTO challenge (id, name, description, type_id, duration_days) VALUES (29, 'Practice Gratitude', 'Complete the practice gratitude challenge.', 1, 7);
-INSERT INTO badge (id, name, description, icon, locked_icon) VALUES (29, 'Thanks Giver', 'Awarded for completing the "Practice Gratitude" challenge.', '/images/badges/unlocked/thanks.png', '/images/badges/locked/thanks_locked.png');
-INSERT INTO badge_requirement (badge_id, source_id, source_type_id) VALUES (29, 29, 1);
-
--- Challenge: Clean Room Daily
-INSERT INTO challenge (id, name, description, type_id, duration_days) VALUES (30, 'Clean Room Daily', 'Complete the clean room daily challenge.', 1, 5);
-INSERT INTO badge (id, name, description, icon, locked_icon) VALUES (30, 'Tidy Star', 'Awarded for completing the "Clean Room Daily" challenge.', '/images/badges/unlocked/cleanroom.png', '/images/badges/locked/cleanroom_locked.png');
-INSERT INTO badge_requirement (badge_id, source_id, source_type_id) VALUES (30, 30, 1);
-
--- Badge System Minimal Test Data
--- only CHALLENGE source type
 -- Insert user_badge assignments
 INSERT INTO user_badge (userID, badge_id, earned_at) VALUES
 (1, 1, '2024-06-01 10:00:00'),
