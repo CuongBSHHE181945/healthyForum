@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Data
@@ -58,10 +59,13 @@ public class User {
     @Column(name = "reset_token_expiry")
     private java.time.LocalDateTime resetTokenExpiry;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Post> posts;
+
     public User() {
     }
 
-    public User(Long userID, Role role, boolean suspended, String address, LocalDate dob, String gender, String email, String fullname, String password, String username, String provider) {
+    public User(Long userID, Role role, boolean suspended, String address, LocalDate dob, String gender, String email, String fullname, String password, String username, String provider, List<Post> posts) {
         this.userID = userID;
         this.role = role;
         this.suspended = suspended;
@@ -74,6 +78,7 @@ public class User {
         this.username = username;
         this.provider = provider;
         this.enabled = false; // Default for new users
+        this.posts = posts;
     }
 
     public Long getUserID() {
@@ -194,5 +199,13 @@ public class User {
 
     public void setResetTokenExpiry(java.time.LocalDateTime resetTokenExpiry) {
         this.resetTokenExpiry = resetTokenExpiry;
+    }
+
+    public List<Post> getPosts() {
+        return posts;
+    }
+
+    public void setPosts(List<Post> posts) {
+        this.posts = posts;
     }
 }
