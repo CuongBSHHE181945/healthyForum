@@ -156,6 +156,30 @@ public class PostController {
         return "redirect:/posts";
     }
 
+    @PostMapping("/{id}/report")
+    public String reportPost(@PathVariable Long id, @RequestParam String reason,
+                             @AuthenticationPrincipal UserDetails userDetails,
+                             RedirectAttributes redirectAttributes) {
+        Post post = postService.getPostById(id);
+        User currentUser = userRepository.findByUsername(userDetails.getUsername()).orElse(null);
+        // The user who created the post
+        User reportedUser = post.getUser();
+
+        if (currentUser == null) {
+            return "redirect:/login";
+        }
+
+        // Don't allow users to report their own posts
+        if (reportedUser.getUserID().equals(currentUser.getUserID())) {
+            redirectAttributes.addFlashAttribute("error", "Bạn không thể báo cáo bài viết của chính mình");
+            return "redirect:/posts/" + id;
+        }
+
+        reportService.createPostReport(currentUser, reportedUser, post, reason);
+        redirectAttributes.addFlashAttribute("success", "Báo cáo đã được gửi và sẽ được xem xét");
+        return "redirect:/posts/" + id;
+    }
+
 
 
 
@@ -189,5 +213,6 @@ public class PostController {
         model.addAttribute("isOwner", isOwner);
         return "posts/post_detail";
     }
+
 
 }

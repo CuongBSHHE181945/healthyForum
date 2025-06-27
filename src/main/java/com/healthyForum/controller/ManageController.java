@@ -100,62 +100,62 @@ public class ManageController {
         return "admin/admin_all_reports";
     }
 
-//    @PostMapping("/reports/{id}/resolve")
-//    public String resolveReport(@PathVariable Long id,
-//                                @RequestParam String resolution,
-//                                @RequestParam(value = "banPost", required = false) Boolean banPost,
-//                                RedirectAttributes redirectAttributes) {
-//
-//        Report report = reportService.getReportById(id);
-//
-//        // Handle post banning if requested
-//        if (banPost != null && banPost && report.getReportedPost() != null) {
-//            Post bannedPost = postService.banPost(report.getReportedPost().getId());
-//            resolution += " (Bài viết đã bị cấm)";
-//        }
-//
-//        // Resolve the report
-//        reportService.resolveReport(id, resolution);
-//
-//        redirectAttributes.addFlashAttribute("success", "Báo cáo đã được xử lý thành công");
-//        return "redirect:/admin/reports";
-//    }
-//
-//    @PostMapping("/reports/{id}/reject")
-//    public String rejectReport(@PathVariable Long id,
-//                               @RequestParam String resolution,
-//                               RedirectAttributes redirectAttributes) {
-//
-//        reportService.rejectReport(id, resolution);
-//
-//        redirectAttributes.addFlashAttribute("success", "Báo cáo đã được từ chối");
-//        return "redirect:/admin/reports";
-//    }
-//
-//    @GetMapping("/reports/{id}/ban-post")
-//    public String banPostDirectly(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-//        Report report = reportService.getReportById(id);
-//
-//        if (report.getReportedPost() != null) {
-//            // Ban the post
-//            postService.banPost(report.getReportedPost().getId());
-//
-//            // Also resolve the report with auto-generated resolution
-//            String resolution = "Bài viết đã bị cấm do vi phạm quy định cộng đồng.";
-//            reportService.resolveReport(id, resolution);
-//
-//            redirectAttributes.addFlashAttribute("success", "Bài viết đã bị cấm và báo cáo đã được xử lý");
-//        } else {
-//            redirectAttributes.addFlashAttribute("error", "Không thể thực hiện - báo cáo này không liên quan đến bài viết");
-//        }
-//
-//        return "redirect:/admin/reports";
-//    }
-//
-//    @GetMapping("/posts/{id}/unban")
-//    public String unbanPost(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-//        postService.unbanPost(id);
-//        redirectAttributes.addFlashAttribute("success", "Bài viết đã được bỏ cấm thành công");
-//        return "redirect:/admin/posts";
-//    }
+    @PostMapping("/reports/{id}/resolve")
+    public String resolveReport(@PathVariable Long id,
+                                @RequestParam String resolution,
+                                @RequestParam(value = "banPost", required = false) Boolean banPost,
+                                RedirectAttributes redirectAttributes) {
+
+        Report report = reportService.getReportById(id);
+
+        // Handle post banning if requested
+        if (banPost != null && banPost && report.getReportedPost() != null) {
+            Post bannedPost = postService.banPost(report.getReportedPost().getId());
+            resolution += " (Bài viết đã bị cấm)";
+        }
+
+        // Resolve the report
+        reportService.resolveReport(id, resolution);
+
+        redirectAttributes.addFlashAttribute("success", "Báo cáo đã được xử lý thành công");
+        return "redirect:/admin/reports";
+    }
+
+    @PostMapping("/reports/{id}/reject")
+    public String rejectReport(@PathVariable Long id,
+                               @RequestParam String resolution,
+                               RedirectAttributes redirectAttributes) {
+
+        reportService.rejectReport(id, resolution);
+
+        redirectAttributes.addFlashAttribute("success", "Báo cáo đã được từ chối");
+        return "redirect:/admin/reports";
+    }
+
+    @GetMapping("/reports/{id}/ban-post")
+    public String banPostDirectly(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        Report report = reportService.getReportById(id);
+
+        if (report.getReportedPost() != null) {
+            // Ban the post
+            postService.banPost(report.getReportedPost().getId());
+
+            // Also resolve the report with auto-generated resolution
+            String resolution = "Bài viết đã bị cấm do vi phạm quy định cộng đồng.";
+            reportService.resolveReport(id, resolution);
+
+            redirectAttributes.addFlashAttribute("success", "Bài viết đã bị cấm và báo cáo đã được xử lý");
+        } else {
+            redirectAttributes.addFlashAttribute("error", "Không thể thực hiện - báo cáo này không liên quan đến bài viết");
+        }
+
+        return "redirect:/admin/reports";
+    }
+
+    @GetMapping("/posts/{id}/unban")
+    public String unbanPost(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        postService.unbanPost(id);
+        redirectAttributes.addFlashAttribute("success", "Bài viết đã được bỏ cấm thành công");
+        return "redirect:/admin/posts";
+    }
 }
