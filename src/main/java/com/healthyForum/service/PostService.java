@@ -3,6 +3,7 @@ package com.healthyForum.service;
 import com.healthyForum.model.Post;
 import com.healthyForum.model.User;
 import com.healthyForum.repository.PostRepository;
+import com.healthyForum.service.keywordFiltering.ContentFilterService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,8 +16,15 @@ public class PostService{
     @Autowired
     private PostRepository postRepository;
 
+    @Autowired
+    private ContentFilterService contentFilterService;
+
     @Transactional
     public Post createPost(Post post) {
+        // Filter inappropriate content
+        post.setTitle(contentFilterService.filterContent(post.getTitle()));
+        post.setContent(contentFilterService.filterContent(post.getContent()));
+
         // Set creation and update timestamps
         Date now = new Date();
         post.setCreatedAt(now);
@@ -35,6 +43,10 @@ public class PostService{
         // Verify post exists
         postRepository.findById(post.getId())
                 .orElseThrow(() -> new RuntimeException("Post not found with id: " + post.getId()));
+
+        // Filter inappropriate content
+        post.setTitle(contentFilterService.filterContent(post.getTitle()));
+        post.setContent(contentFilterService.filterContent(post.getContent()));
 
         // Update the timestamp
         post.setUpdatedAt(new Date());

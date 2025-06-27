@@ -5,6 +5,7 @@ import com.healthyForum.model.Report;
 import com.healthyForum.model.User;
 import com.healthyForum.service.PostService;
 import com.healthyForum.service.ReportService;
+import com.healthyForum.service.keywordFiltering.ContentFilterService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -31,6 +32,9 @@ public class PostController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private ContentFilterService contentFilterService;
 
     // Display all public posts
     @GetMapping

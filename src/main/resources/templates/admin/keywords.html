@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/admin_layout}">
+<head>
+  <title>Quản lý từ khóa cấm</title>
+</head>
+<body>
+<div layout:fragment="content">
+  <div class="container mt-4">
+    <div class="row">
+      <div class="col-12">
+        <div class="card mb-4">
+          <div class="card-header">
+            <h2>Bảng điều khiển Quản lý từ khóa cấm</h2>
+          </div>
+          <div class="card-body">
+            <div class="alert alert-info">
+              <i class="fas fa-info-circle me-2"></i>
+              Hệ thống tự động lọc nội dung có chứa các từ khóa cấm khi người dùng tạo hoặc cập nhật bài viết.
+            </div>
+
+            <div class="row mt-4">
+              <div class="col-md-6">
+                <div class="card bg-primary text-white mb-3">
+                  <div class="card-body">
+                    <h5 class="card-title">Số lượng từ khóa</h5>
+                    <h2 class="display-4" th:text="${#lists.size(keywords)}">0</h2>
+                    <p>từ khóa được quản lý</p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="card bg-success text-white mb-3">
+                  <div class="card-body">
+                    <h5 class="card-title">Từ khóa đang hoạt động</h5>
+                    <h2 class="display-4"
+                        th:text="${#lists.size(keywords.?[active == true])}">0</h2>
+                    <p>từ khóa đang được sử dụng để lọc</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-4">
+              <a th:href="@{/admin/keywords}" class="btn btn-lg btn-primary me-md-2">
+                <i class="fas fa-list me-2"></i>Xem danh sách từ khóa
+              </a>
+              <a th:href="@{/admin/keywords}" class="btn btn-lg btn-success">
+                <i class="fas fa-plus me-2"></i>Thêm từ khóa mới
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Add Card -->
+        <div class="card">
+          <div class="card-header">
+            <h4>Thêm nhanh từ khóa</h4>
+          </div>
+          <div class="card-body">
+            <form th:action="@{/admin/keywords/add}" method="post" th:object="${newKeyword}">
+              <div class="row g-3">
+                <div class="col-md-5">
+                  <input type="text" class="form-control" th:field="*{word}"
+                         placeholder="Nhập từ khóa cấm" required>
+                </div>
+                <div class="col-md-5">
+                  <input type="text" class="form-control" th:field="*{replacement}"
+                         placeholder="Thay thế bằng (tùy chọn)">
+                </div>
+                <div class="col-md-2">
+                  <button type="submit" class="btn btn-primary w-100">Thêm</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
