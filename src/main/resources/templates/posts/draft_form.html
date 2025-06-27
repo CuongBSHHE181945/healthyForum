@@ -16,7 +16,7 @@
 
   <div class="card shadow-sm">
     <div class="card-header bg-primary text-white">
-      <h3 class="mb-0">Create New Post</h3>
+      <h3 class="mb-0">Edit Draft</h3>
     </div>
     <div class="card-body p-4">
       <form th:action="@{/posts/create}" th:object="${post}" method="post">
@@ -57,9 +57,9 @@
 
         <div class="mt-4">
           <button type="submit" class="btn btn-primary">
-            <i class="bi bi-save"></i> Save Post
+            <i class="bi bi-save"></i> Save Draft
           </button>
-          <a href="/posts" class="btn btn-outline-secondary ms-2">Cancel</a>
+          <a href="/posts/drafts" class="btn btn-outline-secondary ms-2">Cancel</a>
         </div>
       </form>
     </div>
