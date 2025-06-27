@@ -18,29 +18,34 @@
         <span class="logo-text">Healthy Forum</span>
       </div>
       <div class="px-3 py-2">
-        <small class="text-uppercase text-muted fw-bold">Quản trị</small>
+        <small class="text-uppercase text-muted fw-bold">Administrator</small>
       </div>
       <ul class="nav flex-column mb-auto px-2">
         <li class="nav-item">
           <a href="/admin" class="nav-link active">
-            <i class="bi bi-speedometer2"></i> Tổng quan
+            <i class="bi bi-speedometer2"></i> Overview
           </a>
         </li>
         <li class="nav-item">
           <a href="/admin/users" class="nav-link">
-            <i class="bi bi-people"></i> Người dùng
+            <i class="bi bi-people"></i> User
           </a>
         </li>
         <li class="nav-item">
           <a href="/admin/reports" class="nav-link">
-            <i class="bi bi-flag"></i> Báo cáo
+            <i class="bi bi-flag"></i> Report
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="/admin/personal-challenge" class="nav-link">
+            <i class="bi bi-flag"></i> Personal challenge
           </a>
         </li>
       </ul>
       <div class="divider"></div>
       <div class="sidebar-footer">
         <a href="/" class="btn btn-light btn-sm w-100">
-          <i class="bi bi-house-door"></i> Về trang chủ
+          <i class="bi bi-house-door"></i> Back to home page
         </a>
       </div>
     </nav>
@@ -48,7 +53,7 @@
     <!-- Main Content -->
     <div class="admin-content">
       <div class="admin-topbar">
-        <h4 class="mb-0">Tổng quan hệ thống</h4>
+        <h4 class="mb-0">System overview</h4>
         <div>
           <button class="btn btn-light sidebar-toggle d-lg-none">
             <i class="bi bi-list"></i>
@@ -68,7 +73,7 @@
               <div class="d-flex justify-content-between align-items-center">
                 <div>
                   <div class="text-xs text-uppercase mb-1 text-primary fw-bold">
-                    Người dùng
+                    User
                   </div>
                   <div class="stat-value" th:text="${userCount}">0</div>
                 </div>
@@ -84,7 +89,7 @@
               <div class="d-flex justify-content-between align-items-center">
                 <div>
                   <div class="text-xs text-uppercase mb-1 text-success fw-bold">
-                    Bài viết
+                    Post
                   </div>
                   <div class="stat-value" th:text="${postCount}">0</div>
                 </div>
@@ -100,7 +105,7 @@
               <div class="d-flex justify-content-between align-items-center">
                 <div>
                   <div class="text-xs text-uppercase mb-1 text-warning fw-bold">
-                    Bình luận
+                    Comment
                   </div>
                   <div class="stat-value" th:text="${commentCount}">0</div>
                 </div>
@@ -116,7 +121,7 @@
               <div class="d-flex justify-content-between align-items-center">
                 <div>
                   <div class="text-xs text-uppercase mb-1 text-danger fw-bold">
-                    Báo cáo đang chờ
+                    Pending report
                   </div>
                   <div class="stat-value" th:text="${pendingReportCount}">0</div>
                 </div>
