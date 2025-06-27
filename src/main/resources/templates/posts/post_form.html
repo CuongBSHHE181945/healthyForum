@@ -19,7 +19,7 @@
       <h3 class="mb-0">Create New Post</h3>
     </div>
     <div class="card-body p-4">
-      <form th:action="@{/post/create}" th:object="${post}" method="post">
+      <form th:action="@{/posts}" th:object="${post}" method="post">
         <div class="mb-3">
           <label for="title" class="form-label">Title <span class="text-danger">*</span></label>
           <input type="text" class="form-control" id="title" th:field="*{title}" required>
@@ -58,7 +58,7 @@
           <button type="submit" class="btn btn-primary">
             <i class="bi bi-save"></i> Save Post
           </button>
-          <a href="/post" class="btn btn-outline-secondary ms-2">Cancel</a>
+          <a href="/posts" class="btn btn-outline-secondary ms-2">Cancel</a>
         </div>
       </form>
     </div>
