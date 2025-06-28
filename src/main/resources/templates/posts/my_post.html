@@ -25,6 +25,16 @@
     </a>
   </div>
 
+  <!-- Alert messages -->
+  <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+    <span th:text="${error}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+  <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+    <span th:text="${success}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+
   <!-- List of Posts -->
   <div class="row row-cols-1 row-cols-md-2 g-4" th:if="${!#lists.isEmpty(posts)}">
     <div class="col" th:each="post : ${posts}">

@@ -5,6 +5,7 @@ import com.healthyForum.model.Post;
 import com.healthyForum.model.User;
 import com.healthyForum.repository.PostRepository;
 import com.healthyForum.repository.UserRepository;
+import com.healthyForum.repository.keywordFiltering.KeywordRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,12 +22,16 @@ import java.util.List;
         @Autowired
         private UserRepository userRepository;
 
+        @Autowired
+        private KeywordRepository keywordRepository;
+
         // Save a post (new or edited) with user from Principal
         public void savePost(Post post, Principal principal) {
             String username = principal.getName();
             User user = userRepository.findByUsername(username)
                     .orElseThrow(() -> new RuntimeException("User not found: " + username));
             post.setUser(user);
+            filterAndBanIfNeeded(post);
             postRepository.save(post);
         }
 
@@ -109,6 +114,23 @@ import java.util.List;
                 return true;
             }
 
+            return false;
+        }
+
+        private boolean containsBannedKeyword(String text) {
+            if (text == null) return false;
+            String lower = text.toLowerCase();
+            return keywordRepository.findAll().stream()
+                    .anyMatch(k -> lower.contains(k.getWord().toLowerCase()));
+        }
+
+        public boolean filterAndBanIfNeeded(Post post) {
+            if (containsBannedKeyword(post.getTitle()) || containsBannedKeyword(post.getContent())) {
+                post.setBanned(true);
+                post.setUpdatedAt(LocalDateTime.now());
+                postRepository.save(post);
+                return true;
+            }
             return false;
         }
 

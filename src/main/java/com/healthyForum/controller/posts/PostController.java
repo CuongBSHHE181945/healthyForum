@@ -81,6 +81,10 @@ public class PostController {
     @PostMapping("/create")
     public String createPost(@ModelAttribute("post") Post post, Principal principal, RedirectAttributes redirectAttributes) {
         postService.savePost(post, principal);
+        if (post.isBanned()) {
+            redirectAttributes.addFlashAttribute("error", "Your post contains inappropriate language and has been banned.");
+            return "redirect:/posts/my-post";
+        }
         redirectAttributes.addFlashAttribute("success", "Post created successfully!");
         return "redirect:/posts";
     }

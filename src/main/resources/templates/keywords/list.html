@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Manage Banned Keywords</title>
+  <meta charset="UTF-8"/>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f7f7f7;
+      margin: 0;
+      padding: 30px;
+    }
+    h1 {
+      color: #333;
+      margin-bottom: 20px;
+    }
+    form {
+      margin-bottom: 20px;
+    }
+    input[type="text"] {
+      padding: 8px;
+      border: 1px solid #bbb;
+      border-radius: 4px;
+      font-size: 16px;
+      margin-right: 8px;
+    }
+    button {
+      padding: 8px 16px;
+      background: #1976d2;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 15px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #1565c0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    th, td {
+      padding: 12px 10px;
+      border-bottom: 1px solid #eee;
+      text-align: left;
+    }
+    th {
+      background: #f0f4f8;
+      color: #444;
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+  </style>
+</head>
+<body>
+<h1>Banned Keywords</h1>
+
+<!-- Add new keyword form -->
+<form th:action="@{/admin/keywords/add}" method="post">
+  <input type="text" name="word" placeholder="Enter new keyword" required/>
+  <button type="submit">Add</button>
+</form>
+
+<!-- List of keywords -->
+<table>
+  <thead>
+  <tr>
+    <th>ID</th>
+    <th>Keyword</th>
+    <th>Action</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr th:each="keyword : ${keywords}">
+    <td th:text="${keyword.id}"></td>
+    <td th:text="${keyword.word}"></td>
+    <td>
+      <form th:action="@{/admin/keywords/delete/{id}(id=${keyword.id})}" method="post" style="display:inline;">
+        <button type="submit" onclick="return confirm('Delete this keyword?')">Delete</button>
+      </form>
+    </td>
+  </tr>
+  </tbody>
+</table>
+
+</body>
+</html>

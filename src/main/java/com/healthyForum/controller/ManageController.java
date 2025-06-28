@@ -2,6 +2,8 @@ package com.healthyForum.controller;
 
 import com.healthyForum.model.Post;
 import com.healthyForum.model.Report;
+import com.healthyForum.model.keywordFiltering.Keyword;
+import com.healthyForum.repository.keywordFiltering.KeywordRepository;
 import com.healthyForum.service.PostService;
 import com.healthyForum.service.ReportService;
 import com.healthyForum.service.UserServiceImpl;
@@ -22,6 +24,9 @@ public class ManageController {
     private ReportService reportService;
     @Autowired
     private PostService postService;
+
+    @Autowired
+    private KeywordRepository keywordRepository;
 
 
     @GetMapping
@@ -158,4 +163,27 @@ public class ManageController {
         redirectAttributes.addFlashAttribute("success", "Bài viết đã được bỏ cấm thành công");
         return "redirect:/admin/posts";
     }
+
+    // In src/main/java/com/healthyForum/controller/ManageController.java
+
+    @GetMapping("/keywords")
+    public String listKeywords(Model model) {
+        model.addAttribute("keywords", keywordRepository.findAll());
+        return "keywords/list";
+    }
+
+    @PostMapping("/keywords/add")
+    public String addKeyword(@RequestParam String word) {
+        Keyword keyword = new Keyword();
+        keyword.setWord(word);
+        keywordRepository.save(keyword);
+        return "redirect:/admin/keywords";
+    }
+
+    @PostMapping("/keywords/delete/{id}")
+    public String deleteKeyword(@PathVariable Long id) {
+        keywordRepository.deleteById(id);
+        return "redirect:/admin/keywords";
+    }
+
 }
