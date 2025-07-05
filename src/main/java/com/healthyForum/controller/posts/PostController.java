@@ -3,16 +3,17 @@ package com.healthyForum.controller.posts;
 import com.healthyForum.model.Post;
 import com.healthyForum.model.Report;
 import com.healthyForum.model.User;
+import com.healthyForum.model.UserAccount;
 import com.healthyForum.model.Enum.Visibility;
-import com.healthyForum.repository.ReportRepository;
-import com.healthyForum.service.PostService;
-import com.healthyForum.repository.UserRepository;
 import com.healthyForum.repository.PostRepository;
+import com.healthyForum.repository.UserAccountRepository;
+import com.healthyForum.repository.UserRepository;
+import com.healthyForum.service.PostService;
 import com.healthyForum.service.ReportService;
-import com.healthyForum.service.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -39,6 +40,9 @@ public class PostController {
     @Autowired
     private ReportService reportService;
 
+    @Autowired
+    private UserAccountRepository userAccountRepository;
+
     /**
      * List all public, non-banned posts
      */
@@ -60,7 +64,12 @@ public class PostController {
     //drafts
     @GetMapping("/drafts")
     public String showUserDrafts(Model model, Principal principal) {
-        List<Post> drafts = postService.getDrafts(principal.getName());
+        User currentUser = getCurrentUser(principal);
+        if (currentUser == null) {
+            System.out.println("[WARN] showUserDrafts: Unauthenticated access attempt, redirecting to login.");
+            return "redirect:/login";
+        }
+        List<Post> drafts = postService.getDrafts(currentUser.getId());
         model.addAttribute("drafts", drafts);
         return "posts/drafts";
     }
@@ -88,10 +97,6 @@ public class PostController {
         redirectAttributes.addFlashAttribute("success", "Post created successfully!");
         return "redirect:/posts";
     }
-
-
-
-
 
     /**
      * Show form to edit a post
@@ -130,7 +135,7 @@ public class PostController {
         }
         model.addAttribute("post", post);
         model.addAttribute("visibilityOptions", Visibility.values());
-        return "posts/draft_form";
+        return "posts/post_form";
     }
 
     @PostMapping("/{id}/draft-edit")
@@ -138,7 +143,7 @@ public class PostController {
         Post existingPost = postService.getPostById(id);
         if (existingPost == null || !postService.isOwner(existingPost, principal)) {
             redirectAttributes.addFlashAttribute("error", "You do not have permission to update this post.");
-            return "redirect:/posts/drafts";
+            return "redirect:/posts";
         }
 
         postService.updatePost(existingPost, updatedPost);
@@ -162,19 +167,20 @@ public class PostController {
 
     @PostMapping("/{id}/report")
     public String reportPost(@PathVariable Long id, @RequestParam String reason,
-                             @AuthenticationPrincipal UserDetails userDetails,
+                             @AuthenticationPrincipal Object principal,
                              RedirectAttributes redirectAttributes) {
         Post post = postService.getPostById(id);
-        User currentUser = userRepository.findByUsername(userDetails.getUsername()).orElse(null);
-        // The user who created the post
-        User reportedUser = post.getUser();
-
+        User currentUser = getCurrentUser(principal);
+        
         if (currentUser == null) {
             return "redirect:/login";
         }
 
+        // The user who created the post
+        User reportedUser = post.getUser();
+
         // Don't allow users to report their own posts
-        if (reportedUser.getUserID().equals(currentUser.getUserID())) {
+        if (reportedUser.getId().equals(currentUser.getId())) {
             redirectAttributes.addFlashAttribute("error", "Bạn không thể báo cáo bài viết của chính mình");
             return "redirect:/posts/" + id;
         }
@@ -184,12 +190,9 @@ public class PostController {
         return "redirect:/posts/" + id;
     }
 
-
-
-
     @GetMapping("/my-reports")
-    public String getMyReports(Model model, @AuthenticationPrincipal UserDetails userDetails) {
-        User currentUser = userRepository.findByUsername(userDetails.getUsername()).orElse(null);
+    public String getMyReports(Model model, @AuthenticationPrincipal Object principal) {
+        User currentUser = getCurrentUser(principal);
         if (currentUser == null) {
             return "redirect:/login";
         }
@@ -198,7 +201,6 @@ public class PostController {
         model.addAttribute("reports", reports);
         return "post/my-reports";
     }
-
 
     /**
      * View details of a post
@@ -218,5 +220,49 @@ public class PostController {
         return "posts/post_detail";
     }
 
+    /**
+     * Helper method to get current user from either UserDetails or OAuth2User
+     */
+    private User getCurrentUser(Object principal) {
+        if (principal instanceof UserDetails userDetails) {
+            return getCurrentUser(userDetails);
+        } else if (principal instanceof OAuth2User oauth2User) {
+            String email = oauth2User.getAttribute("email");
+            if (email != null) {
+                return userRepository.findByEmail(email).orElse(null);
+            }
+            String googleId = oauth2User.getName();
+            if (googleId != null) {
+                UserAccount account = userAccountRepository.findByGoogleId(googleId).orElse(null);
+                if (account != null) return account.getUser();
+            }
+        } else if (principal instanceof Principal p) {
+            String principalName = p.getName();
+            UserAccount account = userAccountRepository.findByUsername(principalName)
+                    .orElseGet(() -> userAccountRepository.findByGoogleId(principalName).orElse(null));
+            if (account != null) {
+                return account.getUser();
+            }
+            User user = userRepository.findByEmail(principalName).orElse(null);
+            if (user != null) {
+                return user;
+            }
+        }
+        return null;
+    }
 
+    private User getCurrentUser(UserDetails userDetails) {
+        if (userDetails == null) {
+            return null;
+        }
+        
+        // Try to find by username first using UserAccountRepository
+        UserAccount account = userAccountRepository.findByUsername(userDetails.getUsername()).orElse(null);
+        if (account != null) {
+            return account.getUser();
+        }
+
+        // Try to find by email
+        return userRepository.findByEmail(userDetails.getUsername()).orElse(null);
+    }
 }

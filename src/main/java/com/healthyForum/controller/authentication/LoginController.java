@@ -1,5 +1,7 @@
 package com.healthyForum.controller.authentication;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,6 +43,14 @@ public class LoginController {
 
     @GetMapping("/home")
     public String home() {
-        return "homePage"; // maps to home.html
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        
+        // Check if user is authenticated (not anonymous)
+        if (authentication != null && authentication.isAuthenticated() && 
+            !"anonymousUser".equals(authentication.getName())) {
+            return "homePage"; // User is authenticated, show homepage
+        } else {
+            return "redirect:/login"; // User is not authenticated, redirect to login
+        }
     }
 }

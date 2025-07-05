@@ -10,10 +10,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.security.Principal;
 
 @Controller
 @RequestMapping("/meal-planner")
@@ -27,133 +29,198 @@ public class MealPlannerController {
         this.userRepository = userRepository;
     }
 
-    // Show form
-    @GetMapping("/create")
-    public String showCreateForm(Model model) {
-        MealPlanner mealPlanner = new MealPlanner();
-        mealPlanner.setMealDate(LocalDate.now());
-
-        //Create ONE empty ingredient
-        List<MealIngredient> ingredients = new ArrayList<>();
-        MealIngredient ingredient = new MealIngredient();
-        ingredient.setMealPlanner(mealPlanner);
-        ingredients.add(ingredient);
-        mealPlanner.setIngredients(ingredients);
-
-        model.addAttribute("mealPlanner", mealPlanner);
-        model.addAttribute("mealTypes", List.of("Breakfast", "Lunch", "Dinner", "Snack"));
-        model.addAttribute("formAction", "/meal-planner/save");
-        return "meal-planner/create";
-    }
-
-    @PostMapping("/save")
-    public String saveMealPlan(@Valid @ModelAttribute MealPlanner mealPlanner,
-                               BindingResult result,
-                               Model model) {
-        if (result.hasErrors()) {
-            model.addAttribute("mealTypes", List.of("Breakfast", "Lunch", "Dinner", "Snack"));
-            return "meal-planner/create";
+    @GetMapping("")
+    public String showMealPlanner(Model model, Principal principal) {
+        if (principal == null) {
+            return "redirect:/login";
         }
 
-        // ✅ Enforce today only
-        if (!mealPlanner.getMealDate().equals(LocalDate.now())) {
-            model.addAttribute("mealTypes", List.of("Breakfast", "Lunch", "Dinner", "Snack"));
-            model.addAttribute("ingredientError", "Meal date must be today.");
-            return "meal-planner/create";
+        User user = getCurrentUser(principal);
+        if (user == null) {
+            return "redirect:/login";
         }
 
-        User user = userRepository.findById(1L)
-                .orElseThrow(() -> new RuntimeException("User with ID 1 not found"));
-        mealPlanner.setUser(user);
-
-//Remove blank rows
-        if (mealPlanner.getIngredients() != null) {
-            mealPlanner.getIngredients().removeIf(ing ->
-                    (ing.getIngredientName() == null || ing.getIngredientName().isBlank())
-                            || ing.getIngredientQuantity() == null);
-        }
-
-        //Reject form if no valid ingredients left
-        if (mealPlanner.getIngredients() == null || mealPlanner.getIngredients().isEmpty()) {
-            model.addAttribute("mealTypes", List.of("Breakfast", "Lunch", "Dinner", "Snack"));
-            model.addAttribute("ingredientError", "At least one ingredient is required.");
-            return "meal-planner/create";
-        }
-
-        for (MealIngredient ingredient : mealPlanner.getIngredients()) {
-            ingredient.setMealPlanner(mealPlanner);
-        }
-        mealPlannerRepository.save(mealPlanner); // Cascades ingredients if set properly
-        return "redirect:/meal-planner/view?date=" + mealPlanner.getMealDate();
-    }
-
-    // View by date
-    @GetMapping("/view")
-    public String viewMealsByDate(@RequestParam(value = "date", required = false) LocalDate date, Model model) {
-        if (date == null) {
-            date = LocalDate.now();
-        }
-        User user = userRepository.findById(1L)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        List<MealPlanner> meals = mealPlannerRepository.findByUserAndMealDate(user, date);
-        model.addAttribute("selectedDate", date);
-        model.addAttribute("meals", meals);
+        List<MealPlanner> userMeals = mealPlannerRepository.findByUser(user);
+        model.addAttribute("meals", userMeals);
+        model.addAttribute("user", user);
+        
         return "meal-planner/view";
     }
 
-    @GetMapping("/edit/{id}")
-    public String showEditForm(@PathVariable("id") Integer id, Model model) {
-        MealPlanner meal = mealPlannerRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Meal not found"));
+    @GetMapping("/create")
+    public String showCreateForm(Model model, Principal principal) {
+        if (principal == null) {
+            return "redirect:/login";
+        }
 
-        model.addAttribute("mealPlanner", meal);
-        model.addAttribute("mealTypes", List.of("Breakfast", "Lunch", "Dinner", "Snack"));
-        model.addAttribute("formAction", "/meal-planner/update"); // ✅ ADD THIS
-        return "meal-planner/create"; // ✅ still reusing create.html
+        User user = getCurrentUser(principal);
+        if (user == null) {
+            return "redirect:/login";
+        }
+
+        model.addAttribute("mealPlanner", new MealPlanner());
+        model.addAttribute("user", user);
+        
+        return "meal-planner/create";
     }
 
-    @PostMapping("/update")
-    public String updateMeal(@Valid @ModelAttribute MealPlanner mealPlanner,
-                             BindingResult result,
-                             Model model) {
-        if (result.hasErrors()) {
-            model.addAttribute("mealTypes", List.of("Breakfast", "Lunch", "Dinner", "Snack"));
-            return "meal-planner/edit";
+    @PostMapping("/create")
+    public String createMeal(@ModelAttribute MealPlanner mealPlanner, 
+                             Principal principal, 
+                             RedirectAttributes redirectAttributes) {
+        if (principal == null) {
+            return "redirect:/login";
         }
 
-        User user = userRepository.findById(1L)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        mealPlanner.setUser(user);
-
-        if (mealPlanner.getIngredients() != null) {
-            mealPlanner.getIngredients().removeIf(ing ->
-                    ing.getIngredientName() == null || ing.getIngredientName().isBlank()
-                            || ing.getIngredientQuantity() == null);
+        User user = getCurrentUser(principal);
+        if (user == null) {
+            return "redirect:/login";
         }
 
-        for (MealIngredient ing : mealPlanner.getIngredients()) {
-            ing.setMealPlanner(mealPlanner);
+        try {
+            mealPlanner.setUser(user);
+            mealPlannerRepository.save(mealPlanner);
+            redirectAttributes.addFlashAttribute("success", "Meal plan created successfully!");
+            return "redirect:/meal-planner";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Failed to create meal plan: " + e.getMessage());
+            return "redirect:/meal-planner/create";
+        }
+    }
+
+    @GetMapping("/edit/{id}")
+    public String showEditForm(@PathVariable Integer id, Model model, Principal principal) {
+        if (principal == null) {
+            return "redirect:/login";
         }
 
-        mealPlannerRepository.save(mealPlanner);
-        return "redirect:/meal-planner/view?date=" + mealPlanner.getMealDate();
+        User user = getCurrentUser(principal);
+        if (user == null) {
+            return "redirect:/login";
+        }
+
+        MealPlanner meal = mealPlannerRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Meal not found"));
+        if (meal == null || !meal.getUser().getId().equals(user.getId())) {
+            return "redirect:/meal-planner";
+        }
+
+        model.addAttribute("mealPlanner", meal);
+        model.addAttribute("user", user);
+        
+        return "meal-planner/create"; // Reuse create form for editing
+    }
+
+    @PostMapping("/edit/{id}")
+    public String updateMeal(@PathVariable Integer id, 
+                             @ModelAttribute MealPlanner mealPlanner, 
+                             Principal principal, 
+                             RedirectAttributes redirectAttributes) {
+        if (principal == null) {
+            return "redirect:/login";
+        }
+
+        User user = getCurrentUser(principal);
+        if (user == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            MealPlanner existingMeal = mealPlannerRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Meal not found"));
+            if (existingMeal == null || !existingMeal.getUser().getId().equals(user.getId())) {
+                return "redirect:/meal-planner";
+            }
+
+            existingMeal.setMealName(mealPlanner.getMealName());
+            existingMeal.setMealType(mealPlanner.getMealType());
+            existingMeal.setMealDate(mealPlanner.getMealDate());
+            existingMeal.setMealDescription(mealPlanner.getMealDescription());
+            existingMeal.setMealCalories(mealPlanner.getMealCalories());
+
+            mealPlannerRepository.save(existingMeal);
+            redirectAttributes.addFlashAttribute("success", "Meal plan updated successfully!");
+            return "redirect:/meal-planner";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Failed to update meal plan: " + e.getMessage());
+            return "redirect:/meal-planner/edit/" + id;
+        }
     }
 
     @PostMapping("/delete/{id}")
-    public String deleteMeal(@PathVariable("id") Integer id,
-                             @RequestParam("date") String date) {
-        mealPlannerRepository.deleteById(id);
-        return "redirect:/meal-planner/view?date=" + date;
+    public String deleteMeal(@PathVariable Integer id, 
+                             Principal principal, 
+                             RedirectAttributes redirectAttributes) {
+        if (principal == null) {
+            return "redirect:/login";
+        }
+
+        User user = getCurrentUser(principal);
+        if (user == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            MealPlanner meal = mealPlannerRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Meal not found"));
+            if (meal == null || !meal.getUser().getId().equals(user.getId())) {
+                return "redirect:/meal-planner";
+            }
+
+            mealPlannerRepository.deleteById(id);
+            redirectAttributes.addFlashAttribute("success", "Meal plan deleted successfully!");
+            return "redirect:/meal-planner";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Failed to delete meal plan: " + e.getMessage());
+            return "redirect:/meal-planner";
+        }
     }
 
-    @GetMapping("/test-user")
+    @GetMapping("/test")
     @ResponseBody
-    public String testUserFetch() {
-        User user = userRepository.findById(1L)
-                .orElseThrow(() -> new RuntimeException("User with ID 1 not found"));
+    public String testUser(Principal principal) {
+        if (principal == null) {
+            return "No principal";
+        }
 
-        return "User found: " + user.getUsername();
+        User user = getCurrentUser(principal);
+        if (user == null) {
+            return "User not found";
+        }
+
+        return "User found: " + user.getEmail();
+    }
+
+    private User getCurrentUser(Principal principal) {
+        if (principal == null) {
+            return null;
+        }
+        // If principal is OAuth2User, try to get email and find by email
+        if (principal instanceof org.springframework.security.oauth2.core.user.OAuth2User oauth2User) {
+            String email = oauth2User.getAttribute("email");
+            if (email != null) {
+                return userRepository.findByEmail(email).orElse(null);
+            }
+            String googleId = oauth2User.getName();
+            if (googleId != null) {
+                // If you have a UserAccountRepository, you can look up by Google ID
+                // UserAccount account = userAccountRepository.findByGoogleId(googleId).orElse(null);
+                // if (account != null) return account.getUser();
+            }
+        }
+        String principalName = principal.getName();
+        // Try to find by email
+        User user = userRepository.findByEmail(principalName).orElse(null);
+        if (user != null) {
+            return user;
+        }
+        // Try to find by username or Google ID if you have a UserAccountRepository
+        // UserAccount account = userAccountRepository.findByUsername(principalName)
+        //         .orElseGet(() -> userAccountRepository.findByGoogleId(principalName).orElse(null));
+        // if (account != null) {
+        //     return account.getUser();
+        // }
+        return null;
     }
 
 }
