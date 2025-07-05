@@ -11,8 +11,8 @@
     <a href="/challenge" class="back-link">← Back to list</a>
   </div>
   <h2 th:text="${challenge.name}"></h2>
-  <p><strong>Type:</strong> <span th:text="${challenge.type.name}"></span></p>
-  <p><strong>Category:</strong> <span th:text="${challenge.category.name}"></span></p>
+  <p><strong>Type:</strong> <span th:text="${challenge.type != null ? challenge.type.name : 'Unknown'}"></span></p>
+  <p><strong>Category:</strong> <span th:text="${challenge.category != null ? challenge.category.name : 'Uncategorized'}"></span></p>
   <p><strong>Duration:</strong> <span th:text="${challenge.durationDays}"></span> days</p>
   <p><strong>Description:</strong></p>
   <p th:text="${challenge.description}"></p>

@@ -17,7 +17,7 @@ public class Blog {
     private Date createdAt;
 
     @ManyToOne
-    @JoinColumn(name = "author_username", referencedColumnName = "username")
+    @JoinColumn(name = "user_id")
     private User author;
 
     private boolean suspended;

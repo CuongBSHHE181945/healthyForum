@@ -2,8 +2,12 @@ package com.healthyForum.service.oauth;
 
 import com.healthyForum.model.Role;
 import com.healthyForum.model.User;
+import com.healthyForum.model.UserAccount;
 import com.healthyForum.repository.RoleRepository;
 import com.healthyForum.repository.UserRepository;
+import com.healthyForum.repository.UserAccountRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -16,12 +20,16 @@ import java.util.Optional;
 @Service
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
+    private static final Logger logger = LoggerFactory.getLogger(CustomOAuth2UserService.class);
+    
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final UserAccountRepository userAccountRepository;
 
-    public CustomOAuth2UserService(UserRepository userRepository, RoleRepository roleRepository) {
+    public CustomOAuth2UserService(UserRepository userRepository, RoleRepository roleRepository, UserAccountRepository userAccountRepository) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
+        this.userAccountRepository = userAccountRepository;
     }
 
     @Override
@@ -33,9 +41,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String name = oauth2User.getAttribute("name");
         String googleId = oauth2User.getName(); // This is the unique Google ID
 
+        logger.info("Processing OAuth login for email: {}, Google ID: {}", email, googleId);
+
         // Try to find by Google ID first (for returning users)
-        Optional<User> userByGoogleId = userRepository.findByGoogleId(googleId);
-        if (userByGoogleId.isPresent()) {
+        Optional<UserAccount> accountByGoogleId = userAccountRepository.findByGoogleId(googleId);
+        if (accountByGoogleId.isPresent()) {
+            UserAccount account = accountByGoogleId.get();
+            logger.info("Found existing user by Google ID: {}", account.getUsername());
             return oauth2User;
         }
 
@@ -43,28 +55,53 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         Optional<User> userByEmail = userRepository.findByEmail(email);
         if (userByEmail.isPresent()) {
             User user = userByEmail.get();
-            // Link Google ID to this user (do NOT change username)
-            user.setGoogleId(googleId);
-            user.setProvider("google");
-            user.setEnabled(true);
-            userRepository.save(user);
+            UserAccount account = userAccountRepository.findByUserId(user.getId()).orElse(null);
+            
+            logger.info("Found existing user by email: {} (provider: {}), linking Google ID", 
+                       account != null ? account.getUsername() : "no account", 
+                       account != null ? account.getProvider() : "none");
+            
+            // Link Google ID to this user's account
+            if (account == null) {
+                // Create account if it doesn't exist
+                account = new UserAccount();
+                account.setUser(user);
+                account.setProvider("local");
+                account.setEnabled(true);
+                account.setSuspended(false);
+            }
+            
+            account.setGoogleId(googleId);
+            account.setEnabled(true);
+            userAccountRepository.save(account);
+            
+            logger.info("Successfully linked Google ID to existing local user: {}", account.getUsername());
             return oauth2User;
         }
 
         // No user found, create new user
+        logger.info("Creating new user for Google OAuth: {}", email);
         User newUser = new User();
         newUser.setEmail(email);
-        newUser.setFullname(name);
-        newUser.setUsername(googleId); // Use Google ID as username for new Google users
-        newUser.setGoogleId(googleId);
-        newUser.setProvider("google");
-        newUser.setEnabled(true); // Enable the user
+        newUser.setFullName(name);
 
         Role userRole = roleRepository.findByRoleName("USER")
                 .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
         newUser.setRole(userRole);
 
-        userRepository.save(newUser);
+        // Save the user first
+        User savedUser = userRepository.save(newUser);
+        
+        // Create Google account
+        UserAccount googleAccount = new UserAccount();
+        googleAccount.setUsername(googleId);
+        googleAccount.setGoogleId(googleId);
+        googleAccount.setProvider("google");
+        googleAccount.setEnabled(true);
+        googleAccount.setUser(savedUser);
+        userAccountRepository.save(googleAccount);
+        
+        logger.info("Successfully created new Google OAuth user: {}", googleAccount.getUsername());
         return oauth2User;
     }
 } 

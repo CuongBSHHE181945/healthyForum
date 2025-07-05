@@ -19,12 +19,12 @@
     <tbody>
     <tr th:each="uc : ${myChallenges}">
         <td th:text="${uc.challenge.name}">Name</td>
-        <td th:text="${uc.challenge.type.name}">Type</td>
-        <td th:text="${uc.challenge.category.name}"></td>
+        <td th:text="${uc.challenge.type != null ? uc.challenge.type.name : 'Unknown'}">Type</td>
+        <td th:text="${uc.challenge.category != null ? uc.challenge.category.name : 'Uncategorized'}"></td>
         <td th:text="${uc.joinDate}">Date</td>
         <td th:text="${uc.status}">ACTIVE</td>
         <td>
-            <span th:switch="${uc.challenge.type.name}">
+            <span th:switch="${uc.challenge.type != null ? uc.challenge.type.name : 'Unknown'}">
                 <span th:case="'PERSONAL'">
                     <a th:if="${uc.status != 'COMPLETED'}"
                        th:href="@{'/challenge/progress/' + ${uc.id}}">📅 View Progress</a>

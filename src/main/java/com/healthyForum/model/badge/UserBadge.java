@@ -16,7 +16,7 @@ public class UserBadge {
 
     @ManyToOne
     @MapsId("userId") // 👈 maps to id.userId
-    @JoinColumn(name = "userID", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @ManyToOne

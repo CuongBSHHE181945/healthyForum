@@ -13,13 +13,13 @@ import java.util.List;
 public interface MessageRepository extends JpaRepository<Message, Long> {
 
     @Query("SELECT m FROM Message m WHERE " +
-            "(m.sender.userID = :user1 AND m.receiver.userID = :user2) OR " +
-            "(m.sender.userID = :user2 AND m.receiver.userID = :user1) " +
+            "(m.sender.id = :user1 AND m.receiver.id = :user2) OR " +
+            "(m.sender.id = :user2 AND m.receiver.id = :user1) " +
             "ORDER BY m.timestamp ASC")
     List<Message> getConversation(@Param("user1") Long user1Id,
                                   @Param("user2") Long user2Id);
 
-    @Query("SELECT COUNT(m) FROM Message m WHERE m.receiver.userID = :receiverId AND m.isRead = false")
+    @Query("SELECT COUNT(m) FROM Message m WHERE m.receiver.id = :receiverId AND m.isRead = false")
     long countUnreadMessages(@Param("receiverId") Long receiverId);
 
     @Modifying

@@ -10,7 +10,7 @@ import java.io.Serializable;
 @Data
 //Serializable 	A marker interface to allow object → byte stream
 public class UserBadgeId implements Serializable {
-    @Column(name = "userID")
+    @Column(name = "user_id")
     private Long userId;
 
     @Column(name = "badge_id")
