@@ -88,7 +88,7 @@ public class ChallengeService {
     }
 
     public List<Integer> getBadgeEarnedChallengeIds(User user) {
-        return userBadgeRepository.findChallengeIdsByUserId(user.getId());
+        return userBadgeRepository.findChallengeIdsByUserId(user.getUserID());
     }
 
     public void createChallengeWithBadge(Challenge challenge, Badge badge) {

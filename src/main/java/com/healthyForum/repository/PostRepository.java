@@ -9,9 +9,9 @@ import java.util.List;
 public interface PostRepository extends JpaRepository<Post, Long> {
     List<Post> findVisibleByVisibility(Visibility visibility);
 
-    List<Post> findByUserId(Long userId);
+    List<Post> findByUserUsername(String username);
 
-    List<Post> findByUserIdAndIsDraftTrue(Long userId);
+    List<Post> findByUserUsernameAndIsDraftTrue(String username);
 
     List<Post> findByIsDraftFalseAndVisibilityAndBannedFalse(Visibility visibility);
 

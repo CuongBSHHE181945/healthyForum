@@ -1,23 +1,16 @@
 package com.healthyForum.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Entity
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Table(name = "sleep_entries")
 public class SleepEntry {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "sleep_id")
-    private Long id;
+    private Long sleepId;
 
     @Column(nullable = false)
     private LocalDate date;
@@ -34,31 +27,80 @@ public class SleepEntry {
     @Column(length = 255)
     private String notes;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    // 🔗 Link to User
+    @ManyToOne
+    @JoinColumn(name = "userID", nullable = false)
     private User user;
 
-    // Helper methods
-    public long getSleepDurationInMinutes() {
-        if (startTime != null && endTime != null) {
-            long startMinutes = startTime.toSecondOfDay() / 60;
-            long endMinutes = endTime.toSecondOfDay() / 60;
-            
-            if (endMinutes < startMinutes) {
-                // Sleep spans midnight
-                endMinutes += 24 * 60;
-            }
-            
-            return endMinutes - startMinutes;
-        }
-        return 0;
+    public SleepEntry() {
     }
 
-    public double getSleepDurationInHours() {
-        return getSleepDurationInMinutes() / 60.0;
+    public SleepEntry(Long sleepId, LocalDate date, LocalTime startTime, LocalTime endTime, int quality, String notes, User user) {
+        this.sleepId = sleepId;
+        this.date = date;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.quality = quality;
+        this.notes = notes;
+        this.user = user;
     }
 
-    public boolean isGoodSleep() {
-        return quality >= 7;
+    // Getters and setters...
+
+
+    public int getQuality() {
+        return quality;
+    }
+
+    public void setQuality(int quality) {
+        this.quality = quality;
+    }
+
+    public Long getSleepId() {
+        return sleepId;
+    }
+
+    public void setSleepId(Long sleepId) {
+        this.sleepId = sleepId;
+    }
+
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
+
+    public LocalTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public LocalTime getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(LocalTime endTime) {
+        this.endTime = endTime;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

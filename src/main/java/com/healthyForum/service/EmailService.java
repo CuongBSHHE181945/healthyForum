@@ -1,7 +1,6 @@
 package com.healthyForum.service;
 
 import com.healthyForum.model.User;
-import com.healthyForum.model.UserAccount;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -20,13 +19,6 @@ public class EmailService {
     }
 
     public void sendVerificationEmail(User user, HttpServletRequest request) throws MessagingException, UnsupportedEncodingException {
-        if (user.getAccount() == null) {
-            throw new IllegalStateException("User account is null. Cannot send verification email.");
-        }
-        sendVerificationEmail(user, user.getAccount(), request);
-    }
-
-    public void sendVerificationEmail(User user, UserAccount account, HttpServletRequest request) throws MessagingException, UnsupportedEncodingException {
         String toAddress = user.getEmail();
         String fromAddress = "your-email@gmail.com"; // Should be the same as in application.properties
         String senderName = "Healthy Forum";
@@ -34,7 +26,7 @@ public class EmailService {
 
         // Construct the verification URL
         String siteURL = request.getRequestURL().toString().replace(request.getServletPath(), "");
-        String verifyURL = siteURL + "/verify?code=" + account.getVerificationCode();
+        String verifyURL = siteURL + "/verify?code=" + user.getVerificationCode();
 
         String content = "Dear [[name]],<br>"
                 + "Please click the link below to verify your registration:<br>"
@@ -42,7 +34,7 @@ public class EmailService {
                 + "Thank you,<br>"
                 + "Healthy Forum.";
 
-        content = content.replace("[[name]]", user.getFullName());
+        content = content.replace("[[name]]", user.getFullname());
         content = content.replace("[[URL]]", verifyURL);
 
         MimeMessage message = mailSender.createMimeMessage();
@@ -69,7 +61,7 @@ public class EmailService {
                 + "Thank you,<br>"
                 + "Healthy Forum.";
 
-        content = content.replace("[[name]]", user.getFullName());
+        content = content.replace("[[name]]", user.getFullname());
         content = content.replace("[[URL]]", resetLink);
 
         MimeMessage message = mailSender.createMimeMessage();

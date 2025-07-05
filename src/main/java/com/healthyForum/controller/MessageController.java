@@ -45,7 +45,7 @@ public class MessageController {
         User sender = userRepository.findByEmail("alice@example.com")
                 .orElseThrow(() -> new RuntimeException("Fake user not found"));
 
-        User receiver = userRepository.findById(message.getReceiver().getId())
+        User receiver = userRepository.findById(message.getReceiver().getUserID())
                 .orElseThrow(() -> new RuntimeException("Receiver not found"));
 
         message.setSender(sender);

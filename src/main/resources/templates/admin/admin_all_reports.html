@@ -94,7 +94,7 @@
 
         <p class="mb-2">
           <strong>Người báo cáo:</strong>
-          <span th:text="${report.reporter.getFullName()}">Người báo cáo</span>
+          <span th:text="${report.reporter.getFullname()}">Người báo cáo</span>
         </p>
 
         <p class="mb-2" th:if="${report.reportedPost != null}">
@@ -111,7 +111,7 @@
 
         <p class="mb-2" th:if="${report.reportedUser != null}">
           <strong>Người dùng bị báo cáo:</strong>
-          <span th:text="${report.getReportedUser().getFullName()}">Người dùng</span>
+          <span th:text="${report.getReportedUser().getFullname()}">Người dùng</span>
         </p>
 
         <p class="mb-2">

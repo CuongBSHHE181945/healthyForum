@@ -24,7 +24,7 @@ public class HealthAssessmentService {
 
 
     public List<HealthAssessment> getUserAssessments(Long userID) {
-        return assessmentRepository.findByUser_IdOrderByAssessmentDateDesc(userID);
+        return assessmentRepository.findByUser_UserIDOrderByAssessmentDateDesc(userID);
     }
 
 

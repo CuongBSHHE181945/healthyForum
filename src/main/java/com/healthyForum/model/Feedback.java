@@ -11,7 +11,7 @@ public class Feedback {
     private Long id;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "userID", nullable = false)
     private User user;
 
     @Column(columnDefinition = "TEXT", nullable = false)

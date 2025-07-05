@@ -1,14 +1,11 @@
 package com.healthyForum.controller.badge;
 
 import com.healthyForum.model.User;
-import com.healthyForum.model.UserAccount;
 import com.healthyForum.model.badge.UserBadge;
 import com.healthyForum.repository.UserRepository;
-import com.healthyForum.repository.UserAccountRepository;
 import com.healthyForum.service.badge.BadgeService;
 import com.healthyForum.service.badge.UserBadgeService;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,25 +22,20 @@ import java.util.List;
 @RequestMapping("/badge-display")
 public class BadgeDisplayController {
     private final UserRepository userRepository;
-    private final UserAccountRepository userAccountRepository;
     private final BadgeService badgeService;
     private final UserBadgeService userBadgeService;
 
-    public BadgeDisplayController(UserRepository userRepository, UserAccountRepository userAccountRepository, BadgeService badgeService, UserBadgeService userBadgeService) {
+    public BadgeDisplayController(UserRepository userRepository, BadgeService badgeService, UserBadgeService userBadgeService) {
         this.userRepository = userRepository;
-        this.userAccountRepository = userAccountRepository;
         this.badgeService = badgeService;
         this.userBadgeService = userBadgeService;
     }
 
     @GetMapping
     public String badgeDisplaySetting(Model model, Principal principal) {
-        User user = getCurrentUser(principal);
-        if (user == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
-        }
-        
-        List<UserBadge> userBadges = userBadgeService.getAllUnlockedByUser(user.getId());
+        User user = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));;
+        List<UserBadge> userBadges = userBadgeService.getAllUnlockedByUser(user.getUserID());
 
         model.addAttribute("userBadges", userBadges);
         return "profile/badge-display"; // badge_display_setting.html
@@ -53,46 +45,10 @@ public class BadgeDisplayController {
     public String updateDisplayedBadges(@RequestParam(required = false) List<Integer> displayedBadgeIds,
                                         Principal principal,
                                         RedirectAttributes redirectAttributes) {
-        User user = getCurrentUser(principal);
-        if (user == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
-        }
-        
-        userBadgeService.updateDisplayedBadges(user.getId(), displayedBadgeIds);
+        User user = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));;
+        userBadgeService.updateDisplayedBadges(user.getUserID(), displayedBadgeIds);
         redirectAttributes.addFlashAttribute("success", "Badge display updated!");
         return "redirect:/profile";
-    }
-
-    /**
-     * Helper method to get current user from Principal (handles both local and OAuth authentication)
-     */
-    private User getCurrentUser(Principal principal) {
-        if (principal == null) {
-            return null;
-        }
-
-        String principalName = principal.getName();
-        
-        // Try to find by username first using UserAccountRepository
-        UserAccount account = userAccountRepository.findByUsername(principalName).orElse(null);
-        if (account != null) {
-            return account.getUser();
-        }
-
-        // Try to find by email (for OAuth authentication)
-        User user = userRepository.findByEmail(principalName).orElse(null);
-        if (user != null) {
-            return user;
-        }
-
-        // If principal is OAuth2User, try to get email and find by email
-        if (principal instanceof OAuth2User oauth2User) {
-            String email = oauth2User.getAttribute("email");
-            if (email != null) {
-                return userRepository.findByEmail(email).orElse(null);
-            }
-        }
-
-        return null;
     }
 }

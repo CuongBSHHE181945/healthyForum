@@ -1,16 +1,13 @@
 package com.healthyForum.controller.challenge;
 
 import com.healthyForum.model.User;
-import com.healthyForum.model.UserAccount;
 import com.healthyForum.model.challenge.UserChallenge;
 import com.healthyForum.model.challenge.UserChallengeProgress;
-import com.healthyForum.repository.UserAccountRepository;
 import com.healthyForum.repository.UserRepository;
 import com.healthyForum.repository.challenge.UserChallengeRepository;
 import com.healthyForum.service.challenge.ChallengeService;
 import com.healthyForum.service.challenge.ChallengeTrackingService;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,23 +27,20 @@ public class TickController {
     private final UserChallengeRepository userChallengeRepo;
     private final ChallengeService challengeService;
     private final UserRepository userRepository;
-    private final UserAccountRepository userAccountRepository;
 
-    public TickController(ChallengeTrackingService challengeTrackingService, UserChallengeRepository userChallengeRepo, ChallengeService challengeService, UserRepository userRepository, UserAccountRepository userAccountRepository) {
+    public TickController(ChallengeTrackingService challengeTrackingService, UserChallengeRepository userChallengeRepo, ChallengeService challengeService, UserRepository userRepository) {
         this.challengeTrackingService = challengeTrackingService;
         this.userChallengeRepo = userChallengeRepo;
         this.challengeService = challengeService;
         this.userRepository = userRepository;
-        this.userAccountRepository = userAccountRepository;
     }
 
     @PostMapping("/tick/{id}")
     public String tickToday(@PathVariable("id") int userChallengeId, RedirectAttributes redirectAttributes,
                             Principal principal) {
-        User user = getCurrentUser(principal);
-        if (user == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
-        }
+        User user = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
 
         boolean success = challengeTrackingService.tickProgress(userChallengeId);
         if (!success) {
@@ -79,38 +73,5 @@ public class TickController {
         model.addAttribute("total", total);
         model.addAttribute("target", target);
         return "challenge/progress";
-    }
-
-    /**
-     * Helper method to get current user from Principal (handles both local and OAuth authentication)
-     */
-    private User getCurrentUser(Principal principal) {
-        if (principal == null) {
-            return null;
-        }
-
-        String principalName = principal.getName();
-        
-        // Try to find by username first using UserAccountRepository
-        UserAccount account = userAccountRepository.findByUsername(principalName).orElse(null);
-        if (account != null) {
-            return account.getUser();
-        }
-
-        // Try to find by email (for OAuth authentication)
-        User user = userRepository.findByEmail(principalName).orElse(null);
-        if (user != null) {
-            return user;
-        }
-
-        // If principal is OAuth2User, try to get email and find by email
-        if (principal instanceof OAuth2User oauth2User) {
-            String email = oauth2User.getAttribute("email");
-            if (email != null) {
-                return userRepository.findByEmail(email).orElse(null);
-            }
-        }
-
-        return null;
     }
 }

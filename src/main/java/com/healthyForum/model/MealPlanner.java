@@ -47,6 +47,6 @@ public class MealPlanner  {
 
     // 🔗 Link to User
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "userID", nullable = false)
     private User user;
 }

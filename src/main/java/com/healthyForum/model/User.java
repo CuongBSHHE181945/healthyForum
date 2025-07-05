@@ -2,25 +2,28 @@ package com.healthyForum.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 @Entity
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Table(name = "user")
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "userID")
+    private Long userID;
+
+    @Column(nullable = false, unique = true)
+    private String username;
+
+    @Column(nullable = true)
+    private String password;
 
     @Column(nullable = false)
-    private String fullName;
+    private String fullname;
 
     @Column(nullable = false, unique = true)
     private String email;
@@ -34,56 +37,186 @@ public class User {
     @Column(nullable = true)
     private String address;
 
-    // Health-related fields from HealthAssessment
-    @Column(nullable = true)
-    private Integer age;
+    @Column(name = "provider", nullable = false)
+    private String provider;
 
-    @Column(nullable = true)
-    private Double height;
+    @Column(name = "suspended", nullable = false)
+    private boolean suspended = false; // Set default value
 
-    @Column(nullable = true)
-    private Double weight;
+    @Column(name = "verification_code", length = 64)
+    private String verificationCode;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @Column(name = "enabled")
+    private boolean enabled = false;
+
+    @ManyToOne
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Column(name = "reset_password_token", length = 64)
+    private String resetPasswordToken;
+
+    @Column(name = "reset_token_expiry")
+    private java.time.LocalDateTime resetTokenExpiry;
+
+    @Column(name = "google_id", unique = true)
+    private String googleId;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Post> posts;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private UserAccount account;
-
-    // Helper methods
-    public int calculateAge() {
-        if (dob != null) {
-            LocalDate today = LocalDate.now();
-            int calculatedAge = today.getYear() - dob.getYear();
-            
-            // Adjust if birthday hasn't occurred this year
-            if (today.getMonthValue() < dob.getMonthValue() || 
-                (today.getMonthValue() == dob.getMonthValue() && today.getDayOfMonth() < dob.getDayOfMonth())) {
-                calculatedAge--;
-            }
-            
-            return calculatedAge;
-        }
-        return age != null ? age : 0;
+    public User() {
     }
 
-    public boolean isAdult() {
-        return calculateAge() >= 18;
+    public User(Long userID, Role role, boolean suspended, String address, LocalDate dob, String gender, String email, String fullname, String password, String username, String provider, List<Post> posts) {
+        this.userID = userID;
+        this.role = role;
+        this.suspended = suspended;
+        this.address = address;
+        this.dob = dob;
+        this.gender = gender;
+        this.email = email;
+        this.fullname = fullname;
+        this.password = password;
+        this.username = username;
+        this.provider = provider;
+        this.enabled = false; // Default for new users
+        this.posts = posts;
     }
 
-    public String getDisplayName() {
-        return fullName != null ? fullName : (account != null ? account.getUsername() : "Unknown");
+    public Long getUserID() {
+        return userID;
     }
 
-    public boolean hasAccount() {
-        return account != null;
+    public void setUserID(Long userID) {
+        this.userID = userID;
     }
 
     public String getUsername() {
-        return account != null ? account.getUsername() : null;
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getFullname() {
+        return fullname;
+    }
+
+    public void setFullname(String fullname) {
+        this.fullname = fullname;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public LocalDate getDob() {
+        return dob;
+    }
+
+    public void setDob(LocalDate dob) {
+        this.dob = dob;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getProvider() {
+        return provider;
+    }
+
+    public void setProvider(String provider) {
+        this.provider = provider;
+    }
+
+    public boolean isSuspended() {
+        return suspended;
+    }
+
+    public void setSuspended(boolean suspended) {
+        this.suspended = suspended;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    public String getVerificationCode() {
+        return verificationCode;
+    }
+
+    public void setVerificationCode(String verificationCode) {
+        this.verificationCode = verificationCode;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public String getResetPasswordToken() {
+        return resetPasswordToken;
+    }
+
+    public void setResetPasswordToken(String resetPasswordToken) {
+        this.resetPasswordToken = resetPasswordToken;
+    }
+
+    public java.time.LocalDateTime getResetTokenExpiry() {
+        return resetTokenExpiry;
+    }
+
+    public void setResetTokenExpiry(java.time.LocalDateTime resetTokenExpiry) {
+        this.resetTokenExpiry = resetTokenExpiry;
+    }
+
+    public String getGoogleId() {
+        return googleId;
+    }
+
+    public void setGoogleId(String googleId) {
+        this.googleId = googleId;
+    }
+
+    public List<Post> getPosts() {
+        return posts;
+    }
+
+    public void setPosts(List<Post> posts) {
+        this.posts = posts;
     }
 }

@@ -2,9 +2,7 @@ package com.healthyForum.config;
 
 import com.healthyForum.config.CustomAuthenticationSuccessHandler;
 import com.healthyForum.repository.UserRepository;
-import com.healthyForum.repository.UserAccountRepository;
 import com.healthyForum.model.User;
-import com.healthyForum.model.UserAccount;
 import com.healthyForum.service.oauth.CustomOAuth2UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,111 +18,73 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import com.healthyForum.config.CustomAuthorizationRequestResolver;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
-import org.springframework.security.oauth2.core.user.OAuth2User;
-import org.springframework.transaction.annotation.Transactional;
 
 @Configuration
-@EnableWebSecurity
 public class SecurityConfig {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
+    private final CustomOAuth2UserService customOAuth2UserService;
 
-    @Autowired
-    private UserAccountRepository userAccountRepository;
-
-    @Autowired
-    private CustomOAuth2UserService customOAuth2UserService;
-
-    @Autowired
-    private CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
+    public SecurityConfig(UserRepository userRepository,
+                          CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler,
+                          CustomOAuth2UserService customOAuth2UserService) {
+        this.userRepository = userRepository;
+        this.customAuthenticationSuccessHandler = customAuthenticationSuccessHandler;
+        this.customOAuth2UserService = customOAuth2UserService;
+    }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, ClientRegistrationRepository clientRegistrationRepository) throws Exception {
         http
-            .authorizeHttpRequests(authz -> authz
-                .requestMatchers("/css/**", "/js/**", "/images/**", "/assets/**", "/uploads/**").permitAll()
-                .requestMatchers("/register", "/login", "/forgot-password", "/reset-password", "/verify").permitAll()
-                .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
-                .requestMatchers("/admin/**").hasRole("ADMIN")
-                .anyRequest().authenticated()
-            )
-            .formLogin(form -> form
-                .loginPage("/login")
-                .defaultSuccessUrl("/", true)
-                .failureUrl("/login?error=true")
-                .permitAll()
-            )
-            .oauth2Login(oauth2 -> oauth2
-                .loginPage("/login")
-                .userInfoEndpoint(userInfo -> userInfo
-                    .userService(customOAuth2UserService)
+                .securityContext(context -> context.requireExplicitSave(false)) // allow auto save of security context
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/assets/**").permitAll() // Allow static resources
+                        .requestMatchers("/login","/verify","/register", "/forgot-password", "/reset-password").permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .anyRequest().authenticated()
                 )
-                .authorizationEndpoint(auth -> auth
-                    .authorizationRequestResolver(
-                        authorizationRequestResolver(
-                            http.getSharedObject(ClientRegistrationRepository.class)
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .successHandler(customAuthenticationSuccessHandler) // Sử dụng custom handler
+                        .failureUrl("/login?error=true")
+                        .permitAll()
+                )
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/login")
+                        .authorizationEndpoint(authorization -> authorization
+                            .authorizationRequestResolver(
+                                new CustomAuthorizationRequestResolver(
+                                    clientRegistrationRepository, "/oauth2/authorization"
+                                )
+                            )
                         )
-                    )
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOAuth2UserService)
+                        )
+                        .defaultSuccessUrl("/", true)
                 )
-                .successHandler(customAuthenticationSuccessHandler)
-            )
-            .logout(logout -> logout
-                .logoutSuccessUrl("/login?logout=true")
-                .permitAll()
-            )
-            .csrf(csrf -> csrf.disable());
+                //default logout by spring
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login")
+                );
 
         return http.build();
     }
 
     @Bean
-    public OAuth2AuthorizationRequestResolver authorizationRequestResolver(
-            ClientRegistrationRepository clientRegistrationRepository) {
-        return new CustomAuthorizationRequestResolver(clientRegistrationRepository, "/oauth2/authorization");
-    }
-
-    @Bean
-    @Transactional(readOnly = true)
     public UserDetailsService userDetailsService() {
-        return new UserDetailsService() {
-            @Override
-            @Transactional(readOnly = true)
-            public UserDetails loadUserByUsername(String usernameOrEmail) throws UsernameNotFoundException {
-                // Try to find by username first
-                UserAccount account = userAccountRepository.findByUsername(usernameOrEmail).orElse(null);
-                if (account == null) {
-                    // Try to find by email
-                    User user = userRepository.findByEmail(usernameOrEmail).orElse(null);
-                    if (user != null) {
-                        account = userAccountRepository.findByUserId(user.getId()).orElse(null);
-                    }
-                }
-                
-                if (account == null) {
-                    throw new UsernameNotFoundException("User not found: " + usernameOrEmail);
-                }
-
-                // Force loading of the user and role to avoid lazy loading issues
-                User user = account.getUser();
-                String roleName = user.getRole().getRoleName();
-
-                return org.springframework.security.core.userdetails.User.builder()
-                    .username(account.getUsername()) // Use username instead of email
-                    .password(account.getPassword())
-                    .disabled(!account.isEnabled())
-                    .accountExpired(false)
-                    .credentialsExpired(false)
-                    .accountLocked(account.isSuspended())
-                    .roles(roleName)
+        return usernameOrEmail -> {
+            User user = userRepository.findByUsername(usernameOrEmail)
+                    .or(() -> userRepository.findByEmail(usernameOrEmail))
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+            return org.springframework.security.core.userdetails.User
+                    .withUsername(user.getUsername())
+                    .password(user.getPassword()) // Already encoded
+                    .roles(user.getRole().getRoleName()) // Role name
+                    .disabled(!user.isEnabled())
                     .build();
-            }
         };
     }
 

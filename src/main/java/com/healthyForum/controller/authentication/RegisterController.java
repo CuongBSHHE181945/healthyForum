@@ -3,8 +3,6 @@ package com.healthyForum.controller.authentication;
 import com.healthyForum.model.*;
 import com.healthyForum.repository.RoleRepository;
 import com.healthyForum.repository.UserRepository;
-import com.healthyForum.repository.UserAccountRepository;
-import com.healthyForum.service.UserAccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -35,13 +33,6 @@ public class RegisterController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
-    
-    @Autowired
-    private UserAccountService userAccountService;
-    
-    @Autowired
-    private UserAccountRepository userAccountRepository;
-    
     //autowired to Spring's interface to call default authentication method
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -58,12 +49,8 @@ public class RegisterController {
     }
 
     @PostMapping
-    public String register(@ModelAttribute User user, 
-                          @RequestParam String password,
-                          @RequestParam String username,
-                          RedirectAttributes redirectAttributes, 
-                          HttpServletRequest request) {
-        if (userAccountRepository.findByUsername(username).isPresent()) {
+    public String register(@ModelAttribute User user, RedirectAttributes redirectAttributes, HttpServletRequest request) {
+        if (userRepository.findByUsername(user.getUsername()).isPresent()) {
             redirectAttributes.addFlashAttribute("registerErrMsg", "Username already exists");
             return "redirect:/register";
         }
@@ -73,7 +60,7 @@ public class RegisterController {
             return "redirect:/register";
         }
 
-        if (!user.getFullName().matches("^[A-Za-z\\s]+$")) {
+        if (!user.getFullname().matches("^[A-Za-z\\s]+$")) {
             redirectAttributes.addFlashAttribute("registerErrMsg", "Full name must contain only letters and spaces.");
             return "redirect:/register";
         }
@@ -81,24 +68,27 @@ public class RegisterController {
         Role userRole = roleRepository.findByRoleName("USER")
                 .orElseThrow(() -> new RuntimeException("Role 'USER' not found"));
         user.setRole(userRole);
+        user.setSuspended(false);
+        user.setProvider("local"); // For local registration
 
-        // Save the user first
-        User savedUser = userRepository.save(user);
+        // Encode password before saving
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-        // Create user account with verification code
+        // Generate verification code
         String verificationCode = UUID.randomUUID().toString();
-        UserAccount account = userAccountService.createLocalAccount(savedUser, username, password);
-        userAccountService.setVerificationCode(account, verificationCode);
+        user.setVerificationCode(verificationCode);
+        user.setEnabled(false); // Disable account until verified
 
-        logger.info("User {} saved successfully. Attempting to send verification email.", account.getUsername());
+        userRepository.save(user);
+        logger.info("User {} saved successfully. Attempting to send verification email.", user.getUsername());
 
         // Send verification email
         try {
-            emailService.sendVerificationEmail(savedUser, account, request);
-            logger.info("Verification email sent successfully to {}.", savedUser.getEmail());
+            emailService.sendVerificationEmail(user, request);
+            logger.info("Verification email sent successfully to {}.", user.getEmail());
         } catch (Exception e) {
             // Log the exception and show a generic error
-            logger.error("Error sending verification email for user {}", account.getUsername(), e);
+            logger.error("Error sending verification email for user {}", user.getUsername(), e);
             redirectAttributes.addFlashAttribute("registerErrMsg", "Error sending verification email. Please try again later.");
             return "redirect:/register";
         }

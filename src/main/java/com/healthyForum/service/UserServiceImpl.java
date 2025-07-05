@@ -1,9 +1,7 @@
 package com.healthyForum.service;
 
 import com.healthyForum.model.User;
-import com.healthyForum.model.UserAccount;
 import com.healthyForum.repository.UserRepository;
-import com.healthyForum.repository.UserAccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,9 +12,6 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
     @Autowired
     private UserRepository userRepository;
-    
-    @Autowired
-    private UserAccountRepository userAccountRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -30,18 +25,8 @@ public class UserServiceImpl implements UserService {
         try {
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
-            
-            UserAccount account = user.getAccount();
-            if (account == null) {
-                // Create account if it doesn't exist
-                account = new UserAccount();
-                account.setUser(user);
-                account.setProvider("local");
-                account.setEnabled(false);
-            }
-            
-            account.setSuspended(true);
-            userAccountRepository.save(account);
+            user.setSuspended(true);
+            userRepository.save(user);
         } catch (Exception e) {
             throw new RuntimeException("Error suspending user: " + e.getMessage());
         }
@@ -53,18 +38,8 @@ public class UserServiceImpl implements UserService {
         try {
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
-            
-            UserAccount account = user.getAccount();
-            if (account == null) {
-                // Create account if it doesn't exist
-                account = new UserAccount();
-                account.setUser(user);
-                account.setProvider("local");
-                account.setEnabled(false);
-            }
-            
-            account.setSuspended(false);
-            userAccountRepository.save(account);
+            user.setSuspended(false);
+            userRepository.save(user);
         } catch (Exception e) {
             throw new RuntimeException("Error unsuspending user: " + e.getMessage());
         }
