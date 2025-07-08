@@ -1,7 +1,9 @@
 package com.healthyForum.controller.authentication;
 
 import com.healthyForum.model.User;
+import com.healthyForum.model.UserAccount;
 import com.healthyForum.repository.UserRepository;
+import com.healthyForum.service.UserAccountService;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -18,33 +20,35 @@ import java.util.Optional;
 public class VerifyController {
 
     private final UserRepository userRepository;
+    private final UserAccountService userAccountService;
 
-    public VerifyController(UserRepository userRepository) {
+    public VerifyController(UserRepository userRepository, UserAccountService userAccountService) {
         this.userRepository = userRepository;
+        this.userAccountService = userAccountService;
     }
 
     @GetMapping("/verify")
     public String verifyAccount(@RequestParam("code") String code, RedirectAttributes redirectAttributes) {
-        Optional<User> userOptional = userRepository.findByVerificationCode(code);
+        Optional<UserAccount> accountOptional = userAccountService.findByVerificationCode(code);
 
-        if (userOptional.isPresent()) {
-            User user = userOptional.get();
-            if (user.isEnabled()) {
+        if (accountOptional.isPresent()) {
+            UserAccount account = accountOptional.get();
+            User user = account.getUser();
+            
+            if (account.isEnabled()) {
                 redirectAttributes.addFlashAttribute("verificationError", "Account has already been verified.");
                 return "redirect:/login";
             }
 
-            user.setEnabled(true);
-            user.setVerificationCode(null); // Clear the code after use
-            userRepository.save(user);
+            userAccountService.enableAccount(account);
 
             // Manually authenticate user
             Authentication auth = new UsernamePasswordAuthenticationToken(
-                    user.getUsername(), null, Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole().getRoleName())));
+                    account.getUsername(), null, Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole().getRoleName())));
             SecurityContextHolder.getContext().setAuthentication(auth);
 
             redirectAttributes.addFlashAttribute("verificationSuccess", "Your account has been successfully verified! You are now logged in.");
-            return "redirect:/home"; // Or a dedicated success page
+            return "redirect:/"; // Redirect to home page
         } else {
             redirectAttributes.addFlashAttribute("verificationError", "Invalid verification code.");
             return "redirect:/login";

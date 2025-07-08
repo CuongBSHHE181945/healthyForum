@@ -89,22 +89,22 @@
                         </thead>
                         <tbody>
                         <tr th:each="user : ${users}">
-                            <td th:text="${user.userID}"></td>
-                            <td th:text="${user.username}"></td>
-                            <td th:text="${user.fullname}"></td>
+                            <td th:text="${user.id}"></td>
+                            <td th:text="${user.account.username}"></td>
+                            <td th:text="${user.fullName}"></td>
                             <td th:text="${user.email}"></td>
                             <td th:text="${user.gender}"></td>
                             <td th:text="${#temporals.format(user.dob, 'dd/MM/yyyy')}"></td>
                             <td th:text="${user.address}"></td>
                             <td>
-                  <span th:class="'badge ' + (${user.suspended} ? 'bg-danger' : 'bg-success')"
-                        th:text="${user.suspended} ? 'Đã khóa' : 'Hoạt động'"></span>
+                  <span th:class="'badge ' + (${user.account.suspended} ? 'bg-danger' : 'bg-success')"
+                        th:text="${user.account.suspended} ? 'Đã khóa' : 'Hoạt động'"></span>
                             </td>
                             <td>
-                                <form th:if="${!user.suspended}" th:action="@{/admin/suspend/{id}(id=${user.userID})}" method="post" class="d-inline">
+                                <form th:if="${!user.account.suspended}" th:action="@{/admin/suspend/{id}(id=${user.id})}" method="post" class="d-inline">
                                     <button type="submit" class="btn btn-warning btn-sm">Khóa</button>
                                 </form>
-                                <form th:if="${user.suspended}" th:action="@{/admin/unsuspend/{id}(id=${user.userID})}" method="post" class="d-inline">
+                                <form th:if="${user.account.suspended}" th:action="@{/admin/unsuspend/{id}(id=${user.id})}" method="post" class="d-inline">
                                     <button type="submit" class="btn btn-success btn-sm">Mở khóa</button>
                                 </form>
                             </td>
