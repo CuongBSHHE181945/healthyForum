@@ -5,6 +5,7 @@ import com.healthyForum.model.MealPlanner;
 import com.healthyForum.model.User;
 import com.healthyForum.repository.MealRepository;
 import com.healthyForum.repository.UserRepository;
+import com.healthyForum.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -23,10 +24,12 @@ public class MealPlannerController {
 
     private final MealRepository mealPlannerRepository;
     private final UserRepository userRepository;
+    private final UserService userService;
 
-    public MealPlannerController(MealRepository mealPlannerRepository, UserRepository userRepository) {
+    public MealPlannerController(MealRepository mealPlannerRepository, UserRepository userRepository, UserService userService) {
         this.mealPlannerRepository = mealPlannerRepository;
         this.userRepository = userRepository;
+        this.userService = userService;
     }
 
     @GetMapping("")
@@ -35,7 +38,7 @@ public class MealPlannerController {
             return "redirect:/login";
         }
 
-        User user = getCurrentUser(principal);
+        User user = userService.getCurrentUser(principal);
         if (user == null) {
             return "redirect:/login";
         }
@@ -53,7 +56,7 @@ public class MealPlannerController {
             return "redirect:/login";
         }
 
-        User user = getCurrentUser(principal);
+        User user = userService.getCurrentUser(principal);
         if (user == null) {
             return "redirect:/login";
         }
@@ -72,7 +75,7 @@ public class MealPlannerController {
             return "redirect:/login";
         }
 
-        User user = getCurrentUser(principal);
+        User user = userService.getCurrentUser(principal);
         if (user == null) {
             return "redirect:/login";
         }
@@ -94,7 +97,7 @@ public class MealPlannerController {
             return "redirect:/login";
         }
 
-        User user = getCurrentUser(principal);
+        User user = userService.getCurrentUser(principal);
         if (user == null) {
             return "redirect:/login";
         }
@@ -120,7 +123,7 @@ public class MealPlannerController {
             return "redirect:/login";
         }
 
-        User user = getCurrentUser(principal);
+        User user = userService.getCurrentUser(principal);
         if (user == null) {
             return "redirect:/login";
         }
@@ -155,7 +158,7 @@ public class MealPlannerController {
             return "redirect:/login";
         }
 
-        User user = getCurrentUser(principal);
+        User user = userService.getCurrentUser(principal);
         if (user == null) {
             return "redirect:/login";
         }
@@ -183,44 +186,12 @@ public class MealPlannerController {
             return "No principal";
         }
 
-        User user = getCurrentUser(principal);
+        User user = userService.getCurrentUser(principal);
         if (user == null) {
             return "User not found";
         }
 
         return "User found: " + user.getEmail();
-    }
-
-    private User getCurrentUser(Principal principal) {
-        if (principal == null) {
-            return null;
-        }
-        // If principal is OAuth2User, try to get email and find by email
-        if (principal instanceof org.springframework.security.oauth2.core.user.OAuth2User oauth2User) {
-            String email = oauth2User.getAttribute("email");
-            if (email != null) {
-                return userRepository.findByEmail(email).orElse(null);
-            }
-            String googleId = oauth2User.getName();
-            if (googleId != null) {
-                // If you have a UserAccountRepository, you can look up by Google ID
-                // UserAccount account = userAccountRepository.findByGoogleId(googleId).orElse(null);
-                // if (account != null) return account.getUser();
-            }
-        }
-        String principalName = principal.getName();
-        // Try to find by email
-        User user = userRepository.findByEmail(principalName).orElse(null);
-        if (user != null) {
-            return user;
-        }
-        // Try to find by username or Google ID if you have a UserAccountRepository
-        // UserAccount account = userAccountRepository.findByUsername(principalName)
-        //         .orElseGet(() -> userAccountRepository.findByGoogleId(principalName).orElse(null));
-        // if (account != null) {
-        //     return account.getUser();
-        // }
-        return null;
     }
 
 }

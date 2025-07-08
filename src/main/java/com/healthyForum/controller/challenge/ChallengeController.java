@@ -6,6 +6,7 @@ import com.healthyForum.model.challenge.Challenge;
 import com.healthyForum.model.challenge.UserChallenge;
 import com.healthyForum.repository.UserAccountRepository;
 import com.healthyForum.repository.UserRepository;
+import com.healthyForum.service.UserService;
 import com.healthyForum.service.challenge.ChallengeService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -29,18 +30,20 @@ public class ChallengeController {
     private final ChallengeService challengeService;
     private final UserRepository userRepository;
     private final UserAccountRepository userAccountRepository;
+    private final UserService userService;
 
-    public ChallengeController(ChallengeService challengeService, UserRepository userRepository, UserAccountRepository userAccountRepository) {
+    public ChallengeController(ChallengeService challengeService, UserRepository userRepository, UserAccountRepository userAccountRepository, UserService userService) {
         this.challengeService = challengeService;
         this.userRepository = userRepository;
         this.userAccountRepository = userAccountRepository;
+        this.userService = userService;
     }
 
     @GetMapping
     public String showChallengeList(Model model, Principal principal) {
-        User user = getCurrentUser(principal);
+        User user = userService.getCurrentUser(principal);
         if (user == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+            return "redirect:/login";
         }
         
         List<Challenge> allChallenges = challengeService.getAllChallenges();
@@ -55,9 +58,9 @@ public class ChallengeController {
 
     @GetMapping("/my")
     public String showMyChallenges(Model model, Principal principal) {
-        User user = getCurrentUser(principal);
+        User user = userService.getCurrentUser(principal);
         if (user == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+            return "redirect:/login";
         }
         
         List<UserChallenge> active = challengeService.getActiveChallengesForUser(user);
@@ -67,9 +70,9 @@ public class ChallengeController {
 
     @GetMapping("/{id}")
     public String showChallengeDetail(@PathVariable int id, Model model, Principal principal) {
-        User user = getCurrentUser(principal);
+        User user = userService.getCurrentUser(principal);
         if (user == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+            return "redirect:/login";
         }
         
         Challenge challenge = challengeService.getChallengeById(id)
@@ -82,9 +85,9 @@ public class ChallengeController {
 
     @PostMapping("/join/{id}")
     public String joinChallenge(@PathVariable int id, Principal principal, RedirectAttributes redirectAttributes) {
-        User user = getCurrentUser(principal);
+        User user = userService.getCurrentUser(principal);
         if (user == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+            return "redirect:/login";
         }
         
         challengeService.joinChallenge(user, id);
@@ -95,38 +98,6 @@ public class ChallengeController {
             redirectAttributes.addFlashAttribute("success", "Challenge joined successfully!");
         }
         return "redirect:/challenge";
-    }
-
-    /**
-     * Helper method to get current user from Principal (handles both local and OAuth authentication)
-     */
-    private User getCurrentUser(Principal principal) {
-        if (principal == null) {
-            return null;
-        }
-        // If principal is OAuth2User, try to get email and find by email
-        if (principal instanceof org.springframework.security.oauth2.core.user.OAuth2User oauth2User) {
-            String email = oauth2User.getAttribute("email");
-            if (email != null) {
-                return userRepository.findByEmail(email).orElse(null);
-            }
-            String googleId = oauth2User.getName();
-            if (googleId != null) {
-                UserAccount account = userAccountRepository.findByGoogleId(googleId).orElse(null);
-                if (account != null) return account.getUser();
-            }
-        }
-        String principalName = principal.getName();
-        UserAccount account = userAccountRepository.findByUsername(principalName)
-                .orElseGet(() -> userAccountRepository.findByGoogleId(principalName).orElse(null));
-        if (account != null) {
-            return account.getUser();
-        }
-        User user = userRepository.findByEmail(principalName).orElse(null);
-        if (user != null) {
-            return user;
-        }
-        return null;
     }
 }
 

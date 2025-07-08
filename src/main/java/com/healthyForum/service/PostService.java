@@ -8,6 +8,7 @@ import com.healthyForum.repository.PostRepository;
 import com.healthyForum.repository.UserRepository;
 import com.healthyForum.repository.UserAccountRepository;
 import com.healthyForum.repository.keywordFiltering.KeywordRepository;
+import com.healthyForum.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -32,9 +33,12 @@ public class PostService {
     @Autowired
     private KeywordRepository keywordRepository;
 
+    @Autowired
+    private UserService userService;
+
     // Save a post (new or edited) with user from Principal
     public void savePost(Post post, Principal principal) {
-        User user = getCurrentUser(principal);
+        User user = userService.getCurrentUser(principal);
         if (user == null) {
             throw new RuntimeException("User not found");
         }
@@ -66,7 +70,7 @@ public class PostService {
     // Check if current user owns the post
     public boolean isOwner(Post post, Principal principal) {
         if (post == null) return false;
-        User currentUser = getCurrentUser(principal);
+        User currentUser = userService.getCurrentUser(principal);
         return currentUser != null && post.getUser().getId().equals(currentUser.getId());
     }
 
@@ -77,7 +81,7 @@ public class PostService {
 
     // List all posts by current user (my posts)
     public List<Post> getPostsByCurrentUser(Principal principal) {
-        User currentUser = getCurrentUser(principal);
+        User currentUser = userService.getCurrentUser(principal);
         if (currentUser == null) {
             return List.of(); // Return empty list if user not found
         }
@@ -143,46 +147,6 @@ public class PostService {
             return true;
         }
         return false;
-    }
-
-    /**
-     * Helper method to get current user from Principal (handles both local and OAuth authentication)
-     */
-    private User getCurrentUser(Principal principal) {
-        if (principal == null) {
-            return null;
-        }
-
-        // If principal is OAuth2User, try to get email and find by email
-        if (principal instanceof OAuth2User oauth2User) {
-            String email = oauth2User.getAttribute("email");
-            if (email != null) {
-                return userRepository.findByEmail(email).orElse(null);
-            }
-            // fallback to googleId if needed
-            String googleId = oauth2User.getName();
-            if (googleId != null) {
-                UserAccount account = userAccountRepository.findByGoogleId(googleId).orElse(null);
-                if (account != null) return account.getUser();
-            }
-        }
-
-        String principalName = principal.getName();
-
-        // Try to find by username first (for local authentication)
-        UserAccount account = userAccountRepository.findByUsername(principalName)
-                .orElseGet(() -> userAccountRepository.findByGoogleId(principalName).orElse(null));
-        if (account != null) {
-            return account.getUser();
-        }
-
-        // Try to find by email
-        User user = userRepository.findByEmail(principalName).orElse(null);
-        if (user != null) {
-            return user;
-        }
-
-        return null;
     }
 }
 
