@@ -48,7 +48,25 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
             userAccountRepository.save(account);
         }
         
-        // Redirect to home page
-        response.sendRedirect("/");
+        // Kiểm tra role và trạng thái
+        String roleName = account.getUser().getRole().getRoleName();
+        if ("ADMIN".equals(roleName)) {
+            // Nếu là admin, chuyển đến trang admin
+            response.sendRedirect("/admin");
+        } else if ("USER".equals(roleName)) {
+            // Nếu là user, kiểm tra trạng thái suspended
+            if (account.isSuspended()) {
+                // User bị cấm - logout và redirect với message
+                request.getSession().invalidate();
+                response.sendRedirect("/login?suspended=true");
+                return;
+            } else {
+                // User hoạt động bình thường - chuyển đến home
+                response.sendRedirect("/home");
+            }
+        } else {
+            // Role không hợp lệ
+            response.sendRedirect("/login?error=invalid_role");
+        }
     }
 }
