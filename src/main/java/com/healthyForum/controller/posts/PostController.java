@@ -3,16 +3,18 @@ package com.healthyForum.controller.posts;
 import com.healthyForum.model.Post;
 import com.healthyForum.model.Report;
 import com.healthyForum.model.User;
+import com.healthyForum.model.UserAccount;
 import com.healthyForum.model.Enum.Visibility;
-import com.healthyForum.repository.ReportRepository;
-import com.healthyForum.service.PostService;
-import com.healthyForum.repository.UserRepository;
 import com.healthyForum.repository.PostRepository;
+import com.healthyForum.repository.UserAccountRepository;
+import com.healthyForum.repository.UserRepository;
+import com.healthyForum.service.PostService;
 import com.healthyForum.service.ReportService;
-import com.healthyForum.service.UserServiceImpl;
+import com.healthyForum.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -27,17 +29,27 @@ import java.util.Optional;
 @RequestMapping("/posts")
 public class PostController {
 
-    @Autowired
-    private PostService postService;
+    private final PostService postService;
+
+    private final UserRepository userRepository;
+
+    private final PostRepository postRepository;
+
+    private final ReportService reportService;
+
+    private final UserAccountRepository userAccountRepository;
+
+    private final UserService userService;
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private PostRepository postRepository;
-
-    @Autowired
-    private ReportService reportService;
+    public PostController(PostService postService, UserRepository userRepository, PostRepository postRepository, ReportService reportService, UserAccountRepository userAccountRepository, UserService userService) {
+        this.postService = postService;
+        this.userRepository = userRepository;
+        this.postRepository = postRepository;
+        this.reportService = reportService;
+        this.userAccountRepository = userAccountRepository;
+        this.userService = userService;
+    }
 
     /**
      * List all public, non-banned posts
@@ -60,7 +72,12 @@ public class PostController {
     //drafts
     @GetMapping("/drafts")
     public String showUserDrafts(Model model, Principal principal) {
-        List<Post> drafts = postService.getDrafts(principal.getName());
+        User currentUser = userService.getCurrentUser(principal);
+        if (currentUser == null) {
+            System.out.println("[WARN] showUserDrafts: Unauthenticated access attempt, redirecting to login.");
+            return "redirect:/login";
+        }
+        List<Post> drafts = postService.getDrafts(currentUser.getId());
         model.addAttribute("drafts", drafts);
         return "posts/drafts";
     }
@@ -88,10 +105,6 @@ public class PostController {
         redirectAttributes.addFlashAttribute("success", "Post created successfully!");
         return "redirect:/posts";
     }
-
-
-
-
 
     /**
      * Show form to edit a post
@@ -130,7 +143,7 @@ public class PostController {
         }
         model.addAttribute("post", post);
         model.addAttribute("visibilityOptions", Visibility.values());
-        return "posts/draft_form";
+        return "posts/post_form";
     }
 
     @PostMapping("/{id}/draft-edit")
@@ -138,7 +151,7 @@ public class PostController {
         Post existingPost = postService.getPostById(id);
         if (existingPost == null || !postService.isOwner(existingPost, principal)) {
             redirectAttributes.addFlashAttribute("error", "You do not have permission to update this post.");
-            return "redirect:/posts/drafts";
+            return "redirect:/posts";
         }
 
         postService.updatePost(existingPost, updatedPost);
@@ -162,19 +175,20 @@ public class PostController {
 
     @PostMapping("/{id}/report")
     public String reportPost(@PathVariable Long id, @RequestParam String reason,
-                             @AuthenticationPrincipal UserDetails userDetails,
+                             @AuthenticationPrincipal Object authPrincipal,
                              RedirectAttributes redirectAttributes) {
         Post post = postService.getPostById(id);
-        User currentUser = userRepository.findByUsername(userDetails.getUsername()).orElse(null);
-        // The user who created the post
-        User reportedUser = post.getUser();
-
+        User currentUser = userService.getCurrentUser(authPrincipal);
+        
         if (currentUser == null) {
             return "redirect:/login";
         }
 
+        // The user who created the post
+        User reportedUser = post.getUser();
+
         // Don't allow users to report their own posts
-        if (reportedUser.getUserID().equals(currentUser.getUserID())) {
+        if (reportedUser.getId().equals(currentUser.getId())) {
             redirectAttributes.addFlashAttribute("error", "Bạn không thể báo cáo bài viết của chính mình");
             return "redirect:/posts/" + id;
         }
@@ -184,12 +198,9 @@ public class PostController {
         return "redirect:/posts/" + id;
     }
 
-
-
-
     @GetMapping("/my-reports")
-    public String getMyReports(Model model, @AuthenticationPrincipal UserDetails userDetails) {
-        User currentUser = userRepository.findByUsername(userDetails.getUsername()).orElse(null);
+    public String getMyReports(Model model, @AuthenticationPrincipal Object authPrincipal) {
+        User currentUser = userService.getCurrentUser(authPrincipal);
         if (currentUser == null) {
             return "redirect:/login";
         }
@@ -198,7 +209,6 @@ public class PostController {
         model.addAttribute("reports", reports);
         return "post/my-reports";
     }
-
 
     /**
      * View details of a post
@@ -217,6 +227,4 @@ public class PostController {
         model.addAttribute("isOwner", isOwner);
         return "posts/post_detail";
     }
-
-
 }
