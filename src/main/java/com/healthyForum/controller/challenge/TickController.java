@@ -1,17 +1,13 @@
 package com.healthyForum.controller.challenge;
 
 import com.healthyForum.model.User;
-import com.healthyForum.model.UserAccount;
 import com.healthyForum.model.challenge.UserChallenge;
 import com.healthyForum.model.challenge.UserChallengeProgress;
-import com.healthyForum.repository.UserAccountRepository;
 import com.healthyForum.repository.UserRepository;
 import com.healthyForum.repository.challenge.UserChallengeRepository;
 import com.healthyForum.service.challenge.ChallengeService;
 import com.healthyForum.service.challenge.ChallengeTrackingService;
-import com.healthyForum.service.UserService;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,25 +27,20 @@ public class TickController {
     private final UserChallengeRepository userChallengeRepo;
     private final ChallengeService challengeService;
     private final UserRepository userRepository;
-    private final UserAccountRepository userAccountRepository;
-    private final UserService userService;
 
-    public TickController(ChallengeTrackingService challengeTrackingService, UserChallengeRepository userChallengeRepo, ChallengeService challengeService, UserRepository userRepository, UserAccountRepository userAccountRepository, UserService userService) {
+    public TickController(ChallengeTrackingService challengeTrackingService, UserChallengeRepository userChallengeRepo, ChallengeService challengeService, UserRepository userRepository) {
         this.challengeTrackingService = challengeTrackingService;
         this.userChallengeRepo = userChallengeRepo;
         this.challengeService = challengeService;
         this.userRepository = userRepository;
-        this.userAccountRepository = userAccountRepository;
-        this.userService = userService;
     }
 
     @PostMapping("/tick/{id}")
     public String tickToday(@PathVariable("id") int userChallengeId, RedirectAttributes redirectAttributes,
                             Principal principal) {
-        User user = userService.getCurrentUser(principal);
-        if (user == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
-        }
+        User user = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
 
         boolean success = challengeTrackingService.tickProgress(userChallengeId);
         if (!success) {
