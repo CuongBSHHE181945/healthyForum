@@ -3,10 +3,8 @@ package com.healthyForum.controller;
 
 import com.healthyForum.model.SleepEntry;
 import com.healthyForum.model.User;
-import com.healthyForum.model.UserAccount;
 import com.healthyForum.repository.SleepRepository;
 import com.healthyForum.repository.UserRepository;
-import com.healthyForum.repository.UserAccountRepository;
 import com.healthyForum.util.DateValidate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,7 +13,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -33,12 +30,10 @@ import java.util.List;
 public class SleepController {
     private final SleepRepository sleepRepository;
     private final UserRepository userRepository;
-    private final UserAccountRepository userAccountRepository;
 
-    public SleepController(SleepRepository sleepEntryRepository, UserRepository userRepository, UserAccountRepository userAccountRepository) {
+    public SleepController(SleepRepository sleepEntryRepository, UserRepository userRepository) {
         this.sleepRepository = sleepEntryRepository;
         this.userRepository = userRepository;
-        this.userAccountRepository = userAccountRepository;
     }
 
     @GetMapping("/list")
@@ -51,10 +46,8 @@ public class SleepController {
             Pageable pageable,
             Principal principal
     ) {
-        User user = getCurrentUser(principal);
-        if (user == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
-        }
+        User user = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         Sort.Direction direction = dir.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
         Sort sortObj = Sort.by(direction, sort);
@@ -79,10 +72,8 @@ public class SleepController {
     //test mapping
     @GetMapping("/list-json")
     public ResponseEntity<List<SleepEntry>> getSleepEntriesJson(Pageable pageable, Principal principal) {
-        User user = getCurrentUser(principal);
-        if (user == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
-        }
+        User user = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         Page<SleepEntry> page = sleepRepository.findByUser(user,
                 PageRequest.of(
@@ -95,10 +86,8 @@ public class SleepController {
 
     @GetMapping("/form")
     public String showSleepEntryForm(Model model, Principal principal) {
-        User user = getCurrentUser(principal);
-        if (user == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
-        }
+        User user = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         SleepEntry sleepEntry = new SleepEntry();
 //        sleepEntry.setUser(user);
@@ -120,10 +109,8 @@ public class SleepController {
                                                  UriComponentsBuilder ucb,
                                                  Principal principal) {
         // Find the logged-in user
-        User user = getCurrentUser(principal);
-        if (user == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
-        }
+        User user = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         // Create a new SleepEntry with the user attached
         SleepEntry sleepEntryToSave = new SleepEntry(
@@ -139,17 +126,15 @@ public class SleepController {
         SleepEntry saved = sleepRepository.save(sleepEntryToSave);
 
         // Build URI for newly created entry
-        URI location = ucb.path("/sleepTracker/sleep/{id}").buildAndExpand(saved.getId()).toUri();
+        URI location = ucb.path("/sleepTracker/sleep/{id}").buildAndExpand(saved.getSleepId()).toUri();
 
         return ResponseEntity.created(location).build();
     }
 
     @PostMapping("/form/submit")
     public String handleSleepForm(@ModelAttribute SleepEntry sleepEntry, Principal principal, RedirectAttributes redirectAttributes) {
-        User user = getCurrentUser(principal);
-        if (user == null) {
-            throw new RuntimeException("User not found");
-        }
+        User user = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         // ❌ Reject future dates
         if (DateValidate.dateIsInFuture(sleepEntry.getDate())) {
@@ -164,13 +149,13 @@ public class SleepController {
             return "redirect:/sleepTracker/form";
         }
 
-        if (sleepEntry.getId() == null) {
+        if (sleepEntry.getSleepId() == null) {
             // Create new entry
             sleepEntry.setUser(user);
             sleepRepository.save(sleepEntry);
         } else {
             // Update existing entry — only update allowed fields
-            SleepEntry existingEntry = sleepRepository.findById(sleepEntry.getId())
+            SleepEntry existingEntry = sleepRepository.findById(sleepEntry.getSleepId())
                     .orElseThrow(() -> new RuntimeException("Sleep entry not found"));
 
             // Only allow updating editable fields
@@ -182,38 +167,6 @@ public class SleepController {
 
         redirectAttributes.addFlashAttribute("successMessage", "Entry saved successfully!");
         return "redirect:/sleepTracker/list";
-    }
-
-    /**
-     * Helper method to get current user from Principal (handles both local and OAuth authentication)
-     */
-    private User getCurrentUser(Principal principal) {
-        if (principal == null) {
-            return null;
-        }
-        // If principal is OAuth2User, try to get email and find by email
-        if (principal instanceof org.springframework.security.oauth2.core.user.OAuth2User oauth2User) {
-            String email = oauth2User.getAttribute("email");
-            if (email != null) {
-                return userRepository.findByEmail(email).orElse(null);
-            }
-            String googleId = oauth2User.getName();
-            if (googleId != null) {
-                UserAccount account = userAccountRepository.findByGoogleId(googleId).orElse(null);
-                if (account != null) return account.getUser();
-            }
-        }
-        String principalName = principal.getName();
-        UserAccount account = userAccountRepository.findByUsername(principalName)
-                .orElseGet(() -> userAccountRepository.findByGoogleId(principalName).orElse(null));
-        if (account != null) {
-            return account.getUser();
-        }
-        User user = userRepository.findByEmail(principalName).orElse(null);
-        if (user != null) {
-            return user;
-        }
-        return null;
     }
 
 //    public static void main(String[] args) {
