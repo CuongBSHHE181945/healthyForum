@@ -13,6 +13,7 @@ import com.healthyForum.service.badge.BadgeRequirementService;
 import com.healthyForum.service.badge.BadgeService;
 import com.healthyForum.service.badge.UserBadgeService;
 import com.healthyForum.service.challenge.ChallengeService;
+import com.healthyForum.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -42,14 +43,16 @@ public class BadgeController {
     private final UserRepository userRepository;
     private final UserAccountRepository userAccountRepository;
     private final ChallengeService challengeService;
+    private final UserService userService;
 
-    public BadgeController(BadgeService badgeService, UserBadgeService userBadgeService, BadgeRequirementService badgeRequirementService, UserRepository userRepository, UserAccountRepository userAccountRepository, ChallengeService challengeService) {
+    public BadgeController(BadgeService badgeService, UserBadgeService userBadgeService, BadgeRequirementService badgeRequirementService, UserRepository userRepository, UserAccountRepository userAccountRepository, ChallengeService challengeService, UserService userService) {
         this.badgeService = badgeService;
         this.userBadgeService = userBadgeService;
         this.badgeRequirementService = badgeRequirementService;
         this.userRepository = userRepository;
         this.userAccountRepository = userAccountRepository;
         this.challengeService = challengeService;
+        this.userService = userService;
     }
 
     @GetMapping("/{id}")
@@ -61,7 +64,7 @@ public class BadgeController {
 
         boolean unlocked = false;
         LocalDateTime earnedAt = null;
-        User user = getCurrentUser(principal);
+        User user = userService.getCurrentUser(principal);
         if (user == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
         }
@@ -91,38 +94,6 @@ public class BadgeController {
         model.addAttribute("earnedAt", earnedAt);
 
         return "profile/badge-detail";
-    }
-
-    /**
-     * Helper method to get current user from Principal (handles both local and OAuth authentication)
-     */
-    private User getCurrentUser(Principal principal) {
-        if (principal == null) {
-            return null;
-        }
-        // If principal is OAuth2User, try to get email and find by email
-        if (principal instanceof org.springframework.security.oauth2.core.user.OAuth2User oauth2User) {
-            String email = oauth2User.getAttribute("email");
-            if (email != null) {
-                return userRepository.findByEmail(email).orElse(null);
-            }
-            String googleId = oauth2User.getName();
-            if (googleId != null) {
-                UserAccount account = userAccountRepository.findByGoogleId(googleId).orElse(null);
-                if (account != null) return account.getUser();
-            }
-        }
-        String principalName = principal.getName();
-        UserAccount account = userAccountRepository.findByUsername(principalName)
-                .orElseGet(() -> userAccountRepository.findByGoogleId(principalName).orElse(null));
-        if (account != null) {
-            return account.getUser();
-        }
-        User user = userRepository.findByEmail(principalName).orElse(null);
-        if (user != null) {
-            return user;
-        }
-        return null;
     }
 }
 

@@ -10,6 +10,7 @@ import com.healthyForum.repository.UserAccountRepository;
 import com.healthyForum.repository.UserRepository;
 import com.healthyForum.service.PostService;
 import com.healthyForum.service.ReportService;
+import com.healthyForum.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -28,20 +29,27 @@ import java.util.Optional;
 @RequestMapping("/posts")
 public class PostController {
 
-    @Autowired
-    private PostService postService;
+    private final PostService postService;
+
+    private final UserRepository userRepository;
+
+    private final PostRepository postRepository;
+
+    private final ReportService reportService;
+
+    private final UserAccountRepository userAccountRepository;
+
+    private final UserService userService;
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private PostRepository postRepository;
-
-    @Autowired
-    private ReportService reportService;
-
-    @Autowired
-    private UserAccountRepository userAccountRepository;
+    public PostController(PostService postService, UserRepository userRepository, PostRepository postRepository, ReportService reportService, UserAccountRepository userAccountRepository, UserService userService) {
+        this.postService = postService;
+        this.userRepository = userRepository;
+        this.postRepository = postRepository;
+        this.reportService = reportService;
+        this.userAccountRepository = userAccountRepository;
+        this.userService = userService;
+    }
 
     /**
      * List all public, non-banned posts
@@ -64,7 +72,7 @@ public class PostController {
     //drafts
     @GetMapping("/drafts")
     public String showUserDrafts(Model model, Principal principal) {
-        User currentUser = getCurrentUser(principal);
+        User currentUser = userService.getCurrentUser(principal);
         if (currentUser == null) {
             System.out.println("[WARN] showUserDrafts: Unauthenticated access attempt, redirecting to login.");
             return "redirect:/login";
@@ -167,10 +175,10 @@ public class PostController {
 
     @PostMapping("/{id}/report")
     public String reportPost(@PathVariable Long id, @RequestParam String reason,
-                             @AuthenticationPrincipal Object principal,
+                             @AuthenticationPrincipal Object authPrincipal,
                              RedirectAttributes redirectAttributes) {
         Post post = postService.getPostById(id);
-        User currentUser = getCurrentUser(principal);
+        User currentUser = userService.getCurrentUser(authPrincipal);
         
         if (currentUser == null) {
             return "redirect:/login";
@@ -191,8 +199,8 @@ public class PostController {
     }
 
     @GetMapping("/my-reports")
-    public String getMyReports(Model model, @AuthenticationPrincipal Object principal) {
-        User currentUser = getCurrentUser(principal);
+    public String getMyReports(Model model, @AuthenticationPrincipal Object authPrincipal) {
+        User currentUser = userService.getCurrentUser(authPrincipal);
         if (currentUser == null) {
             return "redirect:/login";
         }
@@ -218,51 +226,5 @@ public class PostController {
         model.addAttribute("post", post);
         model.addAttribute("isOwner", isOwner);
         return "posts/post_detail";
-    }
-
-    /**
-     * Helper method to get current user from either UserDetails or OAuth2User
-     */
-    private User getCurrentUser(Object principal) {
-        if (principal instanceof UserDetails userDetails) {
-            return getCurrentUser(userDetails);
-        } else if (principal instanceof OAuth2User oauth2User) {
-            String email = oauth2User.getAttribute("email");
-            if (email != null) {
-                return userRepository.findByEmail(email).orElse(null);
-            }
-            String googleId = oauth2User.getName();
-            if (googleId != null) {
-                UserAccount account = userAccountRepository.findByGoogleId(googleId).orElse(null);
-                if (account != null) return account.getUser();
-            }
-        } else if (principal instanceof Principal p) {
-            String principalName = p.getName();
-            UserAccount account = userAccountRepository.findByUsername(principalName)
-                    .orElseGet(() -> userAccountRepository.findByGoogleId(principalName).orElse(null));
-            if (account != null) {
-                return account.getUser();
-            }
-            User user = userRepository.findByEmail(principalName).orElse(null);
-            if (user != null) {
-                return user;
-            }
-        }
-        return null;
-    }
-
-    private User getCurrentUser(UserDetails userDetails) {
-        if (userDetails == null) {
-            return null;
-        }
-        
-        // Try to find by username first using UserAccountRepository
-        UserAccount account = userAccountRepository.findByUsername(userDetails.getUsername()).orElse(null);
-        if (account != null) {
-            return account.getUser();
-        }
-
-        // Try to find by email
-        return userRepository.findByEmail(userDetails.getUsername()).orElse(null);
     }
 }

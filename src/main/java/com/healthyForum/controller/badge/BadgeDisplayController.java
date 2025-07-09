@@ -7,6 +7,7 @@ import com.healthyForum.repository.UserRepository;
 import com.healthyForum.repository.UserAccountRepository;
 import com.healthyForum.service.badge.BadgeService;
 import com.healthyForum.service.badge.UserBadgeService;
+import com.healthyForum.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
@@ -28,19 +29,21 @@ public class BadgeDisplayController {
     private final UserAccountRepository userAccountRepository;
     private final BadgeService badgeService;
     private final UserBadgeService userBadgeService;
+    private final UserService userService;
 
-    public BadgeDisplayController(UserRepository userRepository, UserAccountRepository userAccountRepository, BadgeService badgeService, UserBadgeService userBadgeService) {
+    public BadgeDisplayController(UserRepository userRepository, UserAccountRepository userAccountRepository, BadgeService badgeService, UserBadgeService userBadgeService, UserService userService) {
         this.userRepository = userRepository;
         this.userAccountRepository = userAccountRepository;
         this.badgeService = badgeService;
         this.userBadgeService = userBadgeService;
+        this.userService = userService;
     }
 
     @GetMapping
     public String badgeDisplaySetting(Model model, Principal principal) {
-        User user = getCurrentUser(principal);
+        User user = userService.getCurrentUser(principal);
         if (user == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+            return "redirect:/login";
         }
         
         List<UserBadge> userBadges = userBadgeService.getAllUnlockedByUser(user.getId());
@@ -53,46 +56,13 @@ public class BadgeDisplayController {
     public String updateDisplayedBadges(@RequestParam(required = false) List<Integer> displayedBadgeIds,
                                         Principal principal,
                                         RedirectAttributes redirectAttributes) {
-        User user = getCurrentUser(principal);
+        User user = userService.getCurrentUser(principal);
         if (user == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+            return "redirect:/login";
         }
         
         userBadgeService.updateDisplayedBadges(user.getId(), displayedBadgeIds);
         redirectAttributes.addFlashAttribute("success", "Badge display updated!");
         return "redirect:/profile";
-    }
-
-    /**
-     * Helper method to get current user from Principal (handles both local and OAuth authentication)
-     */
-    private User getCurrentUser(Principal principal) {
-        if (principal == null) {
-            return null;
-        }
-
-        String principalName = principal.getName();
-        
-        // Try to find by username first using UserAccountRepository
-        UserAccount account = userAccountRepository.findByUsername(principalName).orElse(null);
-        if (account != null) {
-            return account.getUser();
-        }
-
-        // Try to find by email (for OAuth authentication)
-        User user = userRepository.findByEmail(principalName).orElse(null);
-        if (user != null) {
-            return user;
-        }
-
-        // If principal is OAuth2User, try to get email and find by email
-        if (principal instanceof OAuth2User oauth2User) {
-            String email = oauth2User.getAttribute("email");
-            if (email != null) {
-                return userRepository.findByEmail(email).orElse(null);
-            }
-        }
-
-        return null;
     }
 }
