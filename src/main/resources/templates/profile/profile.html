@@ -6,11 +6,19 @@
     <link rel="stylesheet" th:href="@{/css/styles.css}">
     <link rel="stylesheet" th:href="@{/css/registration.css}">
     <link rel="stylesheet" th:href="@{/css/profile.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
 
 <div class="container">
-    <h2>My Profile</h2>
+    <!-- Profile Header -->
+    <div class="profile-header">
+        <div class="profile-avatar">
+            <i class="fas fa-user"></i>
+        </div>
+        <h2>My Profile</h2>
+        <p>Welcome back, <span th:text="${user.fullName}"></span>!</p>
+    </div>
 
     <!-- Flash & error messages -->
     <div th:if="${param.error}" class="alert alert-danger"
@@ -18,65 +26,110 @@
     </div>
     <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
 
+    <!-- Basic Profile Information -->
     <div class="profile-info">
-        <p><strong>Username:</strong> <span th:text="${user.username}"></span></p>
-        <p><strong>Full Name:</strong> <span th:text="${user.fullname}"></span></p>
-        <p><strong>Email:</strong> <span th:text="${user.email}"></span></p>
+        <h3><i class="fas fa-user-circle"></i> Basic Information</h3>
+        <div class="info-grid">
+            <div class="info-item">
+                <i class="fas fa-user"></i>
+                <strong>Username:</strong> <span th:text="${user.account.username}"></span>
+            </div>
+            <div class="info-item">
+                <i class="fas fa-id-card"></i>
+                <strong>Full Name:</strong> <span th:text="${user.fullName}"></span>
+            </div>
+            <div class="info-item">
+                <i class="fas fa-envelope"></i>
+                <strong>Email:</strong> <span th:text="${user.email}"></span>
+            </div>
+        </div>
     </div>
 
-    <div class="button-group" style="margin-bottom: 1.5rem;">
-        <a th:href="@{/profile/edit}" class="btn btn-primary">Edit Profile</a>
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <a th:href="@{/profile/edit}" class="btn btn-primary">
+            <i class="fas fa-edit"></i> Edit Profile
+        </a>
+        <a th:if="${user.account.provider == null or user.account.provider == 'local'}" th:href="@{/profile/change-password}" class="btn btn-primary">
+            <i class="fas fa-key"></i> Change Password
+        </a>
     </div>
 
     <!-- Personal & Health Information -->
-    <div class="profile-details">
-        <h3>Personal & Health Information</h3>
-        <div class="details-grid">
-            <p><strong>Date of Birth:</strong> <span th:text="${user.dob != null ? #temporals.format(user.dob, 'dd-MM-yyyy') : 'N/A'}"></span></p>
-            <p><strong>Gender:</strong> <span th:text="${user.gender ?: 'N/A'}"></span></p>
-            <p><strong>Address:</strong> <span th:text="${user.address ?: 'N/A'}"></span></p>
-            <!-- Health Assessment Info -->
-            <p><strong>Height:</strong> <span th:text="${healthAssessment != null ? healthAssessment.height + ' cm' : 'N/A'}"></span></p>
-            <p><strong>Weight:</strong> <span th:text="${healthAssessment != null ? healthAssessment.weight + ' kg' : 'N/A'}"></span></p>
+    <div class="profile-info">
+        <h3><i class="fas fa-heartbeat"></i> Personal & Health Information</h3>
+        <div class="info-grid">
+            <div class="info-item">
+                <i class="fas fa-birthday-cake"></i>
+                <strong>Date of Birth:</strong> <span th:text="${user.dob != null ? #temporals.format(user.dob, 'dd-MM-yyyy') : 'N/A'}"></span>
+            </div>
+            <div class="info-item">
+                <i class="fas fa-calendar-alt"></i>
+                <strong>Age:</strong> <span th:text="${user.age != null ? user.age + ' years' : 'N/A'}"></span>
+            </div>
+            <div class="info-item">
+                <i class="fas fa-venus-mars"></i>
+                <strong>Gender:</strong> <span th:text="${user.gender ?: 'N/A'}"></span>
+            </div>
+            <div class="info-item">
+                <i class="fas fa-map-marker-alt"></i>
+                <strong>Address:</strong> <span th:text="${user.address ?: 'N/A'}"></span>
+            </div>
+            <div class="info-item">
+                <i class="fas fa-ruler-vertical"></i>
+                <strong>Height:</strong> <span th:text="${user.height != null ? user.height + ' cm' : 'N/A'}"></span>
+            </div>
+            <div class="info-item">
+                <i class="fas fa-weight"></i>
+                <strong>Weight:</strong> <span th:text="${user.weight != null ? user.weight + ' kg' : 'N/A'}"></span>
+            </div>
         </div>
     </div>
 
-    <div th:if="${user.provider == null or user.provider == 'local'}" class="button-group" style="margin-top: 2rem;">
-        <a th:href="@{/change-password}" class="btn btn-primary">Change Password</a>
-    </div>
+    <!-- Badges Section -->
+    <div class="badge-section">
+        <h2><i class="fas fa-trophy"></i> Displayed Badges</h2>
+        <div id="display-zone" class="drop-zone">
+            <div th:if="${#lists.isEmpty(displayedBadges)}" style="color: #666; font-style: italic;">
+                No badges displayed yet. <a th:href="@{/badge-display}" style="color: #667eea;">Configure your badges</a>
+            </div>
+            <div th:each="badge : ${displayedBadges}">
+                <a th:href="@{'/badges/' + ${badge.id}}">
+                    <img th:src="@{${badge.icon}}" class="badge-icon" th:title="${badge.name}"/>
+                </a>
+            </div>
+        </div>
+        <a th:href="@{/badge-display}" class="btn btn-primary" style="text-decoration: none;">
+            <i class="fas fa-cog"></i> Edit Displayed Badges
+        </a>
 
-    <div style="margin-top: 1rem;">
-        <a th:href="@{/}" class="btn btn-secondary">Back to Home</a>
-    </div>
-</div>
+        <h3><i class="fas fa-medal"></i> Unlocked Badges</h3>
+        <div id="unlocked-badges" class="badge-list">
+            <div th:if="${#lists.isEmpty(unlockedBadges)}" style="color: #666; font-style: italic; width: 100%;">
+                No badges unlocked yet. Start completing challenges to earn badges!
+            </div>
+            <div th:each="badge : ${unlockedBadges}" th:title="${badge.name}">
+                <a th:href="@{'/badges/' + ${badge.id}}">
+                    <img th:src="@{${badge.icon}}" class="badge-icon"/>
+                </a>
+            </div>
+        </div>
 
-<div class="container" style="margin-top: 2rem;">
-    <h2>🎖 Displayed Badges</h2>
-    <div id="display-zone" class="drop-zone">
-        <div th:each="badge : ${displayedBadges}">
-            <a th:href="@{'/badge/' + ${badge.id}}">
-                <img th:src="@{${badge.icon}}" class="badge-icon"/>
-            </a>
+        <h3><i class="fas fa-lock"></i> Locked Badges</h3>
+        <div id="locked-badges" class="badge-list locked">
+            <div th:each="badge : ${lockedBadges}" th:title="${badge.name}">
+                <a th:href="@{'/badges/' + ${badge.id}}">
+                    <img th:src="@{${badge.lockedIcon}}" class="badge-icon grayscale"/>
+                </a>
+            </div>
         </div>
     </div>
-    <a href="/badge-display">⚙️ Edit Displayed Badges</a>
 
-    <h3>Unlocked Badges</h3>
-    <div id="unlocked-badges" class="badge-list">
-        <div th:each="badge : ${unlockedBadges}" th:title="${badge.name}">
-            <a th:href="@{'/badge/' + ${badge.id}}">
-                <img th:src="@{${badge.icon}}" class="badge-icon"/>
-            </a>
-        </div>
-    </div>
-
-    <h3>Locked Badges</h3>
-    <div id="locked-badges" class="badge-list locked">
-        <div th:each="badge : ${lockedBadges}">
-            <a th:href="@{'/badge/' + ${badge.id}}">
-                <img th:src="@{${badge.lockedIcon}}" class="badge-icon grayscale"/>
-            </a>
-        </div>
+    <!-- Back to Home Button -->
+    <div class="back-to-home">
+        <a th:href="@{/}" class="btn btn-secondary">
+            <i class="fas fa-home"></i> Back to Home
+        </a>
     </div>
 </div>
 

@@ -75,7 +75,7 @@ public class ChallengeTrackingService {
             userChallengeRepo.save(userChallenge);
 
             //Check if badge linked to this challenge and award badge
-            badgeService.checkAndAwardBadge(userChallenge.getUser().getUserID(), userChallenge.getChallenge().getId());
+            badgeService.checkAndAwardBadge(userChallenge.getUser().getId(), userChallenge.getChallenge().getId());
 
             return true;
         }

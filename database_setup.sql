@@ -8,26 +8,36 @@ CREATE TABLE IF NOT EXISTS `role` (
     `role_name` VARCHAR(255) NOT NULL
 );
 
--- Create User table
+-- Create User table (updated with health fields)
 CREATE TABLE IF NOT EXISTS `user` (
-    `userID` BIGINT AUTO_INCREMENT PRIMARY KEY,
-    `username` VARCHAR(255) NOT NULL,
-    `password` VARCHAR(255) NULL,
-    `fullname` VARCHAR(255),
-    `email` VARCHAR(255),
+    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `full_name` VARCHAR(255) NOT NULL,
+    `email` VARCHAR(255) NOT NULL UNIQUE,
     `gender` VARCHAR(255),
     `dob` DATE,
     `address` VARCHAR(255),
-    `provider` VARCHAR(255) NOT NULL,
-    `verification_code` VARCHAR(64),
+    `age` INT,
+    `height` DOUBLE,
+    `weight` DOUBLE,
+    `role_id` BIGINT NOT NULL,
+    CONSTRAINT `fk_user_role` FOREIGN KEY (`role_id`) REFERENCES `role`(`role_id`)
+);
+
+-- Create User Account table (separated from User)
+CREATE TABLE IF NOT EXISTS `user_accounts` (
+    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `user_id` BIGINT NOT NULL UNIQUE,
+    `username` VARCHAR(255) NOT NULL UNIQUE,
+    `password` VARCHAR(255),
+    `provider` VARCHAR(255) NOT NULL DEFAULT 'local',
+    `google_id` VARCHAR(255) UNIQUE,
     `enabled` BOOLEAN NOT NULL DEFAULT FALSE,
     `suspended` BOOLEAN NOT NULL DEFAULT FALSE,
+    `verification_code` VARCHAR(64),
     `reset_password_token` VARCHAR(64),
     `reset_token_expiry` DATETIME,
-    `role_id` BIGINT,
-    `google_id` VARCHAR(255) UNIQUE,
-    CONSTRAINT `fk_user_role` FOREIGN KEY (`role_id`) REFERENCES `role`(`role_id`),
-    CONSTRAINT `unique_username` UNIQUE (`username`)
+    `last_login` DATETIME,
+    CONSTRAINT `fk_user_account_user` FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON DELETE CASCADE
 );
 
 -- Create Post table (add created_at, updated_at, banned, visibility)
@@ -41,7 +51,7 @@ CREATE TABLE IF NOT EXISTS `post` (
     `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     `banned` BOOLEAN NOT NULL DEFAULT FALSE,
-    FOREIGN KEY (`user_id`) REFERENCES `user`(`userID`)
+    FOREIGN KEY (`user_id`) REFERENCES `user`(`id`)
 );
 
 -- Create Sleep Entries table
@@ -52,8 +62,8 @@ CREATE TABLE IF NOT EXISTS `sleep_entries` (
     `end_time` TIME NOT NULL,
     `quality` INT NOT NULL,
     `notes` VARCHAR(255),
-    `userID` BIGINT NOT NULL,
-    FOREIGN KEY (`userID`) REFERENCES `user`(`userID`)
+    `user_id` BIGINT NOT NULL,
+    FOREIGN KEY (`user_id`) REFERENCES `user`(`id`)
 );
 
 -- Create Meal Planner table
@@ -67,8 +77,8 @@ CREATE TABLE IF NOT EXISTS `meal_planner` (
     `meal_proteins` DECIMAL(10,2),
     `meal_carbs` DECIMAL(10,2),
     `meal_fats` DECIMAL(10,2),
-    `userID` BIGINT NOT NULL,
-    FOREIGN KEY (`userID`) REFERENCES `user`(`userID`)
+    `user_id` BIGINT NOT NULL,
+    FOREIGN KEY (`user_id`) REFERENCES `user`(`id`)
 );
 
 -- Create Meal Ingredient table
@@ -84,11 +94,11 @@ CREATE TABLE IF NOT EXISTS `meal_ingredient` (
 -- Create Feedback table
 CREATE TABLE IF NOT EXISTS `feedback` (
     `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
-    `userID` BIGINT NOT NULL,
+    `user_id` BIGINT NOT NULL,
     `message` TEXT NOT NULL,
     `submitted_at` DATETIME NOT NULL,
     `response` TEXT,
-    FOREIGN KEY (`userID`) REFERENCES `user`(`userID`)
+    FOREIGN KEY (`user_id`) REFERENCES `user`(`id`)
 );
 
 -- Create Report table
@@ -102,9 +112,9 @@ CREATE TABLE IF NOT EXISTS `report` (
     `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     `resolution` TEXT,
-    FOREIGN KEY (`reporter_id`) REFERENCES `user`(`userID`),
+    FOREIGN KEY (`reporter_id`) REFERENCES `user`(`id`),
     FOREIGN KEY (`reported_post_id`) REFERENCES `post`(`post_id`),
-    FOREIGN KEY (`reported_user_id`) REFERENCES `user`(`userID`)
+    FOREIGN KEY (`reported_user_id`) REFERENCES `user`(`id`)
 );
 
 -- Create Blog table
@@ -115,7 +125,7 @@ CREATE TABLE IF NOT EXISTS `blog` (
     `created_at` DATETIME,
     `author_username` VARCHAR(255),
     `suspended` BOOLEAN DEFAULT FALSE,
-    CONSTRAINT `fk_author_username` FOREIGN KEY (`author_username`) REFERENCES `user`(`username`)
+    CONSTRAINT `fk_author_username` FOREIGN KEY (`author_username`) REFERENCES `user_accounts`(`username`)
 );
 
 -- Create Messages table
@@ -126,8 +136,30 @@ CREATE TABLE IF NOT EXISTS `messages` (
     `content` TEXT NOT NULL,
     `timestamp` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `is_read` BOOLEAN DEFAULT FALSE,
-    FOREIGN KEY (`sender_id`) REFERENCES `user`(`userID`),
-    FOREIGN KEY (`receiver_id`) REFERENCES `user`(`userID`)
+    FOREIGN KEY (`sender_id`) REFERENCES `user`(`id`),
+    FOREIGN KEY (`receiver_id`) REFERENCES `user`(`id`)
+);
+
+-- Create Health Assessment table
+CREATE TABLE IF NOT EXISTS `health_assessment` (
+    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `age` INT NOT NULL,
+    `gender` VARCHAR(255) NOT NULL,
+    `height` DOUBLE NOT NULL,
+    `weight` DOUBLE NOT NULL,
+    `smoker` BOOLEAN NOT NULL,
+    `exercise_days_per_week` INT NOT NULL,
+    `sleep_pattern` VARCHAR(255) NOT NULL,
+    `risk_level` VARCHAR(255),
+    `health_suggestions` TEXT,
+    `user_id` BIGINT NOT NULL,
+    `assessment_date` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (`user_id`) REFERENCES `user`(`id`)
+);
+
+CREATE TABLE keyword (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    word VARCHAR(255) NOT NULL UNIQUE
 );
 
 -- Table: badge
@@ -160,14 +192,14 @@ CREATE TABLE badge_requirement (
 
 -- Table: user_badge (user owns a badge)
 CREATE TABLE user_badge (
-    userID BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
     badge_id INT NOT NULL,
     earned_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     displayed BIT NOT NULL DEFAULT 0,
 
-    PRIMARY KEY (userID, badge_id),
+    PRIMARY KEY (user_id, badge_id),
     FOREIGN KEY (badge_id) REFERENCES badge(id),
-    FOREIGN KEY (`userID`) REFERENCES `user`(`userID`)
+    FOREIGN KEY (`user_id`) REFERENCES `user`(`id`)
 );
 
 CREATE TABLE challenge_type (
@@ -195,13 +227,13 @@ CREATE TABLE challenge (
 
 CREATE TABLE user_challenge (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    userID BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
     challenge_id INT NOT NULL,
     join_date DATE,
     status VARCHAR(20),
     last_check_date DATE,
 
-    FOREIGN KEY (userID) REFERENCES user(userID),
+    FOREIGN KEY (user_id) REFERENCES user(id),
     FOREIGN KEY (challenge_id) REFERENCES challenge(id)
 );
 
@@ -210,24 +242,35 @@ INSERT INTO `role` (`role_name`) VALUES
 ('ADMIN'), 
 ('USER');
 
--- Insert sample users
-INSERT INTO `user` (`username`, `password`, `fullname`, `email`, `gender`, `dob`, `address`, `provider`, `enabled`, `suspended`, `role_id`) VALUES
-('sarah1', '$2a$10$Zzs1kf5WAviVMIvbUSvsVen.uHWUTjb8Qn.bnKEI21jcBqphZEtPO', 'Sarah Smith', 'sarah@example.com', 'Female', '1990-01-01', '123 Wellness St.', 'local', TRUE, 0, 2),
-('alice123', '$2a$10$DdACFbPlEnoLMoNRT58rRezj9Mnchy.CVolTbxrOZmo7m4AwSalra', 'Alice Johnson', 'alice@example.com', 'Female', '1995-06-12', '123 Main St', 'local', TRUE, 0, 2),
-('bob456', '$2a$10$6ODmXZxJge8dvXWKSpE5RuU66tMP7guAROmGoYW2D1ABxw//YJq5u', 'Bob Smith', 'bob@example.com', 'Male', '1990-03-08', '456 Park Ave', 'local', TRUE, 0, 2),
-('carol789', '$2a$10$4FjsyuABAig4nZTibDZXR.vMgFXmg55ubtdlre2efd17lqQdVqhwS', 'Carol Davis', 'carol@example.com', 'Female', '1988-11-22', '789 Elm Rd', 'local', TRUE, 0, 2),
-('admin1', '$2a$10$Qw8kZx3gqeeUXnIfwRS4l.9gHBvXwIBIsPNrKV86Xqx94H/46oQwe', 'Alice Admin', 'alice@admin.com', 'Female', '1990-01-01', '123 Admin St', 'local', TRUE, 0, 1),
-('mod1', '$2a$10$fWIBxuIsvVpJ3s0jSBG.1.bN5Jb3Dq0yWRySyZxzkXN01H.WMlCZO', 'Bob Mod', 'bob@mod.com', 'Male', '1992-02-02', '456 Mod Ave', 'local', TRUE, 0, 2),
-('user1', '$2a$10$9Y1AT//cDf.3AwoibVN6/ul8rGxUo.RAhGyElbLulcUblxN.O8mHK', 'Charlie User', 'charlie@user.com', 'Male', '1995-03-03', '789 User Rd', 'local', TRUE, 0, 2),
-('user2', '$2a$10$7bPNzIfN.fHo1Q7I0j5/OO8KyYNzgt5UQsIemZwFQPMWVt4SZTnNW', 'Dana User', 'dana@user.com', 'Female', '1998-04-04', '101 User Blvd', 'local', TRUE, 1, 2);
+-- Insert sample users (updated structure)
+INSERT INTO `user` (`full_name`, `email`, `gender`, `dob`, `address`, `age`, `height`, `weight`, `role_id`) VALUES
+('Sarah Smith', 'sarah@example.com', 'Female', '1990-01-01', '123 Wellness St.', 34, 165.0, 60.0, 2),
+('Alice Johnson', 'alice@example.com', 'Female', '1995-06-12', '123 Main St', 29, 160.0, 55.0, 2),
+('Bob Smith', 'bob@example.com', 'Male', '1990-03-08', '456 Park Ave', 34, 175.0, 70.0, 2),
+('Carol Davis', 'carol@example.com', 'Female', '1988-11-22', '789 Elm Rd', 35, 170.0, 65.0, 2),
+('Alice Admin', 'alice@admin.com', 'Female', '1990-01-01', '123 Admin St', 34, 165.0, 60.0, 1),
+('Bob Mod', 'bob@mod.com', 'Male', '1992-02-02', '456 Mod Ave', 32, 180.0, 75.0, 2),
+('Charlie User', 'charlie@user.com', 'Male', '1995-03-03', '789 User Rd', 29, 170.0, 68.0, 2),
+('Dana User', 'dana@user.com', 'Female', '1998-04-04', '101 User Blvd', 26, 155.0, 50.0, 2);
+
+-- Insert sample user accounts
+INSERT INTO `user_accounts` (`user_id`, `username`, `password`, `provider`, `enabled`, `suspended`) VALUES
+(1, 'sarah1', '$2a$10$Zzs1kf5WAviVMIvbUSvsVen.uHWUTjb8Qn.bnKEI21jcBqphZEtPO', 'local', TRUE, FALSE),
+(2, 'alice123', '$2a$10$DdACFbPlEnoLMoNRT58rRezj9Mnchy.CVolTbxrOZmo7m4AwSalra', 'local', TRUE, FALSE),
+(3, 'bob456', '$2a$10$6ODmXZxJge8dvXWKSpE5RuU66tMP7guAROmGoYW2D1ABxw//YJq5u', 'local', TRUE, FALSE),
+(4, 'carol789', '$2a$10$4FjsyuABAig4nZTibDZXR.vMgFXmg55ubtdlre2efd17lqQdVqhwS', 'local', TRUE, FALSE),
+(5, 'admin1', '$2a$10$Qw8kZx3gqeeUXnIfwRS4l.9gHBvXwIBIsPNrKV86Xqx94H/46oQwe', 'local', TRUE, FALSE),
+(6, 'mod1', '$2a$10$fWIBxuIsvVpJ3s0jSBG.1.bN5Jb3Dq0yWRySyZxzkXN01H.WMlCZO', 'local', TRUE, FALSE),
+(7, 'user1', '$2a$10$9Y1AT//cDf.3AwoibVN6/ul8rGxUo.RAhGyElbLulcUblxN.O8mHK', 'local', TRUE, FALSE),
+(8, 'user2', '$2a$10$7bPNzIfN.fHo1Q7I0j5/OO8KyYNzgt5UQsIemZwFQPMWVt4SZTnNW', 'local', TRUE, TRUE);
 
 -- Insert sample sleep entries
-INSERT INTO `sleep_entries` (`date`, `start_time`, `end_time`, `quality`, `notes`, `userID`) VALUES
+INSERT INTO `sleep_entries` (`date`, `start_time`, `end_time`, `quality`, `notes`, `user_id`) VALUES
 ('2024-03-15', '22:00:00', '06:00:00', 8, 'Good night sleep', 1),
 ('2024-03-16', '23:00:00', '07:00:00', 7, 'Decent sleep', 1);
 
 -- Insert sample meal plans
-INSERT INTO `meal_planner` (`meal_name`, `meal_date`, `meal_type`, `meal_description`, `meal_calories`, `meal_proteins`, `meal_carbs`, `meal_fats`, `userID`) VALUES
+INSERT INTO `meal_planner` (`meal_name`, `meal_date`, `meal_type`, `meal_description`, `meal_calories`, `meal_proteins`, `meal_carbs`, `meal_fats`, `user_id`) VALUES
 ('Healthy Breakfast', '2024-03-15', 'Breakfast', 'Nutritious morning meal', 500.00, 20.00, 60.00, 15.00, 1),
 ('Light Lunch', '2024-03-15', 'Lunch', 'Balanced lunch meal', 600.00, 25.00, 70.00, 20.00, 1);
 
@@ -245,18 +288,29 @@ INSERT INTO `blog` (`title`, `content`, `created_at`, `author_username`, `suspen
 ('Mental Health Matters', 'Meditation helps reduce stress.', NOW(), 'user1', TRUE);
 
 -- Insert sample feedbacks
-INSERT INTO `feedback` (`userID`, `message`, `submitted_at`, `response`) VALUES
+INSERT INTO `feedback` (`user_id`, `message`, `submitted_at`, `response`) VALUES
 (2, 'Great site, very helpful!', '2024-06-01 10:15:00', NULL),
 (3, 'I found a bug in the forum.', '2024-06-02 14:30:00', NULL);
 
 -- Insert sample messages
-INSERT INTO `messages` (`sender_Id`, `receiver_Id`, `content`, `is_read`) VALUES
+INSERT INTO `messages` (`sender_id`, `receiver_id`, `content`, `is_read`) VALUES
 (1, 2, 'Hi Bob, how are you?', FALSE),
 (2, 1, 'Hi Alice, I am good. You?', TRUE),
 (1, 3, 'Hey Charlie, long time no see!', FALSE),
 (3, 1, 'Hi Alice! Yes, indeed.', TRUE),
 (2, 3, 'Charlie, are you coming to the meeting?', FALSE),
 (3, 2, 'Yes, I will be there!', TRUE);
+
+-- Insert sample health assessments
+INSERT INTO `health_assessment` (`age`, `gender`, `height`, `weight`, `smoker`, `exercise_days_per_week`, `sleep_pattern`, `risk_level`, `health_suggestions`, `user_id`) VALUES
+(34, 'Female', 165.0, 60.0, FALSE, 5, '7-8 hours', 'Low', 'Keep up the good work!', 1),
+(29, 'Female', 160.0, 55.0, FALSE, 4, '7-8 hours', 'Low', 'Keep up the good work!', 2),
+(34, 'Male', 175.0, 70.0, FALSE, 6, '7-8 hours', 'Low', 'Keep up the good work!', 3),
+(35, 'Female', 170.0, 65.0, FALSE, 5, '7-8 hours', 'Low', 'Keep up the good work!', 4),
+(34, 'Female', 165.0, 60.0, FALSE, 5, '7-8 hours', 'Low', 'Keep up the good work!', 5),
+(32, 'Male', 180.0, 75.0, FALSE, 7, '7-8 hours', 'Low', 'Keep up the good work!', 6),
+(29, 'Male', 170.0, 68.0, FALSE, 5, '7-8 hours', 'Low', 'Keep up the good work!', 7),
+(26, 'Female', 155.0, 50.0, FALSE, 3, '7-8 hours', 'Low', 'Keep up the good work!', 8);
 
 -- Generated SQL for 30 Challenges and Badges
 -- Challenge: Morning Yoga 7 Days
@@ -378,7 +432,7 @@ INSERT INTO badge_requirement (badge_id, source_id, source_type_id) VALUES
 (30, 30, 1);
 
 -- Insert user_badge assignments
-INSERT INTO user_badge (userID, badge_id, earned_at) VALUES
+INSERT INTO user_badge (user_id, badge_id, earned_at) VALUES
 (1, 1, '2024-06-01 10:00:00'),
 (1, 2, '2024-06-08 10:00:00'),
 (2, 1, '2024-06-02 11:00:00'),

@@ -38,7 +38,7 @@ public class HealthAssessment {
     private String healthSuggestions;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "userID")
+    @JoinColumn(name = "user_id")
     private User user;
 
     @Column(name = "assessment_date")

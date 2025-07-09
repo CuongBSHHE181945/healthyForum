@@ -31,8 +31,8 @@
       <a th:href="@{'/challenge/' + ${c.id}}" th:text="${c.name}"></a>
       <span th:if="${badgeEarnedIds.contains(c.id)}" style="color: green;">🎖️ Earned</span>
     </td>
-    <td th:text="${c.type.name}"></td>
-    <td th:text="${c.category.name}"></td>
+    <td th:text="${c.type != null ? c.type.name : 'Unknown'}"></td>
+    <td th:text="${c.category != null ? c.category.name : 'Uncategorized'}"></td>
     <td th:text="${c.description}"></td>
     <td th:text="${c.durationDays}"></td>
     <td>

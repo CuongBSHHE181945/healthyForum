@@ -18,7 +18,7 @@
     <form th:action="@{/register}" th:object="${user}" method="post">
         <div class="form-group">
             <i class="fas fa-user input-icon"></i>
-            <input type="text" id="username" th:field="*{username}" class="form-control" placeholder="Username" required minlength="3" maxlength="20" />
+            <input type="text" id="username" name="username" class="form-control" placeholder="Username" required minlength="3" maxlength="20" />
         </div>
         <div class="form-group">
             <i class="fas fa-envelope input-icon"></i>
@@ -26,7 +26,7 @@
         </div>
         <div class="form-group" style="position:relative;">
             <i class="fas fa-lock input-icon"></i>
-            <input type="password" id="password" th:field="*{password}" class="form-control" placeholder="Password" required minlength="6" />
+            <input type="password" id="password" name="password" class="form-control" placeholder="Password" required minlength="6" />
             <i class="fas fa-eye toggle-password" data-target="password" style="position:absolute; right:10px; top:38px; cursor:pointer;"></i>
         </div>
         <div class="form-group" style="position:relative;">
@@ -36,7 +36,7 @@
         </div>
         <div class="form-group">
             <i class="fas fa-id-card input-icon"></i>
-            <input type="text" id="fullName" th:field="*{fullname}" class="form-control" placeholder="Full Name" required />
+            <input type="text" id="fullName" th:field="*{fullName}" class="form-control" placeholder="Full Name" required />
         </div>
         <div class="form-group">
             <i class="fas fa-calendar input-icon"></i>
