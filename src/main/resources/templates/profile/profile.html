@@ -95,7 +95,7 @@
             </div>
             <div th:each="badge : ${displayedBadges}">
                 <a th:href="@{'/badges/' + ${badge.id}}">
-                    <img th:src="@{${badge.icon}}" class="badge-icon" th:title="${badge.name}"/>
+                    <img th:src="@{${badge.icon}}" class="badge-icon" th:title="${badge.name}" />
                 </a>
             </div>
         </div>

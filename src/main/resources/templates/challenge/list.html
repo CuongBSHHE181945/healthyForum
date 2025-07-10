@@ -13,6 +13,8 @@
 <div th:if="${warning}" class="alert alert-warning" th:text="${warning}"></div>
 <div th:if="${info}" class="alert alert-info" th:text="${info}"></div>
 <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+<a href="/challenge/my" class="forward-link">→ View My Active Challenges</a>
+<a href="/challenge/create" class="forward-link">→ Create new challenge</a>
 
 <table>
   <thead>
@@ -45,6 +47,6 @@
   </tr>
   </tbody>
 </table>
-<a href="/challenge/my" class="forward-link">→ View My Active Challenges</a>
+
 </body>
 </html>

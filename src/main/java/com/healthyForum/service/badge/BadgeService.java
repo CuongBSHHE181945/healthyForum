@@ -10,8 +10,12 @@ import com.healthyForum.repository.badge.BadgeRequirementRepository;
 import com.healthyForum.repository.badge.UserBadgeRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.swing.text.html.Option;
+import java.io.File;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -53,5 +57,37 @@ public class BadgeService {
                 userBadgeRepository.save(ub);
             }
         }
+    }
+
+    public Badge handleBadgeIconUpload(String badgeName, String badgeDescription, MultipartFile badgeIconFile, MultipartFile lockedIconFile, String username) throws IOException {
+        Badge badge = new Badge();
+        badge.setName(badgeName);
+        badge.setDescription(badgeDescription);
+
+        // 🎖 File Upload Setup
+        String unlockedDir = new File("src/main/resources/static/uploads/badges/unlocked/").getAbsolutePath();
+        String lockedDir   = new File("src/main/resources/static/uploads/badges/locked/").getAbsolutePath();
+
+        // Ensure directories exist
+        new File(unlockedDir).mkdirs();
+        new File(lockedDir).mkdirs();
+
+        String iconFileName;
+        String lockedFileName;
+
+        java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmssSSS");
+        String timestamp = java.time.LocalDateTime.now().format(formatter);
+        iconFileName = username + "_" + timestamp + "_" + badgeIconFile.getOriginalFilename();
+        lockedFileName = username + "_" + timestamp + "_" + lockedIconFile.getOriginalFilename();
+
+        File iconFile = new File(unlockedDir + "/" + iconFileName);
+        File lockedFile = new File(lockedDir + "/" + lockedFileName);
+        badgeIconFile.transferTo(iconFile);
+        lockedIconFile.transferTo(lockedFile);
+
+        badge.setIcon("/uploads/badges/unlocked/" + iconFileName);
+        badge.setLockedIcon("/uploads/badges/locked/" + lockedFileName);
+
+        return badge;
     }
 }

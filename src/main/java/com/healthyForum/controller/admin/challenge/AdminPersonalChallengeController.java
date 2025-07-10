@@ -1,11 +1,14 @@
 package com.healthyForum.controller.admin.challenge;
 
 
+import com.healthyForum.model.User;
 import com.healthyForum.model.badge.Badge;
 import com.healthyForum.model.challenge.Challenge;
 import com.healthyForum.model.challenge.ChallengeCategory;
 import com.healthyForum.repository.challenge.ChallengeCategoryRepository;
 import com.healthyForum.repository.challenge.ChallengeTypeRepository;
+import com.healthyForum.service.UserService;
+import com.healthyForum.service.badge.BadgeService;
 import com.healthyForum.service.challenge.ChallengeService;
 import lombok.Value;
 import org.springframework.http.HttpStatus;
@@ -18,6 +21,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.Principal;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,11 +34,15 @@ public class AdminPersonalChallengeController {
         private final ChallengeService challengeService;
         private final ChallengeCategoryRepository challengeCategoryRepository;
         private final ChallengeTypeRepository challengeTypeRepository;
+        private final UserService userService;
+        private final BadgeService badgeService;
 
-    public AdminPersonalChallengeController(ChallengeService challengeService, ChallengeCategoryRepository challengeCategoryRepository, ChallengeTypeRepository challengeTypeRepository) {
+    public AdminPersonalChallengeController(ChallengeService challengeService, ChallengeCategoryRepository challengeCategoryRepository, ChallengeTypeRepository challengeTypeRepository, UserService userService, BadgeService badgeService) {
         this.challengeService = challengeService;
         this.challengeCategoryRepository = challengeCategoryRepository;
         this.challengeTypeRepository = challengeTypeRepository;
+        this.userService = userService;
+        this.badgeService = badgeService;
     }
 
     @GetMapping
@@ -59,33 +69,18 @@ public class AdminPersonalChallengeController {
             @RequestParam("badgeDescription") String badgeDescription,
             @RequestParam("badgeIconFile") MultipartFile badgeIconFile,
             @RequestParam("lockedIconFile") MultipartFile lockedIconFile,
-            RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes, Principal principal) {
 
         try {
-            // 🎖 File Upload Setup
-            String unlockedDir = new File("src/main/resources/static/uploads/badges/unlocked/").getAbsolutePath();
-            String lockedDir   = new File("src/main/resources/static/uploads/badges/locked/").getAbsolutePath();
-
-            // Ensure directories exist
-            new File(unlockedDir).mkdirs();
-            new File(lockedDir).mkdirs();
 
             // Generate file names
-            String iconFileName = UUID.randomUUID() + "_" + badgeIconFile.getOriginalFilename();
-            String lockedFileName = UUID.randomUUID() + "_" + lockedIconFile.getOriginalFilename();
+            User user = userService.getCurrentUser(principal);
+            if (user == null) {
+                return "redirect:/login";
+            }
+            String username = user.getUsername();
 
-            File iconFile = new File(unlockedDir + "/" + iconFileName);
-            File lockedFile = new File(lockedDir + "/" + lockedFileName);
-            // Save files
-            badgeIconFile.transferTo(iconFile);
-            lockedIconFile.transferTo(lockedFile);
-
-            // 🎖 Build Badge object manually
-            Badge badge = new Badge();
-            badge.setName(badgeName);
-            badge.setDescription(badgeDescription);
-            badge.setIcon("/uploads/badges/unlocked/" + iconFileName);
-            badge.setLockedIcon("/uploads/badges/locked/" + lockedFileName);
+            Badge badge = badgeService.handleBadgeIconUpload(badgeName,badgeDescription,badgeIconFile,lockedIconFile,username);
 
             // Save both challenge and badge (you can wrap this in a service)
             challengeService.createChallengeWithBadge(challenge, badge);
