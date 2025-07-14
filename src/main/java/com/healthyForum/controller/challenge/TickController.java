@@ -43,29 +43,29 @@ public class TickController {
         this.userService = userService;
     }
 
-    @PostMapping("/tick/{id}")
-    public String tickToday(@PathVariable("id") int userChallengeId, RedirectAttributes redirectAttributes,
-                            Principal principal) {
-        User user = userService.getCurrentUser(principal);
-        if (user == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
-        }
-
-        boolean success = challengeTrackingService.tickProgress(userChallengeId);
-        if (!success) {
-            redirectAttributes.addFlashAttribute("tickMessage", "Already ticked today!");
-        } else {
-            redirectAttributes.addFlashAttribute("tickMessage", "Progress saved for today!");
-        }
-        // ⏳ Check if completed
-        boolean completed = challengeTrackingService.checkAndCompleteIfDone(userChallengeId);
-
-        if (completed) {
-            redirectAttributes.addFlashAttribute("tickMessage", "🎉 Challenge completed! You've earned a badge!");
-        }
-
-        return "redirect:/challenge/progress/" + userChallengeId;
-    }
+//    @PostMapping("/tick/{id}")
+//    public String tickToday(@PathVariable("id") int userChallengeId, RedirectAttributes redirectAttributes,
+//                            Principal principal) {
+//        User user = userService.getCurrentUser(principal);
+//        if (user == null) {
+//            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+//        }
+//
+//        boolean success = challengeTrackingService.tickProgress(userChallengeId);
+//        if (!success) {
+//            redirectAttributes.addFlashAttribute("tickMessage", "Already ticked today!");
+//        } else {
+//            redirectAttributes.addFlashAttribute("tickMessage", "Progress saved for today!");
+//        }
+//        // ⏳ Check if completed
+//        boolean completed = challengeTrackingService.checkAndCompleteIfDone(userChallengeId);
+//
+//        if (completed) {
+//            redirectAttributes.addFlashAttribute("tickMessage", "🎉 Challenge completed! You've earned a badge!");
+//        }
+//
+//        return "redirect:/challenge/progress/" + userChallengeId;
+//    }
 
     @GetMapping("/progress/{id}")
     public String showProgress(@PathVariable("id") int userChallengeId, Model model) {

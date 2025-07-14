@@ -6,18 +6,16 @@
   <link rel="stylesheet" th:href="@{/css/challenge.css}">
 </head>
 <body>
+<div th:if="${successMessage}" class="alert alert-success">
+  <p th:text="${successMessage}"></p>
+</div>
 <h2 th:text="'📅 Progress for: ' + ${userChallenge.challenge != null ? userChallenge.challenge.name : 'Unknown Challenge'}"></h2>
 
 <div th:if="${tickMessage}">
   <p th:text="${tickMessage}"></p>
 </div>
 
-<form th:action="@{'/challenge/tick/' + ${userChallenge.id}}" method="post">
-  <button type="submit"
-          th:disabled="${userChallenge.status == 'COMPLETED'}"
-          th:text="${userChallenge.status == 'COMPLETED'} ? 'Completed 🎉' : 'Tick Today'">
-  </button>
-</form>
+<a th:href="@{/evidence/create(userChallengeId=${userChallenge.id})}">Submit Today’s Evidence</a>
 
 <p>Total Days Completed: <strong th:text="${total}"></strong> / <span th:text="${target}"></span></p>
 <p>🔥 Current Streak: <strong th:text="${streak}"></strong> day(s)</p>

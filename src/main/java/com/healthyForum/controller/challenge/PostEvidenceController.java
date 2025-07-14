@@ -46,12 +46,15 @@ public class PostEvidenceController {
     }
 
     @GetMapping("/create")
-    public String showCreateForm(Model model, Principal principal) {
-        model.addAttribute("post", new Post());
+    public String showCreateForm(@RequestParam Integer userChallengeId, Model model, Principal principal) {
 
         User user = userService.getCurrentUser(principal);
-        List<UserChallenge> joinedChallenges = userChallengeRepository.findByUser(user);
-        model.addAttribute("joinedChallenges", joinedChallenges);
+        UserChallenge userChallenge = userChallengeRepository.findById(userChallengeId)
+                .orElseThrow(() -> new IllegalStateException("User has not joined this challenge."));
+
+        model.addAttribute("post", new Post());
+        model.addAttribute("userChallenge", userChallenge);
+        model.addAttribute("challengeName", userChallenge.getChallenge().getName());
 
         return "evidence/create"; // Thymeleaf template
     }
@@ -59,7 +62,7 @@ public class PostEvidenceController {
     @PostMapping("/create")
     public String submitPostEvidence(@ModelAttribute("post") Post post,
                                      @RequestParam(required = false) MultipartFile imageFile,
-                                     @RequestParam(required = false) int challengeId,
+                                     @RequestParam(required = false) Integer userChallengeId,
                                      @RequestParam(required = false, defaultValue = "false") boolean markAsEvidence,
                                      Principal principal,
                                      RedirectAttributes redirectAttributes) throws IOException {
@@ -79,13 +82,11 @@ public class PostEvidenceController {
         postRepository.save(post);
 
         if (markAsEvidence) {
-            Challenge challenge = challengeRepository.findById(challengeId).orElseThrow();
-            UserChallenge userChallenge = userChallengeRepository.findByUserAndChallengeId(user, challengeId)
+            UserChallenge userChallenge = userChallengeRepository.findById(userChallengeId)
                     .orElseThrow(() -> new IllegalStateException("User has not joined this challenge."));
 
             EvidencePost evidence = new EvidencePost();
             evidence.setPost(post);
-            evidence.setChallenge(challenge);
             evidence.setUserChallenge(userChallenge);
             evidence.setStatus(EvidenceStatus.PENDING);
             evidence.setVoteBased(false);
@@ -95,8 +96,8 @@ public class PostEvidenceController {
             evidencePostRepository.save(evidence);
         }
 
-        redirectAttributes.addFlashAttribute("success", "Post submitted successfully.");
-        return "redirect:/posts/my-post";
+        redirectAttributes.addFlashAttribute("successMessage", "Evidence submitted!");
+        return "redirect:/challenge/progress/" + userChallengeId;
     }
 
 

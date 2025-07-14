@@ -25,10 +25,6 @@ public class EvidencePost {
     private Post post;
 
     @ManyToOne
-    @JoinColumn(name = "challenge_id", nullable = false)
-    private Challenge challenge;
-
-    @ManyToOne
     @JoinColumn(name = "user_challenge_id", nullable = false)
     private UserChallenge userChallenge;
 

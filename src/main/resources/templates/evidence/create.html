@@ -5,7 +5,17 @@
     <title>Title</title>
 </head>
 <body>
+  <div th:if="${challengeMessage}" class="alert alert-success">
+    <p th:text="${challengeMessage}"></p>
+  </div>
+
+  <div class="alert alert-info">
+    📝 You are submitting evidence for:
+    <strong th:text="${challengeName}"></strong>
+  </div>
+
   <form th:action="@{/evidence/create}" method="post" enctype="multipart/form-data" th:object="${post}">
+    <input type="hidden" name="userChallengeId" th:value="${userChallenge.id}" />
     <label>Title:</label>
     <input type="text" th:field="*{title}" required /><br>
 
@@ -14,19 +24,6 @@
 
     <label>Image:</label>
     <input type="file" name="imageFile"><br>
-
-    <label>
-      <input type="checkbox" name="markAsEvidence" value="true"/> Mark this post as evidence
-    </label><br>
-
-    <label>Challenge:</label>
-    <select name="challengeId">
-      <option value="">-- Select Challenge --</option>
-      <option th:each="jc : ${joinedChallenges}"
-              th:value="${jc.challenge.id}"
-              th:text="${jc.challenge.name}"></option>
-    </select><br>
-
     <button type="submit">Submit Post</button>
   </form>
 </body>
