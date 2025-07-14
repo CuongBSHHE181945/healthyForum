@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+  <form th:action="@{/evidence/create}" method="post" enctype="multipart/form-data" th:object="${post}">
+    <label>Title:</label>
+    <input type="text" th:field="*{title}" required /><br>
+
+    <label>Content:</label>
+    <textarea th:field="*{content}" required></textarea><br>
+
+    <label>Image:</label>
+    <input type="file" name="imageFile"><br>
+
+    <label>
+      <input type="checkbox" name="markAsEvidence" value="true"/> Mark this post as evidence
+    </label><br>
+
+    <label>Challenge:</label>
+    <select name="challengeId">
+      <option value="">-- Select Challenge --</option>
+      <option th:each="jc : ${joinedChallenges}"
+              th:value="${jc.challenge.id}"
+              th:text="${jc.challenge.name}"></option>
+    </select><br>
+
+    <button type="submit">Submit Post</button>
+  </form>
+</body>
+</html>
