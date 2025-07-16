@@ -12,10 +12,12 @@ import com.healthyForum.repository.challenge.EvidencePostRepository;
 import com.healthyForum.repository.challenge.UserChallengeRepository;
 import com.healthyForum.service.UserService;
 import com.healthyForum.service.challenge.EvidenceService;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
@@ -44,6 +46,24 @@ public class PostEvidenceController {
         this.userService = userService;
         this.evidenceService = evidenceService;
     }
+
+    @GetMapping("/review/{userChallengeId}")
+    public String viewEvidenceToApprove(@PathVariable Integer userChallengeId, Model model, Principal principal) {
+        User user = userService.getCurrentUser(principal);
+        List<EvidencePost> evidenceList = evidenceService.getAllEvidenceForSameChallenge(userChallengeId, user.getId());
+        model.addAttribute("evidenceList", evidenceList);
+        return "evidence/review_list";
+    }
+
+    @PostMapping("/approve/{evidenceId}")
+    public String approveEvidence(@PathVariable Long evidenceId, @RequestParam String action) {
+        EvidencePost post = evidencePostRepository.findById(evidenceId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        post.setStatus(EvidenceStatus.valueOf(action)); // "APPROVED" or "REJECTED"
+        evidencePostRepository.save(post);
+        return "redirect:/evidence/review/" + post.getUserChallenge().getId();
+    }
+
 
     @GetMapping("/create")
     public String showCreateForm(@RequestParam Integer userChallengeId, Model model, Principal principal) {
@@ -92,6 +112,7 @@ public class PostEvidenceController {
             evidence.setVoteBased(false);
             evidence.setVoteTimeout(LocalDateTime.now().plusHours(24));
             evidence.setFallbackToAdmin(false);
+            evidence.setCreatedAt(LocalDateTime.now());
 
             evidencePostRepository.save(evidence);
         }

@@ -16,6 +16,7 @@
 
   <form th:action="@{/evidence/create}" method="post" enctype="multipart/form-data" th:object="${post}">
     <input type="hidden" name="userChallengeId" th:value="${userChallenge.id}" />
+    <input type="hidden" name="markAsEvidence" value="true"/>
     <label>Title:</label>
     <input type="text" th:field="*{title}" required /><br>
 

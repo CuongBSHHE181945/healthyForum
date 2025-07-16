@@ -1,15 +1,18 @@
 package com.healthyForum.controller.challenge;
 
+import com.healthyForum.model.EvidencePost;
 import com.healthyForum.model.User;
 import com.healthyForum.model.UserAccount;
 import com.healthyForum.model.challenge.UserChallenge;
 import com.healthyForum.model.challenge.UserChallengeProgress;
 import com.healthyForum.repository.UserAccountRepository;
 import com.healthyForum.repository.UserRepository;
+import com.healthyForum.repository.challenge.EvidencePostRepository;
 import com.healthyForum.repository.challenge.UserChallengeRepository;
 import com.healthyForum.service.challenge.ChallengeService;
 import com.healthyForum.service.challenge.ChallengeTrackingService;
 import com.healthyForum.service.UserService;
+import com.healthyForum.service.challenge.EvidenceService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
@@ -33,14 +36,16 @@ public class TickController {
     private final UserRepository userRepository;
     private final UserAccountRepository userAccountRepository;
     private final UserService userService;
+    private final EvidencePostRepository evidencePostRepository;
 
-    public TickController(ChallengeTrackingService challengeTrackingService, UserChallengeRepository userChallengeRepo, ChallengeService challengeService, UserRepository userRepository, UserAccountRepository userAccountRepository, UserService userService) {
+    public TickController(ChallengeTrackingService challengeTrackingService, UserChallengeRepository userChallengeRepo, ChallengeService challengeService, UserRepository userRepository, UserAccountRepository userAccountRepository, UserService userService, EvidencePostRepository evidencePostRepository) {
         this.challengeTrackingService = challengeTrackingService;
         this.userChallengeRepo = userChallengeRepo;
         this.challengeService = challengeService;
         this.userRepository = userRepository;
         this.userAccountRepository = userAccountRepository;
         this.userService = userService;
+        this.evidencePostRepository = evidencePostRepository;
     }
 
 //    @PostMapping("/tick/{id}")
@@ -68,7 +73,10 @@ public class TickController {
 //    }
 
     @GetMapping("/progress/{id}")
-    public String showProgress(@PathVariable("id") int userChallengeId, Model model) {
+    public String showProgress(@PathVariable("id") int userChallengeId, Model model, Principal principal) {
+        User user = userService.getCurrentUser(principal);
+        List<EvidencePost> evidence = evidencePostRepository.findByUserChallengeId(userChallengeId);
+
         UserChallenge uc = userChallengeRepo.findById(userChallengeId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         List<UserChallengeProgress> logs = challengeTrackingService.getProgress(userChallengeId);
@@ -76,6 +84,7 @@ public class TickController {
         int total = logs.size();
         int target = uc.getChallenge().getDurationDays();
 
+        model.addAttribute("evidence", evidence);
         model.addAttribute("userChallenge", uc);
         model.addAttribute("logs", logs);
         model.addAttribute("streak", streak);

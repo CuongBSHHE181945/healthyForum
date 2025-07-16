@@ -15,7 +15,30 @@
   <p th:text="${tickMessage}"></p>
 </div>
 
+<a th:href="@{'/evidence/review/' + ${userChallenge.id}}" class="forward-link">
+  → Approve Peers' Evidence
+</a>
+
 <a th:href="@{/evidence/create(userChallengeId=${userChallenge.id})}">Submit Today’s Evidence</a>
+
+<h1>My Posted Evidence</h1>
+
+<div th:if="${evidence.isEmpty()}">
+  <p>You haven’t posted any evidence yet.</p>
+</div>
+
+<!-- Challenge Group Header Tracking -->
+<div th:each="evidence : ${evidence}">
+
+    <!-- Evidence Entry -->
+    <div class="evidence-entry">
+      <strong th:text="${#temporals.format(evidence.createdAt, 'dd MMM yyyy')}">Date</strong>
+      <span>Status: <em th:text="${evidence.status}"></em></span><br/>
+      <span th:text="${evidence.post.content}">Caption</span><br/>
+      <img th:src="${evidence.post.imageUrl}" style="width: 200px;"/><br/>
+      <hr/>
+    </div>
+  </div>
 
 <p>Total Days Completed: <strong th:text="${total}"></strong> / <span th:text="${target}"></span></p>
 <p>🔥 Current Streak: <strong th:text="${streak}"></strong> day(s)</p>
