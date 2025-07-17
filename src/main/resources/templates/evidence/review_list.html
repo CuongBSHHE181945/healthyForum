@@ -2,22 +2,32 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <title>Evidence Approval</title>
+  <link rel="stylesheet" th:href="@{/css/evidence_list.css}" />
 </head>
 <body>
 <h2>Evidence Submitted for this Challenge</h2>
 
 <div th:each="evidence : ${evidenceList}">
-  <div style="border:1px solid #ccc; padding: 10px; margin-bottom: 10px;">
+  <div class="evidence-card">
     <p><strong>User:</strong> <span th:text="${evidence.userChallenge.user.username}"></span></p>
     <p><strong>Date:</strong> <span th:text="${#temporals.format(evidence.createdAt, 'dd MMM yyyy')}"></span></p>
     <p><strong>Status:</strong> <span th:text="${evidence.status}"></span></p>
     <p><strong>Caption:</strong> <span th:text="${evidence.post.content}"></span></p>
-    <img th:src="@{${evidence.post.imageUrl}}" style="max-width: 300px;"><br/>
+    <img th:src="@{${evidence.post.imageUrl}}" class="evidence-image"><br/>
 
-    <form th:action="@{'/evidence/approve/' + ${evidence.id}}" method="post">
-      <button type="submit" name="action" value="APPROVED">Approve</button>
-      <button type="submit" name="action" value="REJECTED">Reject</button>
+    <form th:action="@{'/evidence/react/' + ${evidence.post.id}}" method="post">
+      <button type="submit" name="reactionType" value="LIKE"
+              th:classappend="${userReactions[evidence.post.id]?.name() == 'LIKE'} ? 'highlight' : ''">
+        👍 <span th:text="${likeCounts[evidence.post.id]}"></span>
+      </button>
+
+      <button type="submit" name="reactionType" value="DISLIKE"
+              th:classappend="${userReactions[evidence.post.id]?.name() == 'DISLIKE'} ? 'highlight' : ''">
+        👎 <span th:text="${dislikeCounts[evidence.post.id]}"></span>
+      </button>
     </form>
+
+
   </div>
 </div>
 </body>

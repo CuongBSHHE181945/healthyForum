@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h2>Evidence Needing Manual Review</h2>
+
+<div th:each="evidence : ${underReview}">
+  <div class="evidence-entry">
+    <p><strong>User:</strong> <span th:text="${evidence.userChallenge.user.username}"></span></p>
+    <p><strong>Caption:</strong> <span th:text="${evidence.post.caption}"></span></p>
+    <img th:src="@{${evidence.post.imageUrl}}" width="300"/><br/>
+
+    <p>👍 <span th:text="${evidence.likeCount}"></span> | 👎 <span th:text="${evidence.dislikeCount}"></span></p>
+
+    <form th:action="@{'/admin/evidence/approve/' + ${evidence.id}}" method="post">
+      <button type="submit" name="action" value="APPROVE">Approve</button>
+      <button type="submit" name="action" value="REJECT">Reject</button>
+    </form>
+  </div>
+</div>
+
+</body>
+</html>

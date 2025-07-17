@@ -10,7 +10,6 @@ import com.healthyForum.repository.challenge.ChallengeTypeRepository;
 import com.healthyForum.service.UserService;
 import com.healthyForum.service.badge.BadgeService;
 import com.healthyForum.service.challenge.ChallengeService;
-import lombok.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,17 +18,13 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.io.File;
 import java.io.IOException;
 import java.security.Principal;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.UUID;
 
 @Controller
 @RequestMapping("/admin/personal-challenge")
-public class AdminPersonalChallengeController {
+public class AdminChallengeController {
 
         private final ChallengeService challengeService;
         private final ChallengeCategoryRepository challengeCategoryRepository;
@@ -37,7 +32,7 @@ public class AdminPersonalChallengeController {
         private final UserService userService;
         private final BadgeService badgeService;
 
-    public AdminPersonalChallengeController(ChallengeService challengeService, ChallengeCategoryRepository challengeCategoryRepository, ChallengeTypeRepository challengeTypeRepository, UserService userService, BadgeService badgeService) {
+    public AdminChallengeController(ChallengeService challengeService, ChallengeCategoryRepository challengeCategoryRepository, ChallengeTypeRepository challengeTypeRepository, UserService userService, BadgeService badgeService) {
         this.challengeService = challengeService;
         this.challengeCategoryRepository = challengeCategoryRepository;
         this.challengeTypeRepository = challengeTypeRepository;
@@ -127,4 +122,5 @@ public class AdminPersonalChallengeController {
             }
             return "redirect:/admin/personal-challenge";
         }
+
 }

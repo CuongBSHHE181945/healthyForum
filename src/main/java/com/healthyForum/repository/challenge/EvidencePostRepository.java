@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface EvidencePostRepository extends JpaRepository<EvidencePost, Long> {
+public interface EvidencePostRepository extends JpaRepository<EvidencePost, Integer> {
     List<EvidencePost> findByStatus(EvidenceStatus status);
     List<EvidencePost> findByUserChallenge_User(User user);
     List<EvidencePost> findByUserChallengeId(Integer userChallengeId);
@@ -25,7 +25,7 @@ public interface EvidencePostRepository extends JpaRepository<EvidencePost, Long
     WHERE uc.id IN :userChallengeIds AND uc.user.id <> :currentUserId
     """)
     List<EvidencePost> findAllByUserChallengeIdsExcludingUser(
-            @Param("userChallengeIds") List<Long> userChallengeIds,
-            @Param("currentUserId") Long currentUserId
+            @Param("userChallengeIds") List<Integer> userChallengeIds,
+            @Param("currentUserId") Integer currentUserId
     );
 }

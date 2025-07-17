@@ -1,0 +1,13 @@
+/* Evidence Review List Styles */
+.evidence-card {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+.evidence-image {
+  max-width: 300px;
+}
+button.highlight {
+  background-color: #ffe066;
+  border-color: #ffd700;
+} 

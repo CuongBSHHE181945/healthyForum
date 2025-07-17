@@ -2,6 +2,7 @@ package com.healthyForum.controller.challenge;
 
 import com.healthyForum.model.*;
 import com.healthyForum.model.Enum.EvidenceStatus;
+import com.healthyForum.model.Enum.ReactionType;
 import com.healthyForum.model.Enum.Visibility;
 import com.healthyForum.model.EvidencePost;
 import com.healthyForum.model.challenge.*;
@@ -9,6 +10,7 @@ import com.healthyForum.repository.PostRepository;
 import com.healthyForum.repository.UserRepository;
 import com.healthyForum.repository.challenge.ChallengeRepository;
 import com.healthyForum.repository.challenge.EvidencePostRepository;
+import com.healthyForum.repository.challenge.EvidenceReactionRepository;
 import com.healthyForum.repository.challenge.UserChallengeRepository;
 import com.healthyForum.service.UserService;
 import com.healthyForum.service.challenge.EvidenceService;
@@ -23,7 +25,10 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.io.IOException;
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/evidence")
@@ -36,8 +41,9 @@ public class PostEvidenceController {
     private final UserRepository userRepository;
     private final UserService userService;
     private final EvidenceService evidenceService;
+    private final EvidenceReactionRepository evidenceReactionRepository;
 
-    public PostEvidenceController(PostRepository postRepository, EvidencePostRepository evidencePostRepository, ChallengeRepository challengeRepository, UserChallengeRepository userChallengeRepository, UserRepository userRepository, UserService userService, EvidenceService evidenceService) {
+    public PostEvidenceController(PostRepository postRepository, EvidencePostRepository evidencePostRepository, ChallengeRepository challengeRepository, UserChallengeRepository userChallengeRepository, UserRepository userRepository, UserService userService, EvidenceService evidenceService, EvidenceReactionRepository evidenceReactionRepository) {
         this.postRepository = postRepository;
         this.evidencePostRepository = evidencePostRepository;
         this.challengeRepository = challengeRepository;
@@ -45,22 +51,43 @@ public class PostEvidenceController {
         this.userRepository = userRepository;
         this.userService = userService;
         this.evidenceService = evidenceService;
+        this.evidenceReactionRepository = evidenceReactionRepository;
     }
 
     @GetMapping("/review/{userChallengeId}")
     public String viewEvidenceToApprove(@PathVariable Integer userChallengeId, Model model, Principal principal) {
         User user = userService.getCurrentUser(principal);
         List<EvidencePost> evidenceList = evidenceService.getAllEvidenceForSameChallenge(userChallengeId, user.getId());
+
+        Map<Long, Long> likeCounts = new HashMap<>();
+        Map<Long, Long> dislikeCounts = new HashMap<>();
+        Map<Long, ReactionType> userReactions = new HashMap<>();
+
+        for (EvidencePost evidence : evidenceList) {
+            Long postId = evidence.getPost().getId();
+            likeCounts.put(postId, evidenceReactionRepository.countByPostIdAndReactionType(postId, ReactionType.LIKE));
+            dislikeCounts.put(postId, evidenceReactionRepository.countByPostIdAndReactionType(postId, ReactionType.DISLIKE));
+
+            Optional<EvidenceReaction> optionalReaction = evidenceReactionRepository.findByPostIdAndUserId(postId, user.getId());
+            if (optionalReaction.isPresent()) {
+                userReactions.put(postId, optionalReaction.get().getReactionType());
+            }
+        }
+
         model.addAttribute("evidenceList", evidenceList);
+        model.addAttribute("likeCounts", likeCounts);
+        model.addAttribute("dislikeCounts", dislikeCounts);
+        model.addAttribute("userReactions", userReactions);
+
         return "evidence/review_list";
     }
 
-    @PostMapping("/approve/{evidenceId}")
-    public String approveEvidence(@PathVariable Long evidenceId, @RequestParam String action) {
+    @PostMapping("/react/{evidenceId}")
+    public String approveEvidence(@PathVariable Integer evidenceId, @RequestParam String reactionType, Principal principal) {
+        User user = userService.getCurrentUser(principal);
         EvidencePost post = evidencePostRepository.findById(evidenceId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        post.setStatus(EvidenceStatus.valueOf(action)); // "APPROVED" or "REJECTED"
-        evidencePostRepository.save(post);
+        evidenceService.reactToEvidence(user, evidenceId, reactionType);
         return "redirect:/evidence/review/" + post.getUserChallenge().getId();
     }
 
