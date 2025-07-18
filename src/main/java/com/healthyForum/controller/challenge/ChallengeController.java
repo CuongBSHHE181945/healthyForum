@@ -191,6 +191,8 @@ public class ChallengeController {
         challengeService.updateChallenge(updated ,user);
 
         redirect.addFlashAttribute("success", "Challenge updated.");
+        if (userService.isAdminOrModerator(user.getRole()))
+            return "redirect:/admin/personal-challenge";
         return "redirect:/challenge/my-created";
     }
 }
