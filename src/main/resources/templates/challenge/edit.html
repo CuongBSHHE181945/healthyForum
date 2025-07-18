@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+  <form th:action="@{/challenge/edit/{id}(id=${challenge.id})}" th:object="${challenge}" method="post">
+    <label>Name</label>
+    <input type="text" th:field="*{name}" required/>
+
+    <label>Description</label>
+    <textarea th:field="*{description}" rows="4"></textarea>
+
+    <label>Duration (days)</label>
+    <input type="number" th:field="*{durationDays}" min="1"/>
+
+    <label>Category:</label>
+    <select th:field="*{category.id}" required>
+      <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"></option>
+    </select><br>
+
+    <input type="hidden" name="type.id" value="1">
+
+    <!-- Optional: challenge is enabled by default -->
+    <input type="hidden" th:field="*{status}" value="true">
+
+    <button type="submit">Update Challenge</button>
+  </form>
+</body>
+</html>

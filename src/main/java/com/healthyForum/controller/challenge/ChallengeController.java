@@ -9,6 +9,8 @@ import com.healthyForum.model.challenge.UserChallenge;
 import com.healthyForum.repository.UserAccountRepository;
 import com.healthyForum.repository.UserRepository;
 import com.healthyForum.repository.challenge.ChallengeCategoryRepository;
+import com.healthyForum.repository.challenge.ChallengeRepository;
+import com.healthyForum.repository.challenge.ChallengeTypeRepository;
 import com.healthyForum.service.UserService;
 import com.healthyForum.service.badge.BadgeService;
 import com.healthyForum.service.challenge.ChallengeService;
@@ -40,14 +42,18 @@ public class ChallengeController {
     private final UserService userService;
     private final ChallengeCategoryRepository challengeCategoryRepository;
     private final BadgeService badgeService;
+    private final ChallengeTypeRepository challengeTypeRepository;
+    private final ChallengeRepository challengeRepository;
 
-    public ChallengeController(ChallengeService challengeService, UserRepository userRepository, UserAccountRepository userAccountRepository, UserService userService, ChallengeCategoryRepository challengeCategoryRepository, BadgeService badgeService) {
+    public ChallengeController(ChallengeService challengeService, UserRepository userRepository, UserAccountRepository userAccountRepository, UserService userService, ChallengeCategoryRepository challengeCategoryRepository, BadgeService badgeService, ChallengeTypeRepository challengeTypeRepository, ChallengeRepository challengeRepository) {
         this.challengeService = challengeService;
         this.userRepository = userRepository;
         this.userAccountRepository = userAccountRepository;
         this.userService = userService;
         this.challengeCategoryRepository = challengeCategoryRepository;
         this.badgeService = badgeService;
+        this.challengeTypeRepository = challengeTypeRepository;
+        this.challengeRepository = challengeRepository;
     }
 
     @GetMapping
@@ -67,7 +73,7 @@ public class ChallengeController {
         return "challenge/list";
     }
 
-    @GetMapping("/my")
+    @GetMapping("/joined")
     public String showMyChallenges(Model model, Principal principal) {
         User user = userService.getCurrentUser(principal);
         if (user == null) {
@@ -78,6 +84,16 @@ public class ChallengeController {
         model.addAttribute("myChallenges", active);
         return "challenge/my-challenge";
     }
+
+    @GetMapping("/my-created")
+    public String viewMyChallenges(Model model, Principal principal) {
+        User user = userService.getCurrentUser(principal);
+        List<Challenge> challenges = challengeRepository.findByCreator(user);
+
+        model.addAttribute("challenges", challenges);
+        return "challenge/my-created";
+    }
+
 
     @GetMapping("/{id}")
     public String showChallengeDetail(@PathVariable int id, Model model, Principal principal) {
@@ -142,6 +158,7 @@ public class ChallengeController {
             // Use helper for file upload
             Badge badge = badgeService.handleBadgeIconUpload(badgeName,badgeDescription,badgeIconFile,lockedIconFile,username);
             // Save both challenge and badge
+            challenge.setCreator(user);
             challengeService.createChallengeWithBadge(challenge, badge);
             redirectAttributes.addFlashAttribute("success", "Challenge and badge created!");
         } catch (IOException e) {
@@ -149,6 +166,32 @@ public class ChallengeController {
             return "redirect:/challenge/create";
         }
         return "redirect:/challenge";
+    }
+
+    @GetMapping("/edit/{id}")
+    public String editForm(@PathVariable Integer id, Model model, Principal principal) {
+        User user = userService.getCurrentUser(principal);
+        Challenge challenge = challengeService.getChallengeForEdit(id, user);
+
+        boolean inUse = challengeService.isChallengeInUse(id);
+
+        model.addAttribute("challenge", challenge);
+        model.addAttribute("inUse", inUse);
+        model.addAttribute("categories", challengeCategoryRepository.findAll());
+        model.addAttribute("types", challengeTypeRepository.findAll());
+        return "challenge/edit";
+    }
+
+    @PostMapping("/edit/{id}")
+    public String editSubmit(@PathVariable Integer id,
+                             @ModelAttribute Challenge updated,
+                             Principal principal,
+                             RedirectAttributes redirect) {
+        User user = userService.getCurrentUser(principal);
+        challengeService.updateChallenge(updated ,user);
+
+        redirect.addFlashAttribute("success", "Challenge updated.");
+        return "redirect:/challenge/my-created";
     }
 }
 

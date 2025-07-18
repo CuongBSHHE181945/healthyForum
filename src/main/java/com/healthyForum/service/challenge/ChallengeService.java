@@ -10,7 +10,10 @@ import com.healthyForum.repository.badge.BadgeSourceTypeRepository;
 import com.healthyForum.repository.badge.UserBadgeRepository;
 import com.healthyForum.repository.challenge.ChallengeRepository;
 import com.healthyForum.repository.challenge.UserChallengeRepository;
+import com.healthyForum.service.UserServiceImpl;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -29,14 +32,16 @@ public class ChallengeService {
     private final UserBadgeRepository userBadgeRepository;
     private final BadgeRepository badgeRepository;
     private final BadgeSourceTypeRepository badgeSourceTypeRepository;
+    private final UserServiceImpl userService;
     private final BadgeRequirementRepository badgeRequirementRepository;
 
-    public ChallengeService(ChallengeRepository challengeRepo, UserChallengeRepository userChallengeRepository, UserBadgeRepository userBadgeRepository, BadgeRepository badgeRepository, BadgeSourceTypeRepository badgeSourceTypeRepository, BadgeRequirementRepository badgeRequirementRepository) {
+    public ChallengeService(ChallengeRepository challengeRepo, UserChallengeRepository userChallengeRepository, UserBadgeRepository userBadgeRepository, BadgeRepository badgeRepository, BadgeSourceTypeRepository badgeSourceTypeRepository, UserServiceImpl userService, BadgeRequirementRepository badgeRequirementRepository) {
         this.challengeRepo = challengeRepo;
         this.userChallengeRepository = userChallengeRepository;
         this.userBadgeRepository = userBadgeRepository;
         this.badgeRepository = badgeRepository;
         this.badgeSourceTypeRepository = badgeSourceTypeRepository;
+        this.userService = userService;
         this.badgeRequirementRepository = badgeRequirementRepository;
     }
 
@@ -111,10 +116,37 @@ public class ChallengeService {
         badgeRequirementRepository.save(requirement);
     }
 
-    public void updateChallenge(Challenge challenge) {
-        challengeRepo.save(challenge);
+    public Challenge getChallengeForEdit(Integer challengeId, User currentUser) {
+        Challenge challenge = challengeRepo.findById(challengeId)
+                .orElseThrow(() -> new EntityNotFoundException("Challenge not found"));
+
+        boolean isOwner = challenge.getCreator().getId().equals(currentUser.getId());
+        if (!isOwner && !userService.isAdminOrModerator(currentUser.getRole())) {
+            throw new AccessDeniedException("You cannot edit this challenge.");
+        }
+        return challenge;
     }
 
+    public boolean isChallengeInUse(int challengeId) {
+        return userChallengeRepository.existsByChallengeId(challengeId);
+    }
+
+    public void updateChallenge(Challenge updated, User user) {
+        updated.setCreator(user);
+        boolean inUse = isChallengeInUse(updated.getId());
+        if (inUse) {
+            // Prevent updating critical fields
+            Challenge existing = challengeRepo.findById(updated.getId())
+                    .orElseThrow(() -> new EntityNotFoundException("Challenge not found"));
+
+            // Preserve restricted fields
+            updated.setType(existing.getType());
+            updated.setCategory(existing.getCategory());
+            updated.setCreator(existing.getCreator());
+        }
+
+        challengeRepo.save(updated);
+    }
     public void deleteChallenge(int id) {
         challengeRepo.deleteById(id);
     }

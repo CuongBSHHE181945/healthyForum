@@ -1,5 +1,6 @@
 package com.healthyForum.service;
 
+import com.healthyForum.model.Role;
 import com.healthyForum.model.User;
 import com.healthyForum.model.UserAccount;
 import com.healthyForum.repository.UserRepository;
@@ -178,6 +179,14 @@ public class UserServiceImpl implements UserService {
         }
         logger.warn("getCurrentUser(Object): user not found");
         return null;
+    }
+
+    @Override
+    public boolean isAdminOrModerator(Role role){
+        String roleName = role.getRoleName();
+        if ("ADMIN".equals(roleName)||"MODERATOR".equals(roleName))
+            return true;
+        return false;
     }
 }
 

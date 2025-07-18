@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>My Created Challenges</title>
+</head>
+<body>
+<h2>My Created Challenges</h2>
+
+<table border="1">
+  <thead>
+  <tr>
+    <th>Name</th>
+    <th>Duration (days)</th>
+    <th>Category</th>
+    <th>Type</th>
+    <th>Status</th>
+    <th>Edit</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr th:each="challenge : ${challenges}">
+    <td th:text="${challenge.name}">Challenge Name</td>
+    <td th:text="${challenge.durationDays}">30</td>
+    <td th:text="${challenge.category.name}">Health</td>
+    <td th:text="${challenge.type.name}">Public</td>
+    <td th:text="${challenge.status ? 'Active' : 'Inactive'}">Active</td>
+    <td>
+      <a th:href="@{'/challenge/edit/' + ${challenge.id}}">Edit</a>
+    </td>
+  </tr>
+  </tbody>
+</table>
+</body>
+</html>

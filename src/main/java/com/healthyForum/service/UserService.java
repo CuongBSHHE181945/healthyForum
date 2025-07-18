@@ -1,5 +1,6 @@
 package com.healthyForum.service;
 
+import com.healthyForum.model.Role;
 import com.healthyForum.model.User;
 import org.springframework.stereotype.Service;
 
@@ -13,4 +14,5 @@ public interface UserService {
        void unsuspendUser(Long userId);
        User getCurrentUser(Principal principal);
        User getCurrentUser(Object principal);
+       boolean isAdminOrModerator(Role role);
 }

@@ -91,36 +91,41 @@ public class AdminChallengeController {
 
 
     @GetMapping("/edit/{id}")
-        public String edit(@PathVariable int id, Model model) {
-            Challenge challenge = challengeService.getChallengeById(id)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-            model.addAttribute("challenge", challenge);
-            return "admin/personal_challenge/edit";
-        }
+    public String editForm(@PathVariable Integer id, Model model, Principal principal) {
+        User user = userService.getCurrentUser(principal);
+        Challenge challenge = challengeService.getChallengeForEdit(id, user);
 
-        @PostMapping("/edit")
-        public String update(@ModelAttribute("challenge") Challenge challenge, RedirectAttributes redirectAttributes) {
-            challengeService.updateChallenge(challenge);
-            redirectAttributes.addFlashAttribute("success", "Challenge updated successfully!");
-            return "redirect:/admin/personal-challenge";
-        }
+        boolean inUse = challengeService.isChallengeInUse(id);
 
-        @GetMapping("/delete/{id}")
-        public String delete(@PathVariable int id, RedirectAttributes redirectAttributes) {
-            challengeService.deleteChallenge(id);
-            redirectAttributes.addFlashAttribute("success", "Challenge deleted successfully!");
-            return "redirect:/admin/personal-challenge";
-        }
+        model.addAttribute("challenge", challenge);
+        model.addAttribute("inUse", inUse);
+        model.addAttribute("categories", challengeCategoryRepository.findAll());
+        model.addAttribute("types", challengeTypeRepository.findAll());
+        return "challenge/edit";
+    }
 
-        @GetMapping("/toggle-status/{id}")
-        public String toggleStatus(@PathVariable int id) {
+    @PostMapping("/edit/{id}")
+    public String editSubmit(@PathVariable Integer id,
+                             @ModelAttribute Challenge updated,
+                             Principal principal,
+                             RedirectAttributes redirect) {
+        User user = userService.getCurrentUser(principal);
+
+        challengeService.updateChallenge(updated, user);
+
+        redirect.addFlashAttribute("success", "Challenge updated.");
+        return "redirect:/challenges/my";
+    }
+
+    @GetMapping("/toggle-status/{id}")
+        public String toggleStatus(@PathVariable int id, Principal principal) {
+        User user = userService.getCurrentUser(principal);
             Challenge challenge = challengeService.getChallengeById(id)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
             if (challenge != null) {
                 challenge.setStatus(!challenge.isStatus());
-                challengeService.updateChallenge(challenge);
+                challengeService.updateChallenge(challenge, user);
             }
             return "redirect:/admin/personal-challenge";
         }
-
 }

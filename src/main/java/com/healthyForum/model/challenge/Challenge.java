@@ -1,5 +1,6 @@
 package com.healthyForum.model.challenge;
 
+import com.healthyForum.model.User;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -31,4 +32,8 @@ public class Challenge {
     @ManyToOne
     @JoinColumn(name = "category_id")
     private ChallengeCategory category;
+
+    @ManyToOne
+    @JoinColumn(name = "creator_id", nullable = false)
+    private User creator;
 }
