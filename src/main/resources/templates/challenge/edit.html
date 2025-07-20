@@ -5,6 +5,7 @@
     <title>Title</title>
 </head>
 <body>
+<a href="/challenge/my-created">My created Challenges</a>
   <form th:action="@{/challenge/edit/{id}(id=${challenge.id})}" th:object="${challenge}" method="post">
     <label>Name</label>
     <input type="text" th:field="*{name}" required/>

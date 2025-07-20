@@ -8,7 +8,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface EvidencePostRepository extends JpaRepository<EvidencePost, Integer> {
@@ -28,4 +30,10 @@ public interface EvidencePostRepository extends JpaRepository<EvidencePost, Inte
             @Param("userChallengeIds") List<Integer> userChallengeIds,
             @Param("currentUserId") Integer currentUserId
     );
+
+    @Query("SELECT ep FROM EvidencePost ep JOIN ep.post p WHERE ep.userChallenge.id = :userChallengeId AND DATE(p.createdAt) = :date")
+    Optional<EvidencePost> findByUserChallengeIdAndPostDate(@Param("userChallengeId") Integer userChallengeId,
+                                                            @Param("date") LocalDate date);
+
+    Optional<EvidencePost> findTopByUserChallengeIdOrderByCreatedAtDesc(Integer userChallengeId);
 }

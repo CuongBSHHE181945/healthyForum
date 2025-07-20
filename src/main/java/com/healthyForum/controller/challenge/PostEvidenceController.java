@@ -13,8 +13,10 @@ import com.healthyForum.repository.challenge.EvidencePostRepository;
 import com.healthyForum.repository.challenge.EvidenceReactionRepository;
 import com.healthyForum.repository.challenge.UserChallengeRepository;
 import com.healthyForum.service.UserService;
+import com.healthyForum.service.challenge.ChallengeTrackingService;
 import com.healthyForum.service.challenge.EvidenceService;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +26,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
 import java.security.Principal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -42,8 +45,9 @@ public class PostEvidenceController {
     private final UserService userService;
     private final EvidenceService evidenceService;
     private final EvidenceReactionRepository evidenceReactionRepository;
+    private final ChallengeTrackingService challengeTrackingService;
 
-    public PostEvidenceController(PostRepository postRepository, EvidencePostRepository evidencePostRepository, ChallengeRepository challengeRepository, UserChallengeRepository userChallengeRepository, UserRepository userRepository, UserService userService, EvidenceService evidenceService, EvidenceReactionRepository evidenceReactionRepository) {
+    public PostEvidenceController(PostRepository postRepository, EvidencePostRepository evidencePostRepository, ChallengeRepository challengeRepository, UserChallengeRepository userChallengeRepository, UserRepository userRepository, UserService userService, EvidenceService evidenceService, EvidenceReactionRepository evidenceReactionRepository, ChallengeTrackingService challengeTrackingService) {
         this.postRepository = postRepository;
         this.evidencePostRepository = evidencePostRepository;
         this.challengeRepository = challengeRepository;
@@ -52,6 +56,7 @@ public class PostEvidenceController {
         this.userService = userService;
         this.evidenceService = evidenceService;
         this.evidenceReactionRepository = evidenceReactionRepository;
+        this.challengeTrackingService = challengeTrackingService;
     }
 
     @GetMapping("/review/{userChallengeId}")
@@ -91,7 +96,6 @@ public class PostEvidenceController {
         return "redirect:/evidence/review/" + post.getUserChallenge().getId();
     }
 
-
     @GetMapping("/create")
     public String showCreateForm(@RequestParam Integer userChallengeId, Model model, Principal principal) {
 
@@ -99,9 +103,17 @@ public class PostEvidenceController {
         UserChallenge userChallenge = userChallengeRepository.findById(userChallengeId)
                 .orElseThrow(() -> new IllegalStateException("User has not joined this challenge."));
 
-        model.addAttribute("post", new Post());
+        int currentDay = challengeTrackingService.getProgress(userChallengeId).size() + 1;
+        String challengeTitle = userChallenge.getChallenge().getName();
+
+        String suggestedTitle = "Day " + currentDay + " – " + challengeTitle;
+
+        Post post = new Post();
+        post.setTitle(suggestedTitle);
+
+        model.addAttribute("post", post);
         model.addAttribute("userChallenge", userChallenge);
-        model.addAttribute("challengeName", userChallenge.getChallenge().getName());
+        model.addAttribute("challengeName", challengeTitle);
 
         return "evidence/create"; // Thymeleaf template
     }
@@ -148,6 +160,73 @@ public class PostEvidenceController {
         return "redirect:/challenge/progress/" + userChallengeId;
     }
 
+    @GetMapping("/edit/{evidenceId}")
+    public String showEditForm(@PathVariable Integer evidenceId, Model model, Principal principal) {
+        EvidencePost evidence = evidencePostRepository.findById(evidenceId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
+        if (!evidence.getPost().getUser().getUsername().equals(principal.getName())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
+
+        model.addAttribute("evidenceId", evidenceId);
+        model.addAttribute("post", evidence.getPost());
+        return "evidence/edit";
+    }
+
+    @PostMapping("/edit")
+    public String updateEvidencePost(@RequestParam("evidenceId") Integer evidenceId,
+                                     @ModelAttribute("post") Post updatedPost,
+                                     @RequestParam(required = false) MultipartFile imageFile,
+                                     Principal principal,
+                                     RedirectAttributes redirectAttributes) throws IOException {
+        EvidencePost evidence = evidencePostRepository.findById(evidenceId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        if (!evidence.getPost().getUser().getUsername().equals(principal.getName())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
+
+        Post post = evidence.getPost();
+        post.setTitle(updatedPost.getTitle());
+        post.setContent(updatedPost.getContent());
+
+        if (imageFile != null && !imageFile.isEmpty()) {
+            String newUrl = evidenceService.saveEvidenceImage(imageFile, principal.getName());
+            post.setImageUrl(newUrl);
+        }
+
+        postRepository.save(post);
+
+        redirectAttributes.addFlashAttribute("success", "Evidence updated.");
+        return "redirect:/challenge/progress/" + evidence.getUserChallenge().getId();
+    }
+
+    @GetMapping("/retry/{userChallengeId}")
+    public String showRetryEvidenceForm(@PathVariable Integer userChallengeId, Model model, Principal principal,
+                                        RedirectAttributes redirectAttributes) {
+        EvidencePost todayEvidence = evidencePostRepository.findByUserChallengeIdAndPostDate(userChallengeId, LocalDate.now())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        EvidenceStatus status = todayEvidence.getStatus();
+
+        switch (status) {
+            case APPROVED, PENDING, UNDER_REVIEW:
+                // Already submitted → redirect to edit
+                return "redirect:/evidence/edit/" + todayEvidence.getPost().getId();
+
+            case REJECTED:
+                // Retry → pass note to user
+                redirectAttributes.addFlashAttribute("retrying", true);
+                redirectAttributes.addFlashAttribute("rejectedReason", "You got too many dislike");
+                break;
+
+            default:
+                // fallback (optional)
+                return "redirect:/evidence/create?userChallengeId=" + userChallengeId;
+        }
+
+        return "redirect:/evidence/create?userChallengeId=" + userChallengeId;
+    }
 }
 

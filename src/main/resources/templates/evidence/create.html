@@ -14,11 +14,18 @@
     <strong th:text="${challengeName}"></strong>
   </div>
 
+  <div th:if="${retrying}">
+    <div class="alert alert-warning">
+      You are retrying your evidence for today. Reason for rejection:
+      <i th:text="${rejectedReason}">...</i>
+    </div>
+  </div>
+  <a th:href="@{'/challenge/progress/' + ${userChallenge.id}}">Back to challenge's progress</a>
   <form th:action="@{/evidence/create}" method="post" enctype="multipart/form-data" th:object="${post}">
     <input type="hidden" name="userChallengeId" th:value="${userChallenge.id}" />
     <input type="hidden" name="markAsEvidence" value="true"/>
     <label>Title:</label>
-    <input type="text" th:field="*{title}" required /><br>
+    <input type="text" th:field="*{title}" th:value="${suggestedTitle}" required /><br>
 
     <label>Content:</label>
     <textarea th:field="*{content}" required></textarea><br>

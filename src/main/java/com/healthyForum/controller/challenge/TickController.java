@@ -1,5 +1,6 @@
 package com.healthyForum.controller.challenge;
 
+import com.healthyForum.model.Enum.EvidenceStatus;
 import com.healthyForum.model.EvidencePost;
 import com.healthyForum.model.User;
 import com.healthyForum.model.UserAccount;
@@ -26,6 +27,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/challenge")
@@ -37,8 +39,9 @@ public class TickController {
     private final UserAccountRepository userAccountRepository;
     private final UserService userService;
     private final EvidencePostRepository evidencePostRepository;
+    private final EvidenceService evidenceService;
 
-    public TickController(ChallengeTrackingService challengeTrackingService, UserChallengeRepository userChallengeRepo, ChallengeService challengeService, UserRepository userRepository, UserAccountRepository userAccountRepository, UserService userService, EvidencePostRepository evidencePostRepository) {
+    public TickController(ChallengeTrackingService challengeTrackingService, UserChallengeRepository userChallengeRepo, ChallengeService challengeService, UserRepository userRepository, UserAccountRepository userAccountRepository, UserService userService, EvidencePostRepository evidencePostRepository, EvidenceService evidenceService) {
         this.challengeTrackingService = challengeTrackingService;
         this.userChallengeRepo = userChallengeRepo;
         this.challengeService = challengeService;
@@ -46,6 +49,7 @@ public class TickController {
         this.userAccountRepository = userAccountRepository;
         this.userService = userService;
         this.evidencePostRepository = evidencePostRepository;
+        this.evidenceService = evidenceService;
     }
 
 //    @PostMapping("/tick/{id}")
@@ -90,6 +94,22 @@ public class TickController {
         model.addAttribute("streak", streak);
         model.addAttribute("total", total);
         model.addAttribute("target", target);
+
+        Optional<EvidencePost> todayEvidence = evidenceService.getLatestEvidence(userChallengeId);
+        String evidenceAction = "upload"; // default
+
+        if (todayEvidence.isPresent()) {
+            EvidenceStatus status = todayEvidence.get().getStatus(); // PENDING, APPROVED, REJECTED
+            if (status == EvidenceStatus.REJECTED) {
+                evidenceAction = "retry";
+            } else {
+                evidenceAction = "edit";
+            }
+        }
+
+        model.addAttribute("evidenceAction", evidenceAction);
+        model.addAttribute("todayEvidence", todayEvidence.orElse(null));
+
         return "challenge/progress";
     }
 }

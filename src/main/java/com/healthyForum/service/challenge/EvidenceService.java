@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -108,4 +109,12 @@ public class EvidenceService {
         }
     }
 
+    public Optional<EvidencePost> getTodaysEvidence(Integer userChallengeId) {
+        return evidencePostRepository.findByUserChallengeIdAndPostDate(userChallengeId, LocalDate.now());
+    }
+
+    public Optional<EvidencePost> getLatestEvidence(Integer userChallengeId) {
+        return evidencePostRepository
+                .findTopByUserChallengeIdOrderByCreatedAtDesc(userChallengeId);
+    }
 }

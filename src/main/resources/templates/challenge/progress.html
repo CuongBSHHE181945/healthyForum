@@ -19,7 +19,19 @@
   → Approve Peers' Evidence
 </a>
 
-<a th:href="@{/evidence/create(userChallengeId=${userChallenge.id})}">Submit Today’s Evidence</a>
+<th:block th:switch="${evidenceAction}">
+  <a th:case="'upload'"
+     th:href="@{/evidence/create(userChallengeId=${userChallenge.id})}"
+     class="btn btn-primary">Upload Evidence for today</a>
+
+  <a th:case="'edit'"
+     th:href="@{/evidence/edit/{id}(id=${todayEvidence.id})}"
+     class="btn btn-warning">Edit Evidence</a>
+
+  <a th:case="'retry'"
+     th:href="@{/evidence/retry/{id}(id=${userChallenge.id})}"
+     class="btn btn-danger">Retry Challenge for today</a>
+</th:block>
 
 <h1>My Posted Evidence</h1>
 
@@ -35,7 +47,7 @@
       <strong th:text="${#temporals.format(evidence.createdAt, 'dd MMM yyyy')}">Date</strong>
       <span>Status: <em th:text="${evidence.status}"></em></span><br/>
       <span th:text="${evidence.post.content}">Caption</span><br/>
-      <img th:src="${evidence.post.imageUrl}" style="width: 200px;"/><br/>
+      <img th:src="${evidence.post.imageUrl}" style="width: 200px;" />
       <hr/>
     </div>
   </div>
@@ -48,6 +60,6 @@
   <li th:each="log : ${logs}" th:text="${log.date}"></li>
 </ul>
 
-<a href="/challenge/my" class="back-link">← Back to My Challenges</a>
+<a href="/challenge/joined" class="back-link">← Back to My Challenges</a>
 </body>
 </html>

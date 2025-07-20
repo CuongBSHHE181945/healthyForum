@@ -5,6 +5,7 @@
   <link rel="stylesheet" th:href="@{/css/evidence_list.css}" />
 </head>
 <body>
+<a th:href="@{'/challenge/progress/' + ${userChallenge.id}}">Back to challenge's progress</a>
 <h2>Evidence Submitted for this Challenge</h2>
 
 <div th:each="evidence : ${evidenceList}">
