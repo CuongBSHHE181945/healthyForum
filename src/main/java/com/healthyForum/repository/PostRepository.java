@@ -3,6 +3,9 @@ package com.healthyForum.repository;
 import com.healthyForum.model.Enum.Visibility;
 import com.healthyForum.model.Post;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -15,4 +18,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     List<Post> findByIsDraftFalseAndVisibilityAndBannedFalse(Visibility visibility);
 
+    @Query("SELECT p FROM Post p WHERE p.isDraft = false AND p.banned = false AND p.visibility = :visibility AND (LOWER(p.title) LIKE :pattern OR p.content LIKE :pattern) ORDER BY p.id DESC")
+    List<Post> searchPosts(@Param("pattern") String pattern, @Param("visibility") Visibility visibility, org.springframework.data.domain.Pageable pageable);
 }
