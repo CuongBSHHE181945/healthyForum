@@ -1,7 +1,9 @@
 package com.healthyForum.service;
 
+import com.healthyForum.model.Follow;
 import com.healthyForum.model.User;
 import com.healthyForum.model.UserAccount;
+import com.healthyForum.repository.FollowRepository;
 import com.healthyForum.repository.UserRepository;
 import com.healthyForum.repository.UserAccountRepository;
 import org.slf4j.Logger;
@@ -24,6 +26,9 @@ public class UserServiceImpl implements UserService {
     
     @Autowired
     private UserAccountRepository userAccountRepository;
+
+    @Autowired
+    private FollowRepository followRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -178,6 +183,33 @@ public class UserServiceImpl implements UserService {
         }
         logger.warn("getCurrentUser(Object): user not found");
         return null;
+    }
+
+    @Override
+    public User getUserById(Long id) {
+        return userRepository.findById(id).orElse(null);
+    }
+
+    @Override
+    public boolean isFollowing(User follower, User followed) {
+        return followRepository.existsByFollowerAndFollowed(follower, followed);
+    }
+
+    @Transactional
+    @Override
+    public void follow(User follower, User followed) {
+        if (!isFollowing(follower, followed)) {
+            Follow follow = new Follow();
+            follow.setFollower(follower);
+            follow.setFollowed(followed);
+            followRepository.save(follow);
+        }
+    }
+
+    @Transactional
+    @Override
+    public void unfollow(User follower, User followed) {
+        followRepository.deleteByFollowerAndFollowed(follower, followed);
     }
 }
 

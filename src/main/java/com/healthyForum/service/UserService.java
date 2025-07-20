@@ -13,4 +13,8 @@ public interface UserService {
        void unsuspendUser(Long userId);
        User getCurrentUser(Principal principal);
        User getCurrentUser(Object principal);
+       User getUserById(Long id);
+       boolean isFollowing(User follower, User followed);
+       void follow(User follower, User followed);
+       void unfollow(User follower, User followed);
 }

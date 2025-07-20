@@ -46,15 +46,15 @@
     </div>
 
     <!-- Action Buttons -->
-    <div class="action-buttons">
+    <div class="action-buttons" th:if="${isOwner}">
         <a th:href="@{/profile/edit}" class="btn btn-primary">
             <i class="fas fa-edit"></i> Edit Profile
         </a>
-        <a th:if="${user.account.provider == null or user.account.provider == 'local'}" th:href="@{/profile/change-password}" class="btn btn-primary">
+        <a th:if="${user.account.provider == null or user.account.provider == 'local'}"
+           th:href="@{/profile/change-password}" class="btn btn-primary">
             <i class="fas fa-key"></i> Change Password
         </a>
     </div>
-
     <!-- Personal & Health Information -->
     <div class="profile-info">
         <h3><i class="fas fa-heartbeat"></i> Personal & Health Information</h3>
@@ -91,7 +91,7 @@
         <h2><i class="fas fa-trophy"></i> Displayed Badges</h2>
         <div id="display-zone" class="drop-zone">
             <div th:if="${#lists.isEmpty(displayedBadges)}" style="color: #666; font-style: italic;">
-                No badges displayed yet. <a th:href="@{/badge-display}" style="color: #667eea;">Configure your badges</a>
+                No badges displayed yet. <a th:if="${isOwner}" th:href="@{/badge-display}" style="color: #667eea;">Configure your badges</a>
             </div>
             <div th:each="badge : ${displayedBadges}">
                 <a th:href="@{'/badges/' + ${badge.id}}">
@@ -99,7 +99,7 @@
                 </a>
             </div>
         </div>
-        <a th:href="@{/badge-display}" class="btn btn-primary" style="text-decoration: none;">
+        <a th:if="${isOwner}" th:href="@{/badge-display}" class="btn btn-primary" style="text-decoration: none;">
             <i class="fas fa-cog"></i> Edit Displayed Badges
         </a>
 
@@ -123,6 +123,20 @@
                 </a>
             </div>
         </div>
+    </div>
+    <div>
+    <p th:text="'Followers: ' + ${followerCount}"></p>
+    <p th:text="'Following: ' + ${followingCount}"></p>
+
+        <form th:if="${isFollowing != null and !isFollowing}"
+              th:action="@{'/users/' + ${targetUser.id} + '/follow'}" method="post">
+            <button type="submit" class="btn btn-primary">Follow</button>
+        </form>
+
+        <form th:if="${isFollowing != null and isFollowing}"
+              th:action="@{'/users/' + ${targetUser.id} + '/unfollow'}" method="post">
+            <button type="submit" class="btn btn-secondary">Unfollow</button>
+        </form>
     </div>
 
     <!-- Back to Home Button -->

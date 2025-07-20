@@ -130,7 +130,7 @@ public class PostController {
         }
 
         postService.updatePost(existingPost, updatedPost);
-        redirectAttributes.addFlashAttribute("success", updatedPost.isDraft() ? "Draft updated." : "Post updated.");
+        redirectAttributes.addFlashAttribute("success", updatedPost.getVisibility() == Visibility.DRAFTS ? "Draft updated." : "Post updated.");
         return "redirect:/posts";
     }
 
@@ -155,7 +155,8 @@ public class PostController {
         }
 
         postService.updatePost(existingPost, updatedPost);
-        redirectAttributes.addFlashAttribute("success", updatedPost.isDraft() ? "Draft updated." : "Post updated.");
+        redirectAttributes.addFlashAttribute("success",
+                updatedPost.getVisibility() == Visibility.DRAFTS ? "Draft updated." : "Post updated.");
         return "redirect:/posts/drafts";
     }
 
@@ -163,14 +164,14 @@ public class PostController {
      * Delete a post
      */
     @PostMapping("/{id}/delete")
-    public String deletePost(@PathVariable Long id, Principal principal, RedirectAttributes redirectAttributes) {
+    public String deletePost(@PathVariable Long id, @RequestParam(required = false) String redirectUrl, Principal principal, RedirectAttributes redirectAttributes) {
         boolean deleted = postService.deletePost(id, principal);
         if (deleted) {
             redirectAttributes.addFlashAttribute("success", "Post deleted successfully.");
         } else {
             redirectAttributes.addFlashAttribute("error", "You are not authorized to delete this post.");
         }
-        return "redirect:/posts";
+        return "redirect:" + (redirectUrl != null && !redirectUrl.isBlank() ? redirectUrl : "/posts");
     }
 
     @PostMapping("/{id}/report")
@@ -216,15 +217,19 @@ public class PostController {
     @GetMapping("/{id}")
     public String viewPost(@PathVariable Long id, Model model, Principal principal, RedirectAttributes redirectAttributes) {
         Post post = postService.getPostById(id);
-        if (post == null || post.isBanned() || post.isDraft()) {
+        if (post == null || post.isBanned() || post.getVisibility() == Visibility.DRAFTS) {
             redirectAttributes.addFlashAttribute("error", "Post not available");
             return "redirect:/posts";
         }
 
-        boolean isOwner = postService.isOwner(post, principal);
+        User viewer = userService.getCurrentUser(principal);
+        if (!postService.isPostAccessibleByUser(post, viewer)) {
+            redirectAttributes.addFlashAttribute("error", "You are not authorized to view this post.");
+            return "redirect:/posts";
+        }
 
         model.addAttribute("post", post);
-        model.addAttribute("isOwner", isOwner);
+        model.addAttribute("isOwner", post.getUser().getId().equals(viewer.getId()));
         return "posts/post_detail";
     }
 }

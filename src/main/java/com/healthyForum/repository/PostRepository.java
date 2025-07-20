@@ -11,8 +11,9 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     List<Post> findByUserId(Long userId);
 
-    List<Post> findByUserIdAndIsDraftTrue(Long userId);
+    List<Post> findByUserIdAndVisibility(Long userId, Visibility visibility);
 
-    List<Post> findByIsDraftFalseAndVisibilityAndBannedFalse(Visibility visibility);
+    List<Post> findByVisibilityAndBannedFalse(Visibility visibility);
 
+    List<Post> findByUserIdAndVisibilityNot(Long userId, Visibility excludedVisibility);
 }

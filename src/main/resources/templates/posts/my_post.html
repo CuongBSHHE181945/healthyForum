@@ -67,7 +67,9 @@
             </a>
             <form th:action="@{/posts/{id}/delete(id=${post.id})}" method="post" style="display:inline-block;"
                   onsubmit="return confirm('Are you sure you want to delete this post?')">
+              <input type="hidden" name="redirectUrl" value="/posts/my-post" />
               <button type="submit" class="btn btn-outline-danger btn-sm">
+
                 <i class="bi bi-trash"></i> Delete
               </button>
             </form>
