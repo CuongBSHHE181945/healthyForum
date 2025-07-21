@@ -1,10 +1,10 @@
 package com.healthyForum.controller;
 
-import com.healthyForum.model.Post;
+import com.healthyForum.model.Post.Post;
 import com.healthyForum.model.Report;
 import com.healthyForum.model.keywordFiltering.Keyword;
 import com.healthyForum.repository.keywordFiltering.KeywordRepository;
-import com.healthyForum.service.PostService;
+import com.healthyForum.service.post.PostService;
 import com.healthyForum.service.ReportService;
 import com.healthyForum.service.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;

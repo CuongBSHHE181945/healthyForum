@@ -1,8 +1,8 @@
 package com.healthyForum.service;
 
-import com.healthyForum.model.Post;
+import com.healthyForum.model.Post.Post;
 import com.healthyForum.model.User;
-import com.healthyForum.repository.PostRepository;
+import com.healthyForum.repository.Post.PostRepository;
 import com.healthyForum.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

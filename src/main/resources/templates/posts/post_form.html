@@ -20,7 +20,7 @@
       <h3 class="mb-0">Create New Post</h3>
     </div>
     <div class="card-body p-4">
-      <form th:action="@{/posts/create}" th:object="${post}" method="post">
+      <form th:action="@{/posts/create}" th:object="${post}" method="post" enctype="multipart/form-data">
         <input type="hidden" th:field="*{id}" />
         <div class="mb-3">
           <label for="title" class="form-label">Title <span class="text-danger">*</span></label>
@@ -32,6 +32,16 @@
           <label for="content" class="form-label">Content <span class="text-danger">*</span></label>
           <textarea class="form-control" id="content" th:field="*{content}" rows="10" required></textarea>
           <div class="text-danger" th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></div>
+        </div>
+
+        <div class="mb-3">
+          <label for="imageFile" class="form-label">Upload Image (JPG, PNG)</label>
+          <input type="file" class="form-control" id="imageFile" name="imageFile" accept="image/*">
+        </div>
+
+        <div class="mb-3">
+          <label for="videoFile" class="form-label">Upload Video (MP4)</label>
+          <input type="file" class="form-control" id="videoFile" name="videoFile" accept="video/mp4">
         </div>
 
         <div class="row mb-3">

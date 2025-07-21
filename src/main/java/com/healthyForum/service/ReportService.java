@@ -1,6 +1,6 @@
 package com.healthyForum.service;
 
-import com.healthyForum.model.Post;
+import com.healthyForum.model.Post.Post;
 import com.healthyForum.model.Report;
 import com.healthyForum.model.User;
 import com.healthyForum.repository.ReportRepository;
