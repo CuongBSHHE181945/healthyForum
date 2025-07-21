@@ -13,4 +13,5 @@ public interface UserService {
        void unsuspendUser(Long userId);
        User getCurrentUser(Principal principal);
        User getCurrentUser(Object principal);
+       User findByUsername(String username);
 }
