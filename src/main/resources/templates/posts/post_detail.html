@@ -26,18 +26,18 @@
 
             <!-- Post content -->
             <p class="card-text" th:text="${post.content}">Post content goes here...</p>
-            <!-- Hiển thị hình ảnh -->
-            <div th:if="${post.imageUrl != null}">
-                <img th:src="@{${post.imageUrl}}" alt="Post Image" class="img-fluid">
-            </div>
+            <!-- Post image -->
+            <img th:if="${#strings.endsWith(post.imageUrl, '.png') or
+             #strings.endsWith(post.imageUrl, '.jpg') or
+             #strings.endsWith(post.imageUrl, '.jpeg')}"
+                 th:src="@{${post.imageUrl}}"
+                 style="width: 200px;" />
 
-            <!-- Hiển thị video -->
-            <div th:if="${post.videoUrl != null}" class="mt-3">
-                <video controls class="w-100">
-                    <source th:src="@{${post.videoUrl}}" type="video/mp4">
-                    Your browser does not support the video tag.
-                </video>
-            </div>
+            <!-- Show video if extension is .mp4 -->
+            <video th:if="${#strings.endsWith(post.imageUrl, '.mp4')}"
+                   width="320" height="240" controls>
+                <source th:src="@{${post.imageUrl}}" type="video/mp4" />
+            </video>
 
             <!-- Like/Dislike -->
             <div class="mb-3 d-flex align-items-center gap-2">

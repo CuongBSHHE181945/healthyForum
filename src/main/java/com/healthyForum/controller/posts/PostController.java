@@ -119,24 +119,19 @@ public class PostController {
     @PostMapping("/create")
     public String createPost(@ModelAttribute("post") Post post,
                              @RequestParam("imageFile") MultipartFile imageFile,
-                             @RequestParam("videoFile") MultipartFile videoFile,
+//                             @RequestParam("videoFile") MultipartFile videoFile,
                              Principal principal,
                              RedirectAttributes redirectAttributes) {
-        try {
-            String uploadDir = "C:/Users/admin/Downloads/healthyForum/healthyForum/healthyForum/Uploads/";
-            new File(uploadDir).mkdirs();
-
+//        try {
             if (!imageFile.isEmpty()) {
-                String imageName = UUID.randomUUID() + "_" + imageFile.getOriginalFilename();
-                imageFile.transferTo(Paths.get(uploadDir + imageName));
-                post.setImageUrl("/uploads/" + imageName);
+                post.setImageUrl(fileStorageService.save(imageFile));
             }
 
-            if (!videoFile.isEmpty()) {
-                String videoName = UUID.randomUUID() + "_" + videoFile.getOriginalFilename();
-                videoFile.transferTo(Paths.get(uploadDir + videoName));
-                post.setVideoUrl("/uploads/" + videoName);
-            }
+//            if (!videoFile.isEmpty()) {
+//                String videoName = UUID.randomUUID() + "_" + videoFile.getOriginalFilename();
+//                videoFile.transferTo(Paths.get(uploadDir + videoName));
+//                post.setVideoUrl("/uploads/" + videoName);
+//            }
 
             postService.savePost(post, principal);
 
@@ -148,10 +143,10 @@ public class PostController {
             redirectAttributes.addFlashAttribute("success", "Post created successfully!");
             return "redirect:/posts";
 
-        } catch (IOException e) {
-            redirectAttributes.addFlashAttribute("error", "File upload failed: " + e.getMessage());
-            return "redirect:/posts/create";
-        }
+//        } catch (IOException e) {
+//            redirectAttributes.addFlashAttribute("error", "File upload failed: " + e.getMessage());
+//            return "redirect:/posts/create";
+//        }
     }
 
 

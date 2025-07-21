@@ -2,7 +2,7 @@ package com.healthyForum.service.challenge;
 
 import com.healthyForum.model.Enum.EvidenceStatus;
 import com.healthyForum.model.Enum.ReactionType;
-import com.healthyForum.model.EvidencePost;
+import com.healthyForum.model.challenge.EvidencePost;
 import com.healthyForum.model.User;
 import com.healthyForum.model.challenge.UserChallenge;
 import com.healthyForum.model.challenge.UserChallengeProgress;
@@ -10,6 +10,7 @@ import com.healthyForum.repository.challenge.EvidencePostRepository;
 import com.healthyForum.repository.challenge.EvidenceReactionRepository;
 import com.healthyForum.repository.challenge.UserChallengeProgressRepository;
 import com.healthyForum.repository.challenge.UserChallengeRepository;
+import com.healthyForum.service.post.FileStorageService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,11 +18,14 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,18 +45,35 @@ public class EvidenceService {
     }
 
     public String saveEvidenceImage(MultipartFile file, String username) throws IOException {
-        String evidenceDir = new File("src/main/resources/static/uploads/evidences/").getAbsolutePath();
-        new File(evidenceDir).mkdirs();
-        java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmssSSS");
-        String timestamp = java.time.LocalDateTime.now().format(formatter);
-        String evidenceFileName = username + "_" + timestamp + "_" + file.getOriginalFilename();
+            try {
+                if (file == null || file.isEmpty()) {
+                    throw new IllegalArgumentException("File is empty or null");
+                }
 
-        File evidenceFile = new File(evidenceDir + "/" + evidenceFileName);
-        file.transferTo(evidenceFile);
-        return "/uploads/evidences/" + evidenceFileName;
-    }
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmssSSS");
+                String timestamp = LocalDateTime.now().format(formatter);
 
-    public List<EvidencePost> getAllEvidenceForSameChallenge(Integer userChallengeId, Long currentUserId) {
+                String originalFileName = Paths.get(file.getOriginalFilename()).getFileName().toString();
+                String evidenceFileName = username + "_" + timestamp + "_" + originalFileName;
+
+                // Path relative to the project root
+                Path projectRoot = Paths.get("").toAbsolutePath(); // current working dir
+                Path evidenceDir = projectRoot.resolve("uploads").resolve("evidences");
+                Files.createDirectories(evidenceDir); // create folders if they don't exist
+
+                Path targetFile = evidenceDir.resolve(evidenceFileName);
+                file.transferTo(targetFile.toFile());
+
+                // Return relative path for access via web
+                return "/uploads/evidences/" + evidenceFileName;
+
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to save file", e);
+            }
+        }
+
+
+        public List<EvidencePost> getAllEvidenceForSameChallenge(Integer userChallengeId, Long currentUserId) {
         UserChallenge baseUC = userChallengeRepository.findById(userChallengeId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
