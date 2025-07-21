@@ -15,4 +15,8 @@ public interface UserService {
        User getCurrentUser(Principal principal);
        User getCurrentUser(Object principal);
        boolean isAdminOrModerator(Role role);
+       User getUserById(Long id);
+       boolean isFollowing(User follower, User followed);
+       void follow(User follower, User followed);
+       void unfollow(User follower, User followed);
 }

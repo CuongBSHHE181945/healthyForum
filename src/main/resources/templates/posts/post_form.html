@@ -41,19 +41,20 @@
               <option th:each="option : ${visibilityOptions}"
                       th:value="${option}"
                       th:text="${option.name() == 'PUBLIC' ? 'Public' :
-                                             option.name() == 'PRIVATE' ? 'Private' :
-                                             'Followers Only'}">
+                                 option.name() == 'PRIVATE' ? 'Private' :
+                                 option.name() == 'FOLLOWERS_ONLY' ? 'Followers only' :
+                                 'Drafts' }">
               </option>
             </select>
           </div>
-          <div class="col-md-6">
-            <div class="form-check mt-4">
-              <input class="form-check-input" type="checkbox" id="isDraft" th:field="*{draft}">
-              <label class="form-check-label" for="isDraft">
-                Save as draft
-              </label>
-            </div>
-          </div>
+<!--          <div class="col-md-6">-->
+<!--            <div class="form-check mt-4">-->
+<!--              <input class="form-check-input" type="checkbox" id="isDraft" th:field="*{draft}">-->
+<!--              <label class="form-check-label" for="isDraft">-->
+<!--                Save as draft-->
+<!--              </label>-->
+<!--            </div>-->
+<!--          </div>-->
         </div>
 
         <div class="mt-4">

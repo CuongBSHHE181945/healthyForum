@@ -40,8 +40,9 @@
               <option th:each="option : ${visibilityOptions}"
                       th:value="${option}"
                       th:text="${option.name() == 'PUBLIC' ? 'Public' :
-                                             option.name() == 'PRIVATE' ? 'Private' :
-                                             'Followers Only'}">
+                                 option.name() == 'PRIVATE' ? 'Private' :
+                                 option.name() == 'FOLLOWERS_ONLY' ? 'Followers Only' :
+                                 'Drafts' }">
               </option>
             </select>
           </div>

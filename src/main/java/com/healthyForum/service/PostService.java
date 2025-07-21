@@ -3,15 +3,11 @@ package com.healthyForum.service;
 import com.healthyForum.model.Enum.Visibility;
 import com.healthyForum.model.Post;
 import com.healthyForum.model.User;
-import com.healthyForum.model.UserAccount;
 import com.healthyForum.repository.PostRepository;
 import com.healthyForum.repository.UserRepository;
 import com.healthyForum.repository.UserAccountRepository;
 import com.healthyForum.repository.keywordFiltering.KeywordRepository;
-import com.healthyForum.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
@@ -76,7 +72,7 @@ public class PostService {
 
     // List all public posts that are not banned
     public List<Post> getAllVisiblePublicPosts() {
-        return postRepository.findByIsDraftFalseAndVisibilityAndBannedFalse(Visibility.PUBLIC);
+        return postRepository.findByVisibilityAndBannedFalse(Visibility.PUBLIC);
     }
 
     // List all posts by current user (my posts)
@@ -85,11 +81,11 @@ public class PostService {
         if (currentUser == null) {
             return List.of(); // Return empty list if user not found
         }
-        return postRepository.findByUserId(currentUser.getId());
+        return postRepository.findByUserIdAndVisibilityNot(currentUser.getId(), Visibility.DRAFTS);
     }
 
     public List<Post> getDrafts(Long userId) {
-        return postRepository.findByUserIdAndIsDraftTrue(userId);
+        return postRepository.findByUserIdAndVisibility(userId, Visibility.DRAFTS);
     }
 
     public Post banPost(Long postId) {
@@ -106,7 +102,6 @@ public class PostService {
         existingPost.setTitle(updatedPost.getTitle());
         existingPost.setContent(updatedPost.getContent());
         existingPost.setVisibility(updatedPost.getVisibility());
-        existingPost.setDraft(updatedPost.isDraft());
         existingPost.setImageUrl(updatedPost.getImageUrl());
         existingPost.setUpdatedAt(LocalDateTime.now()); // optional
         postRepository.save(existingPost);
@@ -125,8 +120,14 @@ public class PostService {
             return true;
         }
 
+        // Chủ bài viết
         if (post.getUser().getId().equals(user.getId())) {
             return true;
+        }
+
+        // Follower của chủ bài viết
+        if (post.getVisibility() == Visibility.FOLLOWERS_ONLY) {
+            return userService.isFollowing(user, post.getUser());
         }
 
         return false;

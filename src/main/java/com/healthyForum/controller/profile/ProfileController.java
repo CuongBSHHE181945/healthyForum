@@ -1,10 +1,12 @@
 package com.healthyForum.controller.profile;
 
+import com.healthyForum.model.Follow;
 import com.healthyForum.model.HealthAssessment;
 import com.healthyForum.model.User;
 import com.healthyForum.model.UserAccount;
 import com.healthyForum.model.badge.Badge;
 import com.healthyForum.model.badge.UserBadge;
+import com.healthyForum.repository.FollowRepository;
 import com.healthyForum.repository.HealthAssessmentRepository;
 import com.healthyForum.repository.UserRepository;
 import com.healthyForum.repository.UserAccountRepository;
@@ -41,6 +43,9 @@ public class ProfileController {
     @Autowired
     private HealthAssessmentService healthAssessmentService;
 
+    @Autowired
+    private FollowRepository followRepository;
+
     private final BadgeService badgeService;
     private final UserBadgeService userBadgeService;
     private final HealthAssessmentRepository healthAssessmentRepository;
@@ -66,6 +71,7 @@ public class ProfileController {
         
         // Refresh user data from database to get latest updates
         User user = userRepository.findById(account.getUser().getId()).orElse(account.getUser());
+        User viewer = account.getUser();
         
         // Calculate age if it's null but DOB exists
         if (user.getAge() == null && user.getDob() != null) {
@@ -94,7 +100,89 @@ public class ProfileController {
             }
         }
 
+        List<Follow> followers = followRepository.findByFollowed(user);
+        List<Follow> following = followRepository.findByFollower(user);
+
         model.addAttribute("user", user);
+        model.addAttribute("isOwner", viewer.getId().equals(user.getId()));
+        model.addAttribute("healthAssessment", latestAssessment);
+        model.addAttribute("displayedBadges", displayedBadges);
+        model.addAttribute("unlockedBadges", unlockedBadges);
+        model.addAttribute("lockedBadges", lockedBadges);
+        model.addAttribute("followers", followers);
+        model.addAttribute("followerCount", followers.size());
+        model.addAttribute("followingCount", following.size());
+
+        return "profile/profile";
+    }
+
+    @GetMapping("/{id}")
+    public String viewUserProfile(@PathVariable Long id, Model model, Principal principal) {
+        if (principal == null) {
+            return "redirect:/login";
+        }
+
+        String principalName = principal.getName();
+        UserAccount viewerAccount = userAccountRepository.findByUsername(principalName)
+                .orElseGet(() -> userAccountRepository.findByGoogleId(principalName).orElse(null));
+
+        if (viewerAccount == null) throw new IllegalArgumentException("User not found: " + principalName);
+
+        Optional<User> targetUserOpt = userRepository.findById(id);
+        if (targetUserOpt.isEmpty()) return "redirect:/error";
+
+        User targetUser = targetUserOpt.get();
+        User viewer = viewerAccount.getUser();
+
+        if (targetUser.getAge() == null && targetUser.getDob() != null) {
+            targetUser.setAge(targetUser.calculateAge());
+            userRepository.save(targetUser);
+        }
+
+
+        // Calculate age if it's null but DOB exists
+        if (targetUser.getAge() == null && targetUser.getDob() != null) {
+            targetUser.setAge(targetUser.calculateAge());
+            userRepository.save(targetUser);
+        }
+
+        System.out.println("[DEBUG] viewProfile: User data - fullName: " + targetUser.getFullName() + ", height: " + targetUser.getHeight() + ", weight: " + targetUser.getWeight() + ", age: " + targetUser.getAge());
+
+        // Fetch the latest health assessment
+        List<HealthAssessment> assessments = healthAssessmentRepository.findByUser_IdOrderByAssessmentDateDesc(targetUser.getId());
+        HealthAssessment latestAssessment = assessments.stream().findFirst().orElse(null);
+
+        List<UserBadge> allUserBadges = userBadgeService.getAllUnlockedByUser(targetUser.getId());
+        List<Badge> unlockedBadges = new ArrayList<>();
+        List<Badge> lockedBadges = badgeService.getAllBadges(); // clone to remove unlocked
+
+        List<Badge> displayedBadges = new ArrayList<>();
+
+        for (UserBadge ub : allUserBadges) {
+            Badge badge = ub.getBadge();
+            unlockedBadges.add(badge);
+            lockedBadges.remove(badge);
+            if (ub.isDisplayed()) {
+                displayedBadges.add(badge);
+            }
+        }
+
+        boolean isOwner = viewer.getId().equals(targetUser.getId());
+        boolean isFollowing = followRepository.existsByFollowerAndFollowed(viewer, targetUser);
+        long followerCount = followRepository.countByFollowed(targetUser);
+        long followingCount = followRepository.countByFollower(targetUser);
+
+        List<Follow> followers = followRepository.findByFollowed(targetUser);
+        List<Follow> following = followRepository.findByFollower(targetUser);
+
+        model.addAttribute("user", targetUser);
+        model.addAttribute("targetUser", targetUser);
+        model.addAttribute("isOwner", viewer.getId().equals(targetUser.getId()));
+        model.addAttribute("isFollowing", isFollowing);
+        model.addAttribute("followerCount", followerCount);
+        model.addAttribute("followingCount", followingCount);
+        model.addAttribute("followers", followers);
+        model.addAttribute("following", following);
         model.addAttribute("healthAssessment", latestAssessment);
         model.addAttribute("displayedBadges", displayedBadges);
         model.addAttribute("unlockedBadges", unlockedBadges);
@@ -131,6 +219,8 @@ public class ProfileController {
         model.addAttribute("healthAssessment", latestAssessment);
         return "profile/edit-profile";
     }
+
+
 
     @PostMapping("/edit")
     public String editProfileSubmit(@ModelAttribute("user") User formUser,
