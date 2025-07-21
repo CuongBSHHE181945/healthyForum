@@ -8,8 +8,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface MealRepository extends JpaRepository<MealPlanner, Integer> {
-
-    List<MealPlanner> findByUserAndMealDate(User user, LocalDate mealDate);
-
     List<MealPlanner> findByUser(User user);
+    List<MealPlanner> findByUserAndMealDate(User user, LocalDate mealDate);
 }

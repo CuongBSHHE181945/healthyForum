@@ -3,6 +3,7 @@
 <head>
     <title>Create Meal</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     
 </head>
 <body class="bg-light">
@@ -11,6 +12,11 @@
 
     <form th:action="@{${formAction}}" th:object="${mealPlanner}" method="post">
         <input type="hidden" th:field="*{mealId}" />
+        <!-- Hidden fields for calculated nutrition totals -->
+        <input type="hidden" id="meal-calories" name="mealCalories" />
+        <input type="hidden" id="meal-proteins" name="mealProteins" />
+        <input type="hidden" id="meal-fats" name="mealFats" />
+        <input type="hidden" id="meal-carbs" name="mealCarbs" />
         <!-- General Fields -->
         <div class="row mb-3">
             <div class="col-md-6">
@@ -34,73 +40,124 @@
             <textarea class="form-control" th:field="*{mealDescription}" maxlength="255" rows="2"></textarea>
         </div>
 
-        <!-- Nutrients -->
+        <!-- Nutrients (Auto-calculated from ingredients) -->
         <div class="row mb-3">
             <div class="col">
-                <label class="form-label">Calories</label>
-                <input type="number" class="form-control" th:field="*{mealCalories}" min="0">
+                <label class="form-label">Total Calories</label>
+                <input type="number" class="form-control" id="total-calories" readonly>
             </div>
             <div class="col">
-                <label class="form-label">Fat (g)</label>
-                <input type="number" class="form-control" th:field="*{mealFats}" min="0">
+                <label class="form-label">Total Fat (g)</label>
+                <input type="number" class="form-control" id="total-fat" readonly>
             </div>
             <div class="col">
-                <label class="form-label">Protein (g)</label>
-                <input type="number" class="form-control" th:field="*{mealProteins}" min="0">
+                <label class="form-label">Total Protein (g)</label>
+                <input type="number" class="form-control" id="total-protein" readonly>
             </div>
             <div class="col">
-                <label class="form-label">Carbs (g)</label>
-                <input type="number" class="form-control" th:field="*{mealCarbs}" min="0">
+                <label class="form-label">Total Carbs (g)</label>
+                <input type="number" class="form-control" id="total-carbs" readonly>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col">
+                <label class="form-label">Total Fiber (g)</label>
+                <input type="number" class="form-control" id="total-fiber" readonly>
+            </div>
+            <div class="col">
+                <label class="form-label">Total Sugar (g)</label>
+                <input type="number" class="form-control" id="total-sugar" readonly>
+            </div>
+            <div class="col">
+                <label class="form-label">Total Sodium (mg)</label>
+                <input type="number" class="form-control" id="total-sodium" readonly>
+            </div>
+            <div class="col">
+                <!-- Empty column for spacing -->
             </div>
         </div>
 
-        <!-- Ingredient Section -->
-        <h5>Ingredients</h5>
+        <!-- Food Items Section -->
+        <h5>Add Food Items to Your Meal</h5>
+        <p class="text-muted mb-3">Search for foods from our nutrition database and add them to your meal. Nutrition will be calculated automatically.</p>
+        <p class="text-muted small mb-3"><i class="bi bi-info-circle"></i> Note: Nutrition data is based on 100g servings. The system will convert your quantity and unit automatically.</p>
+        
         <!-- Ingredient Error -->
         <div th:if="${ingredientError}" class="alert alert-danger">
             <span th:text="${ingredientError}"></span>
         </div>
 
+        <div class="mb-3 position-relative" style="max-width: 400px;">
+            <label class="form-label">Search Food Database</label>
+            <input type="text" id="food-search" class="form-control" placeholder="Start typing food name (e.g., banana, chicken, rice)..." autocomplete="off">
+            <div id="food-suggestions" class="autocomplete-suggestions"></div>
+        </div>
+
         <table class="table table-bordered">
             <thead class="table-success">
             <tr>
-                <th>Name</th>
+                <th>Food Name</th>
                 <th>Quantity</th>
                 <th>Unit</th>
+                <th>Calories</th>
+                <th>Protein</th>
+                <th>Fat</th>
+                <th>Carbs</th>
+                <th>Fiber</th>
+                <th>Sugar</th>
+                <th>Sodium</th>
                 <th>Action</th>
             </tr>
             </thead>
             <tbody id="ingredientTable">
             <tr th:each="ingredient, iterStat : *{ingredients}">
                 <td>
-                    <input type="text"
-                           th:field="*{ingredients[__${iterStat.index}__].ingredientName}"
-                           class="form-control"
+                    <input type="text" 
+                           th:field="*{ingredients[__${iterStat.index}__].ingredientName}" 
+                           class="form-control ingredient-name" 
                            required />
+                    <small class="food-category-badge"></small>
                 </td>
                 <td>
                     <input type="number"
                            th:field="*{ingredients[__${iterStat.index}__].ingredientQuantity}"
-                           class="form-control"
+                           class="form-control quantity-input"
                            min="1"
                            required />
                 </td>
                 <td>
-                    <input type="text"
-                           th:field="*{ingredients[__${iterStat.index}__].ingredientUnit}"
-                           class="form-control" />
+                    <select class="form-select unit-select" th:field="*{ingredients[__${iterStat.index}__].ingredientUnit}">
+                        <option value="">Select Unit</option>
+                        <option value="grams">grams (g)</option>
+                        <option value="pieces">pieces</option>
+                        <option value="cups">cups</option>
+                        <option value="tablespoons">tablespoons (tbsp)</option>
+                        <option value="teaspoons">teaspoons (tsp)</option>
+                        <option value="milliliters">milliliters (ml)</option>
+                        <option value="ounces">ounces (oz)</option>
+                        <option value="pounds">pounds (lb)</option>
+                        <option value="slices">slices</option>
+                        <option value="whole">whole</option>
+                    </select>
                 </td>
+                <td><input type="number" class="form-control ingredient-calories" readonly /></td>
+                <td><input type="number" class="form-control ingredient-protein" readonly /></td>
+                <td><input type="number" class="form-control ingredient-fat" readonly /></td>
+                <td><input type="number" class="form-control ingredient-carbs" readonly /></td>
+                <td><input type="number" class="form-control ingredient-fiber" readonly /></td>
+                <td><input type="number" class="form-control ingredient-sugar" readonly /></td>
+                <td><input type="number" class="form-control ingredient-sodium" readonly /></td>
                 <td>
                     <button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">✕</button>
                 </td>
             </tr>
             </tbody>
         </table>
-        <button type="button" class="btn btn-outline-primary mb-3" onclick="addRow()">Add Ingredient</button>
+        <button type="button" class="btn btn-outline-primary mb-3" onclick="addRow()">Add Another Food Item</button>
 
         <div class="mt-3">
             <button type="submit" class="btn btn-primary">Save Dish</button>
-            <a href="/" class="btn btn-secondary">Cancel</a>
+            <a href="/meal-planner" class="btn btn-secondary">Cancel</a>
         </div>
     </form>
 </div>
@@ -109,21 +166,545 @@
     function removeRow(button) {
         const row = button.closest("tr");
         row.remove();
+        updateTotals(); // Update totals after removing a row
     }
 
-function addRow() {
-    const tbody = document.getElementById("ingredientTable");
-    const index = tbody.rows.length;
-    const newRow = document.createElement("tr");
-    newRow.innerHTML = `
-        <td><input type="text" name="ingredients[${index}].ingredientName" class="form-control" required /></td>
-        <td><input type="number" name="ingredients[${index}].ingredientQuantity" class="form-control" min="1" required /></td>
-        <td><input type="text" name="ingredients[${index}].ingredientUnit" class="form-control" /></td>
-        <td><button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">✕</button></td>
-    `;
-    tbody.appendChild(newRow);
-}
+    function addRow() {
+        const tbody = document.getElementById("ingredientTable");
+        const index = tbody.rows.length;
+        const newRow = document.createElement("tr");
+        newRow.innerHTML = `
+            <td>
+                <input type="text" name="ingredients[${index}].ingredientName" class="form-control ingredient-name" required />
+                <small class="food-category-badge"></small>
+            </td>
+            <td>
+                <input type="number" name="ingredients[${index}].ingredientQuantity" class="form-control quantity-input" min="1" required />
+            </td>
+            <td>
+                <select class="form-select unit-select" name="ingredients[${index}].ingredientUnit">
+                    <option value="">Select Unit</option>
+                    <option value="grams">grams (g)</option>
+                    <option value="pieces">pieces</option>
+                    <option value="cups">cups</option>
+                    <option value="tablespoons">tablespoons (tbsp)</option>
+                    <option value="teaspoons">teaspoons (tsp)</option>
+                    <option value="milliliters">milliliters (ml)</option>
+                    <option value="ounces">ounces (oz)</option>
+                    <option value="pounds">pounds (lb)</option>
+                    <option value="slices">slices</option>
+                    <option value="whole">whole</option>
+                </select>
+            </td>
+            <td><input type="number" class="form-control ingredient-calories" readonly /></td>
+            <td><input type="number" class="form-control ingredient-protein" readonly /></td>
+            <td><input type="number" class="form-control ingredient-fat" readonly /></td>
+            <td><input type="number" class="form-control ingredient-carbs" readonly /></td>
+            <td><input type="number" class="form-control ingredient-fiber" readonly /></td>
+            <td><input type="number" class="form-control ingredient-sugar" readonly /></td>
+            <td><input type="number" class="form-control ingredient-sodium" readonly /></td>
+            <td><button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">✕</button></td>
+        `;
+        tbody.appendChild(newRow);
+        
+        // Add event listeners to the new row
+        const newRowElement = tbody.lastElementChild;
+        addRowEventListeners(newRowElement);
+        
+        updateTotals(); // Update totals after adding a row
+    }
+
+    function addRowEventListeners(row) {
+        const quantityInput = row.querySelector('.quantity-input');
+        const unitSelect = row.querySelector('.unit-select');
+        const ingredientNameInput = row.querySelector('.ingredient-name');
+        
+        if (quantityInput) {
+            quantityInput.addEventListener('input', function() {
+                recalculateRowNutrition(row);
+            });
+        }
+        
+        if (unitSelect) {
+            unitSelect.addEventListener('change', function() {
+                recalculateRowNutrition(row);
+            });
+        }
+        
+        if (ingredientNameInput) {
+            ingredientNameInput.addEventListener('input', function() {
+                updateUnitsForFood(row);
+            });
+        }
+    }
+
+    function recalculateRowNutrition(row) {
+        const foodName = row.querySelector('.ingredient-name').value;
+        const quantity = parseFloat(row.querySelector('.quantity-input').value) || 0;
+        const unit = row.querySelector('.unit-select').value;
+        
+        if (!foodName || quantity <= 0 || !unit) {
+            // Clear nutrition fields if data is incomplete
+            row.querySelector('.ingredient-calories').value = '';
+            row.querySelector('.ingredient-protein').value = '';
+            row.querySelector('.ingredient-fat').value = '';
+            row.querySelector('.ingredient-carbs').value = '';
+            row.querySelector('.ingredient-fiber').value = '';
+            row.querySelector('.ingredient-sugar').value = '';
+            row.querySelector('.ingredient-sodium').value = '';
+            updateTotals();
+            return;
+        }
+        
+        // Search for the food in the database
+        fetch('/meal-planner/food-search?q=' + encodeURIComponent(foodName))
+            .then(res => res.json())
+            .then(data => {
+                if (data.length > 0) {
+                    const food = data[0]; // Use first match
+                    const nutrition = calculateNutritionForQuantity(food, quantity, unit);
+                    
+                    // Update the nutrition fields
+                    row.querySelector('.ingredient-calories').value = nutrition.calories.toFixed(2);
+                    row.querySelector('.ingredient-protein').value = nutrition.protein.toFixed(2);
+                    row.querySelector('.ingredient-fat').value = nutrition.fat.toFixed(2);
+                    row.querySelector('.ingredient-carbs').value = nutrition.carbs.toFixed(2);
+                    row.querySelector('.ingredient-fiber').value = nutrition.fiber.toFixed(2);
+                    row.querySelector('.ingredient-sugar').value = nutrition.sugar.toFixed(2);
+                    row.querySelector('.ingredient-sodium').value = nutrition.sodium.toFixed(2);
+                    
+                    updateTotals();
+                }
+            });
+    }
+
+    function updateUnitsForFood(row) {
+        const foodName = row.querySelector('.ingredient-name').value.toLowerCase();
+        const unitSelect = row.querySelector('.unit-select');
+        const categoryBadge = row.querySelector('.food-category-badge');
+        
+        // Clear current options
+        unitSelect.innerHTML = '<option value="">Select Unit</option>';
+        
+        if (!foodName) {
+            // Show all units if no food selected
+            addAllUnits(unitSelect);
+            if (categoryBadge) categoryBadge.innerHTML = '';
+            return;
+        }
+        
+        // Determine food category and add appropriate units
+        const foodCategory = getFoodCategory(foodName);
+        const appropriateUnits = getAppropriateUnits(foodCategory);
+        
+        // Update category badge
+        if (categoryBadge) {
+            const categoryLabel = foodCategory.charAt(0).toUpperCase() + foodCategory.slice(1);
+            categoryBadge.innerHTML = `<span class="badge bg-info">${categoryLabel}</span>`;
+        }
+        
+        appropriateUnits.forEach(unit => {
+            const option = document.createElement('option');
+            option.value = unit.value;
+            option.textContent = unit.label;
+            unitSelect.appendChild(option);
+        });
+        
+        // Clear nutrition fields when food changes
+        row.querySelector('.ingredient-calories').value = '';
+        row.querySelector('.ingredient-protein').value = '';
+        row.querySelector('.ingredient-fat').value = '';
+        row.querySelector('.ingredient-carbs').value = '';
+        row.querySelector('.ingredient-fiber').value = '';
+        row.querySelector('.ingredient-sugar').value = '';
+        row.querySelector('.ingredient-sodium').value = '';
+    }
+
+    function getFoodCategory(foodName) {
+        if (foodName.includes('banana') || foodName.includes('apple') || foodName.includes('orange') || 
+            foodName.includes('strawberry') || foodName.includes('grape') || foodName.includes('pear') ||
+            foodName.includes('peach') || foodName.includes('plum') || foodName.includes('mango') ||
+            foodName.includes('pineapple') || foodName.includes('kiwi') || foodName.includes('cherry')) {
+            return 'fruit';
+        }
+        
+        if (foodName.includes('carrot') || foodName.includes('broccoli') || foodName.includes('spinach') ||
+            foodName.includes('lettuce') || foodName.includes('tomato') || foodName.includes('cucumber') ||
+            foodName.includes('onion') || foodName.includes('pepper') || foodName.includes('celery') ||
+            foodName.includes('cauliflower') || foodName.includes('cabbage') || foodName.includes('kale')) {
+            return 'vegetable';
+        }
+        
+        if (foodName.includes('rice') || foodName.includes('pasta') || foodName.includes('bread') ||
+            foodName.includes('oat') || foodName.includes('quinoa') || foodName.includes('barley') ||
+            foodName.includes('wheat') || foodName.includes('corn') || foodName.includes('potato')) {
+            return 'grain';
+        }
+        
+        if (foodName.includes('chicken') || foodName.includes('beef') || foodName.includes('pork') ||
+            foodName.includes('fish') || foodName.includes('salmon') || foodName.includes('tuna') ||
+            foodName.includes('turkey') || foodName.includes('lamb') || foodName.includes('shrimp')) {
+            return 'protein';
+        }
+        
+        if (foodName.includes('milk') || foodName.includes('cheese') || foodName.includes('yogurt') ||
+            foodName.includes('cream') || foodName.includes('butter') || foodName.includes('egg')) {
+            return 'dairy';
+        }
+        
+        if (foodName.includes('oil') || foodName.includes('olive') || foodName.includes('butter') ||
+            foodName.includes('margarine') || foodName.includes('mayonnaise') || foodName.includes('dressing')) {
+            return 'fat';
+        }
+        
+        if (foodName.includes('sugar') || foodName.includes('honey') || foodName.includes('syrup') ||
+            foodName.includes('jam') || foodName.includes('jelly') || foodName.includes('chocolate')) {
+            return 'sweetener';
+        }
+        
+        if (foodName.includes('salt') || foodName.includes('pepper') || foodName.includes('spice') ||
+            foodName.includes('herb') || foodName.includes('garlic') || foodName.includes('ginger')) {
+            return 'seasoning';
+        }
+        
+        if (foodName.includes('water') || foodName.includes('juice') || foodName.includes('soda') ||
+            foodName.includes('coffee') || foodName.includes('tea') || foodName.includes('soup')) {
+            return 'liquid';
+        }
+        
+        return 'general'; // Default category
+    }
+
+    function getAppropriateUnits(category) {
+        switch (category) {
+            case 'fruit':
+                return [
+                    { value: 'pieces', label: 'pieces' },
+                    { value: 'whole', label: 'whole' },
+                    { value: 'grams', label: 'grams (g)' },
+                    { value: 'cups', label: 'cups' },
+                    { value: 'ounces', label: 'ounces (oz)' }
+                ];
+            case 'vegetable':
+                return [
+                    { value: 'pieces', label: 'pieces' },
+                    { value: 'grams', label: 'grams (g)' },
+                    { value: 'cups', label: 'cups' },
+                    { value: 'tablespoons', label: 'tablespoons (tbsp)' },
+                    { value: 'ounces', label: 'ounces (oz)' }
+                ];
+            case 'grain':
+                return [
+                    { value: 'grams', label: 'grams (g)' },
+                    { value: 'cups', label: 'cups' },
+                    { value: 'tablespoons', label: 'tablespoons (tbsp)' },
+                    { value: 'slices', label: 'slices' },
+                    { value: 'ounces', label: 'ounces (oz)' }
+                ];
+            case 'protein':
+                return [
+                    { value: 'grams', label: 'grams (g)' },
+                    { value: 'pieces', label: 'pieces' },
+                    { value: 'ounces', label: 'ounces (oz)' },
+                    { value: 'pounds', label: 'pounds (lb)' }
+                ];
+            case 'dairy':
+                return [
+                    { value: 'grams', label: 'grams (g)' },
+                    { value: 'cups', label: 'cups' },
+                    { value: 'tablespoons', label: 'tablespoons (tbsp)' },
+                    { value: 'teaspoons', label: 'teaspoons (tsp)' },
+                    { value: 'pieces', label: 'pieces' },
+                    { value: 'ounces', label: 'ounces (oz)' }
+                ];
+            case 'fat':
+                return [
+                    { value: 'grams', label: 'grams (g)' },
+                    { value: 'tablespoons', label: 'tablespoons (tbsp)' },
+                    { value: 'teaspoons', label: 'teaspoons (tsp)' },
+                    { value: 'cups', label: 'cups' },
+                    { value: 'ounces', label: 'ounces (oz)' }
+                ];
+            case 'sweetener':
+                return [
+                    { value: 'grams', label: 'grams (g)' },
+                    { value: 'tablespoons', label: 'tablespoons (tbsp)' },
+                    { value: 'teaspoons', label: 'teaspoons (tsp)' },
+                    { value: 'cups', label: 'cups' }
+                ];
+            case 'seasoning':
+                return [
+                    { value: 'grams', label: 'grams (g)' },
+                    { value: 'tablespoons', label: 'tablespoons (tbsp)' },
+                    { value: 'teaspoons', label: 'teaspoons (tsp)' },
+                    { value: 'pieces', label: 'pieces' }
+                ];
+            case 'liquid':
+                return [
+                    { value: 'milliliters', label: 'milliliters (ml)' },
+                    { value: 'cups', label: 'cups' },
+                    { value: 'tablespoons', label: 'tablespoons (tbsp)' },
+                    { value: 'teaspoons', label: 'teaspoons (tsp)' },
+                    { value: 'ounces', label: 'ounces (oz)' }
+                ];
+            default: // general
+                return [
+                    { value: 'grams', label: 'grams (g)' },
+                    { value: 'pieces', label: 'pieces' },
+                    { value: 'cups', label: 'cups' },
+                    { value: 'tablespoons', label: 'tablespoons (tbsp)' },
+                    { value: 'teaspoons', label: 'teaspoons (tsp)' },
+                    { value: 'milliliters', label: 'milliliters (ml)' },
+                    { value: 'ounces', label: 'ounces (oz)' },
+                    { value: 'pounds', label: 'pounds (lb)' },
+                    { value: 'slices', label: 'slices' },
+                    { value: 'whole', label: 'whole' }
+                ];
+        }
+    }
+
+    function addAllUnits(unitSelect) {
+        const allUnits = [
+            { value: 'grams', label: 'grams (g)' },
+            { value: 'pieces', label: 'pieces' },
+            { value: 'cups', label: 'cups' },
+            { value: 'tablespoons', label: 'tablespoons (tbsp)' },
+            { value: 'teaspoons', label: 'teaspoons (tsp)' },
+            { value: 'milliliters', label: 'milliliters (ml)' },
+            { value: 'ounces', label: 'ounces (oz)' },
+            { value: 'pounds', label: 'pounds (lb)' },
+            { value: 'slices', label: 'slices' },
+            { value: 'whole', label: 'whole' }
+        ];
+        
+        allUnits.forEach(unit => {
+            const option = document.createElement('option');
+            option.value = unit.value;
+            option.textContent = unit.label;
+            unitSelect.appendChild(option);
+        });
+    }
+
+    function calculateNutritionForQuantity(food, quantity, unit) {
+        // Convert to grams (assuming food database is per 100g)
+        let quantityInGrams = convertToGrams(quantity, unit, food.name);
+        
+        // Calculate nutrition (per 100g basis)
+        const multiplier = quantityInGrams / 100;
+        
+        return {
+            calories: (food.calories || 0) * multiplier,
+            protein: (food.protein || 0) * multiplier,
+            fat: (food.fat || 0) * multiplier,
+            carbs: (food.carbs || 0) * multiplier,
+            fiber: (food.fiber || 0) * multiplier,
+            sugar: (food.sugar || 0) * multiplier,
+            sodium: (food.sodium || 0) * multiplier
+        };
+    }
+
+    function convertToGrams(quantity, unit, foodName) {
+        if (!unit) return quantity;
+        
+        switch (unit.toLowerCase()) {
+            case "grams":
+            case "g":
+                return quantity;
+            case "pieces":
+            case "whole":
+                return convertPiecesToGrams(quantity, foodName);
+            case "cups":
+                return quantity * 240; // 1 cup ≈ 240g
+            case "tablespoons":
+            case "tbsp":
+                return quantity * 15; // 1 tbsp ≈ 15g
+            case "teaspoons":
+            case "tsp":
+                return quantity * 5; // 1 tsp ≈ 5g
+            case "milliliters":
+            case "ml":
+                return quantity; // 1ml ≈ 1g for most foods
+            case "ounces":
+            case "oz":
+                return quantity * 28.35; // 1 oz ≈ 28.35g
+            case "pounds":
+            case "lb":
+                return quantity * 453.59; // 1 lb ≈ 453.59g
+            case "slices":
+                return convertSlicesToGrams(quantity, foodName);
+            default:
+                return quantity; // Default to grams
+        }
+    }
+
+    function convertPiecesToGrams(quantity, foodName) {
+        const lowerName = foodName.toLowerCase();
+        if (lowerName.includes("banana")) {
+            return quantity * 120; // 1 banana ≈ 120g
+        } else if (lowerName.includes("apple")) {
+            return quantity * 182; // 1 apple ≈ 182g
+        } else if (lowerName.includes("orange")) {
+            return quantity * 131; // 1 orange ≈ 131g
+        } else if (lowerName.includes("egg")) {
+            return quantity * 50; // 1 egg ≈ 50g
+        } else if (lowerName.includes("bread")) {
+            return quantity * 30; // 1 slice bread ≈ 30g
+        } else {
+            return quantity * 100; // Default: 100g per piece
+        }
+    }
+
+    function convertSlicesToGrams(quantity, foodName) {
+        const lowerName = foodName.toLowerCase();
+        if (lowerName.includes("bread")) {
+            return quantity * 30; // 1 slice bread ≈ 30g
+        } else if (lowerName.includes("cheese")) {
+            return quantity * 28; // 1 slice cheese ≈ 28g
+        } else if (lowerName.includes("tomato")) {
+            return quantity * 20; // 1 slice tomato ≈ 20g
+        } else {
+            return quantity * 25; // Default: 25g per slice
+        }
+    }
+
+    function updateTotals() {
+        let totalCalories = 0;
+        let totalFat = 0;
+        let totalProtein = 0;
+        let totalCarbs = 0;
+        let totalFiber = 0;
+        let totalSugar = 0;
+        let totalSodium = 0;
+
+        document.querySelectorAll('#ingredientTable tr').forEach(row => {
+            const calories = parseFloat(row.querySelector('.ingredient-calories').value) || 0;
+            const fat = parseFloat(row.querySelector('.ingredient-fat').value) || 0;
+            const protein = parseFloat(row.querySelector('.ingredient-protein').value) || 0;
+            const carbs = parseFloat(row.querySelector('.ingredient-carbs').value) || 0;
+            const fiber = parseFloat(row.querySelector('.ingredient-fiber').value) || 0;
+            const sugar = parseFloat(row.querySelector('.ingredient-sugar').value) || 0;
+            const sodium = parseFloat(row.querySelector('.ingredient-sodium').value) || 0;
+
+            totalCalories += calories;
+            totalFat += fat;
+            totalProtein += protein;
+            totalCarbs += carbs;
+            totalFiber += fiber;
+            totalSugar += sugar;
+            totalSodium += sodium;
+        });
+
+        document.getElementById('total-calories').value = totalCalories.toFixed(2);
+        document.getElementById('total-fat').value = totalFat.toFixed(2);
+        document.getElementById('total-protein').value = totalProtein.toFixed(2);
+        document.getElementById('total-carbs').value = totalCarbs.toFixed(2);
+        document.getElementById('total-fiber').value = totalFiber.toFixed(2);
+        document.getElementById('total-sugar').value = totalSugar.toFixed(2);
+        document.getElementById('total-sodium').value = totalSodium.toFixed(2);
+        
+        // Update hidden form fields for submission
+        document.getElementById('meal-calories').value = totalCalories.toFixed(2);
+        document.getElementById('meal-proteins').value = totalProtein.toFixed(2);
+        document.getElementById('meal-fats').value = totalFat.toFixed(2);
+        document.getElementById('meal-carbs').value = totalCarbs.toFixed(2);
+    }
+
+    // Autocomplete logic
+    document.getElementById('food-search').addEventListener('input', function() {
+        const query = this.value;
+        if (query.length < 2) {
+            document.getElementById('food-suggestions').innerHTML = '';
+            return;
+        }
+        fetch('/meal-planner/food-search?q=' + encodeURIComponent(query))
+            .then(res => res.json())
+            .then(data => {
+                let suggestions = '';
+                data.forEach(item => {
+                    const category = getFoodCategory(item.name.toLowerCase());
+                    const categoryLabel = category.charAt(0).toUpperCase() + category.slice(1);
+                    suggestions += `<div class="suggestion-item" 
+                        data-name="${item.name}" 
+                        data-calories="${item.calories || ''}" 
+                        data-protein="${item.protein || ''}" 
+                        data-fat="${item.fat || ''}" 
+                        data-carbs="${item.carbs || ''}" 
+                        data-fiber="${item.fiber || ''}" 
+                        data-sugar="${item.sugar || ''}" 
+                        data-sodium="${item.sodium || ''}">
+                        <strong>${item.name}</strong> 
+                        <span class="text-muted">(${item.calories || '?'} kcal)</span>
+                        <small class="badge bg-secondary ms-2">${categoryLabel}</small>
+                    </div>`;
+                });
+                document.getElementById('food-suggestions').innerHTML = suggestions;
+            });
+    });
+
+    document.getElementById('food-suggestions').addEventListener('click', function(e) {
+        if (e.target.classList.contains('suggestion-item')) {
+            // Find the first empty ingredient row
+            const rows = document.querySelectorAll('#ingredientTable tr');
+            let targetRow = null;
+            for (const row of rows) {
+                const nameInput = row.querySelector('.ingredient-name');
+                if (nameInput && !nameInput.value) {
+                    targetRow = row;
+                    break;
+                }
+            }
+            // If all rows are filled, add a new row
+            if (!targetRow) {
+                addRow();
+                const rows = document.querySelectorAll('#ingredientTable tr');
+                targetRow = rows[rows.length - 1];
+            }
+            targetRow.querySelector('.ingredient-name').value = e.target.dataset.name;
+            targetRow.querySelector('.ingredient-calories').value = e.target.dataset.calories;
+            targetRow.querySelector('.ingredient-protein').value = e.target.dataset.protein;
+            targetRow.querySelector('.ingredient-fat').value = e.target.dataset.fat;
+            targetRow.querySelector('.ingredient-carbs').value = e.target.dataset.carbs;
+            targetRow.querySelector('.ingredient-fiber').value = e.target.dataset.fiber;
+            targetRow.querySelector('.ingredient-sugar').value = e.target.dataset.sugar;
+            targetRow.querySelector('.ingredient-sodium').value = e.target.dataset.sodium;
+            document.getElementById('food-suggestions').innerHTML = '';
+            document.getElementById('food-search').value = '';
+            updateTotals(); // Update totals after adding a food item
+            updateUnitsForFood(targetRow); // Update units for the newly selected food
+        }
+    });
+
+    // Initialize event listeners for existing rows
+    function initializeExistingRows() {
+        document.querySelectorAll('#ingredientTable tr').forEach(row => {
+            addRowEventListeners(row);
+        });
+    }
+
+    // Initialize when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeExistingRows();
+    });
 </script>
+<style>
+.autocomplete-suggestions {
+    border: 1px solid #ccc;
+    max-height: 150px;
+    overflow-y: auto;
+    background: #fff;
+    position: absolute;
+    z-index: 1000;
+    width: 100%;
+}
+.suggestion-item {
+    padding: 5px 10px;
+    cursor: pointer;
+}
+.suggestion-item:hover {
+    background: #f0f0f0;
+}
+</style>
 
 </body>
 </html>
+
