@@ -47,7 +47,20 @@
       <strong th:text="${#temporals.format(evidence.createdAt, 'dd MMM yyyy')}">Date</strong>
       <span>Status: <em th:text="${evidence.status}"></em></span><br/>
       <span th:text="${evidence.post.content}">Caption</span><br/>
-      <img th:src="${evidence.post.imageUrl}" style="width: 200px;" />
+      <!-- Show image if extension is .png, .jpg, or .jpeg -->
+      <img th:if="${#strings.endsWith(evidence.post.imageUrl, '.png') or
+             #strings.endsWith(evidence.post.imageUrl, '.jpg') or
+             #strings.endsWith(evidence.post.imageUrl, '.jpeg')}"
+           th:src="@{${evidence.post.imageUrl}}"
+           style="width: 200px;" />
+
+      <!-- Show video if extension is .mp4 -->
+      <video th:if="${#strings.endsWith(evidence.post.imageUrl, '.mp4')}"
+             width="320" height="240" controls>
+        <source th:src="@{${evidence.post.imageUrl}}" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+
       <hr/>
     </div>
   </div>

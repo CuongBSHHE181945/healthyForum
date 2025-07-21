@@ -5,7 +5,7 @@
   <link rel="stylesheet" th:href="@{/css/evidence_list.css}" />
 </head>
 <body>
-<a th:href="@{'/challenge/progress/' + ${userChallenge.id}}">Back to challenge's progress</a>
+<a th:href="@{'/challenge/progress/' + ${userChallengeId}}">Back to challenge's progress</a>
 <h2>Evidence Submitted for this Challenge</h2>
 
 <div th:each="evidence : ${evidenceList}">
@@ -14,9 +14,21 @@
     <p><strong>Date:</strong> <span th:text="${#temporals.format(evidence.createdAt, 'dd MMM yyyy')}"></span></p>
     <p><strong>Status:</strong> <span th:text="${evidence.status}"></span></p>
     <p><strong>Caption:</strong> <span th:text="${evidence.post.content}"></span></p>
-    <img th:src="@{${evidence.post.imageUrl}}" class="evidence-image"><br/>
 
-    <form th:action="@{'/evidence/react/' + ${evidence.post.id}}" method="post">
+    <!-- Show image if extension is .png, .jpg, or .jpeg -->
+    <img th:if="${#strings.endsWith(evidence.post.imageUrl, '.png') or
+             #strings.endsWith(evidence.post.imageUrl, '.jpg') or
+             #strings.endsWith(evidence.post.imageUrl, '.jpeg')}"
+         th:src="@{${evidence.post.imageUrl}}"
+         style="width: 200px;" />
+
+    <!-- Show video if extension is .mp4 -->
+    <video th:if="${#strings.endsWith(evidence.post.imageUrl, '.mp4')}"
+           width="320" height="240" controls>
+      <source th:src="@{${evidence.post.imageUrl}}" type="video/mp4" />
+    </video>
+
+    <form th:action="@{'/evidence/react/' + ${evidence.id}}" method="post">
       <button type="submit" name="reactionType" value="LIKE"
               th:classappend="${userReactions[evidence.post.id]?.name() == 'LIKE'} ? 'highlight' : ''">
         👍 <span th:text="${likeCounts[evidence.post.id]}"></span>

@@ -79,6 +79,7 @@ public class PostEvidenceController {
             }
         }
 
+        model.addAttribute("userChallengeId", userChallengeId);
         model.addAttribute("evidenceList", evidenceList);
         model.addAttribute("likeCounts", likeCounts);
         model.addAttribute("dislikeCounts", dislikeCounts);

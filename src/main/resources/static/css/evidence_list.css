@@ -87,4 +87,15 @@
 }
 .back-link:hover {
   color: #2e7d32;
+}
+
+button.highlight {
+  background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
+  color: #fff !important;
+  font-weight: 700;
+  border: 2px solid #43a047;
+  box-shadow: 0 2px 8px rgba(67, 160, 71, 0.15);
+  outline: none;
+  transform: scale(1.05);
+  z-index: 1;
 } 
