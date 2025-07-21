@@ -1,7 +1,7 @@
 package com.healthyForum.repository.challenge;
 
 import com.healthyForum.model.Enum.EvidenceStatus;
-import com.healthyForum.model.EvidencePost;
+import com.healthyForum.model.challenge.EvidencePost;
 import com.healthyForum.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

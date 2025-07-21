@@ -1,7 +1,7 @@
 package com.healthyForum.service.challenge;
 
 import com.healthyForum.model.Enum.ReactionType;
-import com.healthyForum.model.EvidencePost;
+import com.healthyForum.model.challenge.EvidencePost;
 import com.healthyForum.model.User;
 import com.healthyForum.model.challenge.EvidenceReaction;
 import com.healthyForum.repository.UserRepository;

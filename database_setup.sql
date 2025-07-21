@@ -479,26 +479,4 @@ INSERT INTO user_badge (user_id, badge_id, earned_at) VALUES
 (2, 3, '2024-06-09 12:00:00'),
 (3, 4, '2024-06-15 09:00:00');
 
----- Sample food_item data for backup/demo (for backup data if csv import file didn't work)
---INSERT INTO food_item (food_id, name, calories, protein, fat, carbs, fiber, sugar, sodium) VALUES
---(321358, 'Hummus, commercial', 229, 7.35, 17.1, 14.9, 5.4, NULL, 438),
---(321359, 'Milk, reduced fat, fluid, 2% milkfat, with added vitamin A and vitamin D', 50, 3.35, 1.9, 4.91, NULL, NULL, 39),
---(321360, 'Tomatoes, grape, raw', 27, 0.83, 0.63, 5.51, 2.1, NULL, 6),
---(321365, 'Salt; iodized', NULL, NULL, NULL, NULL, NULL, NULL, 37200),
---(321371, 'Salt; iodized', NULL, NULL, NULL, NULL, NULL, NULL, 38900),
---(321377, 'Salt; iodized', NULL, NULL, NULL, NULL, NULL, NULL, 38100),
---(321383, 'Salt; iodized', NULL, NULL, NULL, NULL, NULL, NULL, 37300),
---(319877, 'Hummus', NULL, NULL, 19, NULL, NULL, NULL, NULL),
---(319884, 'Hummus', NULL, NULL, NULL, NULL, NULL, 444, NULL),
---(319892, 'Hummus', NULL, NULL, 16.6, NULL, NULL, NULL, NULL),
---(319900, 'Hummus', NULL, NULL, NULL, NULL, NULL, 489, NULL),
---(319915, 'Hummus - NFY12140Q', NULL, NULL, NULL, NULL, 5.7, NULL, NULL),
---(320027, 'MILK, 2%', NULL, NULL, 1.8, NULL, NULL, NULL, NULL),
---(320050, 'MILK, 2%', NULL, NULL, NULL, NULL, NULL, 42, NULL),
---(320356, 'Proximates, Beef, Eye of Round roast/steak, lean only, raw, animal 5, select', NULL, 23.4, 3.46, NULL, NULL, NULL, NULL),
---(320383, 'Proximates, Beef, Eye of Round roast/steak, lean only, raw, animal 10, select', NULL, 23.9, 1.91, NULL, NULL, NULL, NULL),
---(320393, 'Proximates, Beef, Eye of Round roast/steak, lean only, raw, animal 17, select', NULL, 23.8, 3.3, NULL, NULL, NULL, NULL),
---(320448, 'TOMATOES, GRAPE', NULL, NULL, 0.7, NULL, NULL, NULL, NULL),
---(320459, 'TOMATOES, GRAPE', NULL, NULL, NULL, NULL, NULL, 4, NULL),
---(320518, 'TOMATOES, GRAPE', NULL, NULL, NULL, NULL, 2.2, NULL, NULL);
 

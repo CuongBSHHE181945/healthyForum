@@ -1,7 +1,6 @@
 package com.healthyForum.model.challenge;
 
 import com.healthyForum.model.Enum.ReactionType;
-import com.healthyForum.model.EvidencePost;
 import com.healthyForum.model.User;
 import jakarta.persistence.*;
 import lombok.Data;

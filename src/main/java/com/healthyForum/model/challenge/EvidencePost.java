@@ -1,8 +1,7 @@
-package com.healthyForum.model;
+package com.healthyForum.model.challenge;
 
 import com.healthyForum.model.Enum.EvidenceStatus;
-import com.healthyForum.model.challenge.Challenge;
-import com.healthyForum.model.challenge.UserChallenge;
+import com.healthyForum.model.Post.*;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;

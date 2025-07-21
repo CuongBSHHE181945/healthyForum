@@ -1,7 +1,7 @@
 package com.healthyForum.controller.admin.challenge;
 
 import com.healthyForum.model.Enum.EvidenceStatus;
-import com.healthyForum.model.EvidencePost;
+import com.healthyForum.model.challenge.EvidencePost;
 import com.healthyForum.repository.challenge.EvidencePostRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
