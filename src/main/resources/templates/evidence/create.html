@@ -2,37 +2,36 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Submit Evidence</title>
+    <link rel="stylesheet" th:href="@{/css/evidence_list.css}">
 </head>
 <body>
+<div class="container card-green">
   <div th:if="${challengeMessage}" class="alert alert-success">
     <p th:text="${challengeMessage}"></p>
   </div>
-
   <div class="alert alert-info">
     📝 You are submitting evidence for:
     <strong th:text="${challengeName}"></strong>
   </div>
-
   <div th:if="${retrying}">
     <div class="alert alert-warning">
       You are retrying your evidence for today. Reason for rejection:
       <i th:text="${rejectedReason}">...</i>
     </div>
   </div>
-  <a th:href="@{'/challenge/progress/' + ${userChallenge.id}}">Back to challenge's progress</a>
-  <form th:action="@{/evidence/create}" method="post" enctype="multipart/form-data" th:object="${post}">
+  <a th:href="@{'/challenge/progress/' + ${userChallenge.id}}" class="back-link">← Back to challenge's progress</a>
+  <form th:action="@{/evidence/create}" method="post" enctype="multipart/form-data" th:object="${post}" class="evidence-form">
     <input type="hidden" name="userChallengeId" th:value="${userChallenge.id}" />
-    <input type="hidden" name="markAsEvidence" value="true"/>
+    <h2 class="page-title">🍏 Submit Evidence</h2>
     <label>Title:</label>
-    <input type="text" th:field="*{title}" th:value="${suggestedTitle}" required /><br>
-
+    <input type="text" th:field="*{title}" th:value="${suggestedTitle}" required />
     <label>Content:</label>
-    <textarea th:field="*{content}" required></textarea><br>
-
+    <textarea th:field="*{content}" required></textarea>
     <label>Image:</label>
-    <input type="file" name="imageFile"><br>
-    <button type="submit">Submit Post</button>
+    <input type="file" name="imageFile">
+    <button type="submit" class="btn btn-primary">Submit Post</button>
   </form>
+</div>
 </body>
 </html>

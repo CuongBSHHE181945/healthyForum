@@ -122,7 +122,7 @@ public class PostEvidenceController {
     public String submitPostEvidence(@ModelAttribute("post") Post post,
                                      @RequestParam(required = false) MultipartFile imageFile,
                                      @RequestParam(required = false) Integer userChallengeId,
-                                     @RequestParam(required = false, defaultValue = "false") boolean markAsEvidence,
+                                     // @RequestParam(required = false, defaultValue = "true") boolean markAsEvidence,
                                      Principal principal,
                                      RedirectAttributes redirectAttributes) throws IOException {
         User user = userService.getCurrentUser(principal);
@@ -140,7 +140,7 @@ public class PostEvidenceController {
 
         postRepository.save(post);
 
-        if (markAsEvidence) {
+
             UserChallenge userChallenge = userChallengeRepository.findById(userChallengeId)
                     .orElseThrow(() -> new IllegalStateException("User has not joined this challenge."));
 
@@ -148,13 +148,13 @@ public class PostEvidenceController {
             evidence.setPost(post);
             evidence.setUserChallenge(userChallenge);
             evidence.setStatus(EvidenceStatus.PENDING);
-            evidence.setVoteBased(false);
+            evidence.setVoteBased(true);
             evidence.setVoteTimeout(LocalDateTime.now().plusHours(24));
             evidence.setFallbackToAdmin(false);
             evidence.setCreatedAt(LocalDateTime.now());
 
             evidencePostRepository.save(evidence);
-        }
+
 
         redirectAttributes.addFlashAttribute("successMessage", "Evidence submitted!");
         return "redirect:/challenge/progress/" + userChallengeId;
@@ -169,6 +169,7 @@ public class PostEvidenceController {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
 
+        model.addAttribute("userChallenge", evidence.getUserChallenge());
         model.addAttribute("evidenceId", evidenceId);
         model.addAttribute("post", evidence.getPost());
         return "evidence/edit";

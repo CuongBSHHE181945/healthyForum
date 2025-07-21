@@ -99,3 +99,104 @@ button[disabled], .btn[disabled] {
 .back-home-btn:hover {
     background: #217dbb;
 } 
+
+.card-green {
+    background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(76,175,80,0.08);
+    padding: 2rem 2.5rem;
+    margin: 2rem auto;
+    max-width: 600px;
+    border: 1.5px solid #a5d6a7;
+}
+
+.challenge-form label {
+    color: #388e3c;
+    font-weight: 600;
+    margin-top: 1rem;
+    display: block;
+}
+.challenge-form input[type="text"],
+.challenge-form input[type="number"],
+.challenge-form textarea,
+.challenge-form select {
+    width: 100%;
+    padding: 10px 14px;
+    margin-top: 6px;
+    margin-bottom: 12px;
+    border: 1px solid #c8e6c9;
+    border-radius: 6px;
+    background: #f9fff9;
+    font-size: 1em;
+    box-sizing: border-box;
+    transition: border 0.2s;
+}
+.challenge-form input:focus,
+.challenge-form textarea:focus,
+.challenge-form select:focus {
+    border: 1.5px solid #66bb6a;
+    outline: none;
+}
+.challenge-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #f9fff9;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(76,175,80,0.04);
+}
+.challenge-table th, .challenge-table td {
+    padding: 0.85rem 1.2rem;
+    border-bottom: 1px solid #c8e6c9;
+    text-align: left;
+}
+.challenge-table th {
+    background: #c8e6c9;
+    color: #388e3c;
+    font-weight: 700;
+}
+.challenge-table tr:last-child td {
+    border-bottom: none;
+}
+.btn, button {
+    background: linear-gradient(90deg, #66bb6a 0%, #43a047 100%);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 0.6rem 1.4rem;
+    font-weight: 600;
+    font-size: 1em;
+    cursor: pointer;
+    margin-top: 1rem;
+    transition: background 0.2s, color 0.2s;
+    box-shadow: 0 2px 8px rgba(76,175,80,0.08);
+}
+.btn-primary {
+    background: linear-gradient(90deg, #43a047 0%, #66bb6a 100%);
+}
+.btn-danger {
+    background: linear-gradient(90deg, #e57373 0%, #c62828 100%);
+}
+.btn:hover, .btn-primary:hover {
+    background: #388e3c;
+    color: #fff;
+}
+.page-title {
+    color: #388e3c;
+    font-family: 'Segoe UI', 'Nunito', Arial, sans-serif;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    letter-spacing: 1px;
+}
+.back-link {
+    color: #43a047;
+    text-decoration: none;
+    font-weight: 500;
+    margin-bottom: 1.5rem;
+    display: inline-block;
+    transition: color 0.2s;
+}
+.back-link:hover {
+    color: #2e7d32;
+} 

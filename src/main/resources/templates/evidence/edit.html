@@ -3,28 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <title>Edit Evidence</title>
+  <link rel="stylesheet" th:href="@{/css/evidence_list.css}">
 </head>
 <body>
-<a th:href="@{'/challenge/progress/' + ${userChallenge.id}}">Back to challenge's progress</a>
-<h2>Edit Evidence</h2>
-
-<form th:action="@{/evidence/edit}" method="post" enctype="multipart/form-data" th:object="${post}">
-  <input type="hidden" name="evidenceId" th:value="${evidenceId}" />
-
-  <label>Title:</label>
-  <input type="text" th:field="*{title}" required /><br>
-
-  <label>Content:</label>
-  <textarea th:field="*{content}" required></textarea><br>
-
-  <label>Replace Image (optional):</label>
-  <input type="file" name="imageFile"><br>
-
-  <div th:if="${post.imageUrl}">
-    <img th:src="@{${post.imageUrl}}" alt="Current Image" style="width: 200px;" />
-  </div><br>
-
-  <button type="submit">Update</button>
-</form>
+<div class="container card-green">
+  <a th:href="@{'/challenge/progress/' + ${userChallenge.id}}" class="back-link">← Back to challenge's progress</a>
+  <form th:action="@{/evidence/edit}" method="post" enctype="multipart/form-data" th:object="${post}" class="evidence-form">
+    <h2 class="page-title">🥦 Edit Evidence</h2>
+    <input type="hidden" name="evidenceId" th:value="${evidenceId}" />
+    <label>Title:</label>
+    <input type="text" th:field="*{title}" required />
+    <label>Content:</label>
+    <textarea th:field="*{content}" required></textarea>
+    <label>Replace Image (optional):</label>
+    <input type="file" name="imageFile">
+    <div th:if="${post.imageUrl}">
+      <img th:src="@{${post.imageUrl}}" alt="Current Image" class="evidence-image" />
+    </div>
+    <button type="submit" class="btn btn-primary">Update</button>
+  </form>
+</div>
 </body>
 </html>
