@@ -45,6 +45,20 @@
   </nav>
   <!-- Page Content -->
   <div class="container px-4 px-lg-5">
+    <!-- Search Bar Row -->
+    <div class="row mb-4">
+      <div class="col-12 col-md-8 mx-auto">
+        <div class="position-relative">
+          <input id="searchBar" type="text" class="form-control" placeholder="Search posts or users..." autocomplete="off" />
+          <button id="searchButton" class="btn btn-primary position-absolute end-0 top-0 mt-1 me-2 d-none d-md-block" style="z-index:2;">Search</button>
+          <!-- Results Dropdown -->
+          <div id="searchResultsDropdown" class="dropdown-menu w-100 mt-1 shadow" style="max-height: 350px; overflow-y: auto; display: none;"></div>
+          <!-- Error/No Results Messages -->
+          <div id="searchErrorMsg" class="alert alert-danger mt-2 d-none" role="alert"></div>
+          <div id="searchNoResultsMsg" class="alert alert-warning mt-2 d-none" role="alert"></div>
+        </div>
+      </div>
+    </div>
 
     <!-- Hero Row -->
     <div class="row gx-4 gx-lg-5 align-items-center my-5">
