@@ -1,11 +1,11 @@
 package com.healthyForum.model;
 
+import com.healthyForum.model.Post.Post;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity

@@ -104,6 +104,67 @@
         <div class="card-body">
           <h5 class="card-title" th:text="${post.title}">Post Title</h5>
           <p class="card-text" th:text="${post.content}">Post content...</p>
+
+
+          <!-- Post image -->
+          <div th:if="${post.imageUrl != null}" class="mb-3 text-center">
+            <img th:src="${post.imageUrl}" class="img-fluid rounded" alt="Post image">
+          </div>
+
+          <!-- Post video -->
+          <div th:if="${post.videoUrl != null}" class="mb-3 text-center">
+            <video th:src="${post.videoUrl}" controls class="w-100 rounded"></video>
+          </div>
+
+          <!-- Like/Dislike -->
+          <div class="mb-3 d-flex align-items-center gap-2">
+            <form th:action="@{'/posts/' + ${post.id} + '/like'}" method="post">
+              <button type="submit" class="btn btn-outline-success" th:disabled="${likedByUser}">
+                <i class="bi bi-hand-thumbs-up"></i> Like
+              </button>
+            </form>
+            <form th:action="@{'/posts/' + ${post.id} + '/dislike'}" method="post">
+              <button type="submit" class="btn btn-outline-danger" th:disabled="${dislikedByUser}">
+                <i class="bi bi-hand-thumbs-down"></i> Dislike
+              </button>
+            </form>
+            <span class="ms-3 text-muted">
+        👍 <span th:text="${likeCount}">0</span> &nbsp; 👎 <span th:text="${dislikeCount}">0</span>
+    </span>
+          </div>
+
+          <!-- Comment Section -->
+          <div class="mt-5">
+            <h5 class="mb-3">Comments</h5>
+
+            <div th:if="${post.comments != null}">
+              <ul class="list-group mb-4">
+                <li class="list-group-item"
+                    th:each="comment, iterStat : ${post.comments}"
+                    th:if="${iterStat.index < 5}">
+                  <strong th:text="${comment.user.fullName}">User</strong>:
+                  <span th:text="${comment.content}">Comment content</span><br>
+                  <small class="text-muted" th:text="${#temporals.format(comment.createdAt, 'dd/MM/yyyy HH:mm')}">Date</small>
+                </li>
+              </ul>
+
+              <!-- Nút xem thêm -->
+              <div th:if="${#lists.size(post.comments) > 5}">
+                <a th:href="@{'/posts/' + ${post.id}}" class="btn btn-sm btn-link">More comment...</a>
+              </div>
+            </div>
+
+            <!-- Form bình luận -->
+            <form th:action="@{'/posts/' + ${post.id} + '/comment'}" method="post">
+              <div class="mb-3">
+                <textarea name="content" class="form-control" rows="3" placeholder="Enter comment..." required></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary">
+                <i class="bi bi-send"></i> Send Comment
+              </button>
+            </form>
+          </div>
+
           <div class="post-meta mt-auto">
             <span><i class="bi bi-person"></i> <span th:text="${post.user.username}">Author</span></span>
             <span class="ms-3"><i class="bi bi-clock"></i> <span th:text="${#temporals.format(post.createdAt, 'dd/MM/yyyy HH:mm')}">Posted date</span></span>

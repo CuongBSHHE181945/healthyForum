@@ -1,6 +1,6 @@
 package com.healthyForum.model;
 
-import com.healthyForum.model.User;
+import com.healthyForum.model.Post.Post;
 import jakarta.persistence.*;
 import lombok.Data;
 
