@@ -237,6 +237,19 @@ CREATE TABLE user_challenge (
     FOREIGN KEY (challenge_id) REFERENCES challenge(id)
 );
 
+-- Create Food Item table for nutrition lookup
+CREATE TABLE IF NOT EXISTS food_item (
+    food_id INT PRIMARY KEY,
+    name VARCHAR(255),
+    calories DECIMAL(10,2),
+    protein DECIMAL(10,2),
+    fat DECIMAL(10,2),
+    carbs DECIMAL(10,2),
+    fiber DECIMAL(10,2),
+    sugar DECIMAL(10,2),
+    sodium DECIMAL(10,2)
+);
+
 -- Insert initial roles
 INSERT INTO `role` (`role_name`) VALUES 
 ('ADMIN'), 
@@ -280,6 +293,33 @@ INSERT INTO `meal_ingredient` (`ingredient_name`, `ingredient_quantity`, `ingred
 ('Banana', 1, 'piece', 1),
 ('Chicken Breast', 150, 'grams', 2),
 ('Brown Rice', 100, 'grams', 2);
+
+-- Sample meal plans for user_id 2 (Alice Johnson)
+INSERT INTO `meal_planner` (`meal_id`, `meal_name`, `meal_date`, `meal_type`, `meal_description`, `meal_calories`, `meal_proteins`, `meal_carbs`, `meal_fats`, `user_id`) VALUES
+(3, 'Power Lunch', '2024-03-16', 'Lunch', 'Protein-packed lunch', 700.00, 35.00, 80.00, 25.00, 2),
+(4, 'Evening Salad', '2024-03-16', 'Dinner', 'Fresh veggie salad', 350.00, 8.00, 40.00, 15.00, 2);
+
+INSERT INTO `meal_ingredient` (`ingredient_id`, `ingredient_name`, `ingredient_quantity`, `ingredient_unit`, `meal_id`) VALUES
+(5, 'Grilled Chicken Breast', 150, 'grams', 3),
+(6, 'Brown Rice', 100, 'grams', 3),
+(7, 'Broccoli', 80, 'grams', 3),
+(8, 'Lettuce', 50, 'grams', 4),
+(9, 'Tomato', 1, 'pieces', 4),
+(10, 'Olive Oil', 1, 'tablespoons', 4);
+
+-- Insert sample meal plans for user_id 3 (Bob Smith)
+INSERT INTO `meal_planner` (`meal_id`, `meal_name`, `meal_date`, `meal_type`, `meal_description`, `meal_calories`, `meal_proteins`, `meal_carbs`, `meal_fats`, `user_id`) VALUES
+(5, 'Morning Oats', '2024-03-17', 'Breakfast', 'Oatmeal with fruit', 400.00, 12.00, 60.00, 8.00, 3),
+(6, 'Steak Dinner', '2024-03-17', 'Dinner', 'Classic steak and potatoes', 800.00, 40.00, 70.00, 35.00, 3);
+
+INSERT INTO `meal_ingredient` (`ingredient_id`, `ingredient_name`, `ingredient_quantity`, `ingredient_unit`, `meal_id`) VALUES
+(11, 'Oatmeal', 60, 'grams', 5),
+(12, 'Banana', 1, 'pieces', 5),
+(13, 'Milk', 200, 'milliliters', 5),
+(14, 'Beef Steak', 200, 'grams', 6),
+(15, 'Potato', 150, 'grams', 6),
+(16, 'Butter', 1, 'tablespoons', 6);
+
 
 -- Insert sample blog posts
 INSERT INTO `blog` (`title`, `content`, `created_at`, `author_username`, `suspended`) VALUES
@@ -438,3 +478,27 @@ INSERT INTO user_badge (user_id, badge_id, earned_at) VALUES
 (2, 1, '2024-06-02 11:00:00'),
 (2, 3, '2024-06-09 12:00:00'),
 (3, 4, '2024-06-15 09:00:00');
+
+---- Sample food_item data for backup/demo (for backup data if csv import file didn't work)
+--INSERT INTO food_item (food_id, name, calories, protein, fat, carbs, fiber, sugar, sodium) VALUES
+--(321358, 'Hummus, commercial', 229, 7.35, 17.1, 14.9, 5.4, NULL, 438),
+--(321359, 'Milk, reduced fat, fluid, 2% milkfat, with added vitamin A and vitamin D', 50, 3.35, 1.9, 4.91, NULL, NULL, 39),
+--(321360, 'Tomatoes, grape, raw', 27, 0.83, 0.63, 5.51, 2.1, NULL, 6),
+--(321365, 'Salt; iodized', NULL, NULL, NULL, NULL, NULL, NULL, 37200),
+--(321371, 'Salt; iodized', NULL, NULL, NULL, NULL, NULL, NULL, 38900),
+--(321377, 'Salt; iodized', NULL, NULL, NULL, NULL, NULL, NULL, 38100),
+--(321383, 'Salt; iodized', NULL, NULL, NULL, NULL, NULL, NULL, 37300),
+--(319877, 'Hummus', NULL, NULL, 19, NULL, NULL, NULL, NULL),
+--(319884, 'Hummus', NULL, NULL, NULL, NULL, NULL, 444, NULL),
+--(319892, 'Hummus', NULL, NULL, 16.6, NULL, NULL, NULL, NULL),
+--(319900, 'Hummus', NULL, NULL, NULL, NULL, NULL, 489, NULL),
+--(319915, 'Hummus - NFY12140Q', NULL, NULL, NULL, NULL, 5.7, NULL, NULL),
+--(320027, 'MILK, 2%', NULL, NULL, 1.8, NULL, NULL, NULL, NULL),
+--(320050, 'MILK, 2%', NULL, NULL, NULL, NULL, NULL, 42, NULL),
+--(320356, 'Proximates, Beef, Eye of Round roast/steak, lean only, raw, animal 5, select', NULL, 23.4, 3.46, NULL, NULL, NULL, NULL),
+--(320383, 'Proximates, Beef, Eye of Round roast/steak, lean only, raw, animal 10, select', NULL, 23.9, 1.91, NULL, NULL, NULL, NULL),
+--(320393, 'Proximates, Beef, Eye of Round roast/steak, lean only, raw, animal 17, select', NULL, 23.8, 3.3, NULL, NULL, NULL, NULL),
+--(320448, 'TOMATOES, GRAPE', NULL, NULL, 0.7, NULL, NULL, NULL, NULL),
+--(320459, 'TOMATOES, GRAPE', NULL, NULL, NULL, NULL, NULL, 4, NULL),
+--(320518, 'TOMATOES, GRAPE', NULL, NULL, NULL, NULL, 2.2, NULL, NULL);
+
