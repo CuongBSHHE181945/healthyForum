@@ -247,7 +247,7 @@ ALTER TABLE challenge
 ADD COLUMN creator_id BIGINT,
 ADD CONSTRAINT fk_challenge_creator FOREIGN KEY (creator_id) REFERENCES user(id);
 
-UPDATE challenge SET creator_id = 5 WHERE creator_id IS NULL;
+
 
 -- Create user_challenge table (must come before evidence_post)
 CREATE TABLE user_challenge (
@@ -506,6 +506,8 @@ INSERT INTO challenge (id, name, description, status, type_id, category_id, dura
 (28, 'Write a Daily Journal', 'Complete the write a daily journal challenge.', 1, 1, 6, 10),
 (29, 'Practice Gratitude', 'Complete the practice gratitude challenge.', 1, 1, 2, 7),
 (30, 'Clean Room Daily', 'Complete the clean room daily challenge.', 1, 1, 6, 5);
+
+UPDATE challenge SET creator_id = 5 WHERE creator_id IS NULL;
 
 -- Insert badges with icon and locked_icon
 INSERT INTO badge (id, name, description, icon, locked_icon) VALUES
