@@ -107,17 +107,18 @@
 
 
           <!-- Post image -->
-          <img th:if="${#strings.endsWith(post.imageUrl, '.png') or
-             #strings.endsWith(post.imageUrl, '.jpg') or
-             #strings.endsWith(post.imageUrl, '.jpeg')}"
+          <img th:if="${post.imageUrl != null and (#strings.endsWith(post.imageUrl, '.png') or
+                                         #strings.endsWith(post.imageUrl, '.jpg') or
+                                         #strings.endsWith(post.imageUrl, '.jpeg'))}"
                th:src="@{${post.imageUrl}}"
                style="width: 200px;" />
 
-          <!-- Show video if extension is .mp4 -->
-          <video th:if="${#strings.endsWith(post.imageUrl, '.mp4')}"
+          <!-- Show video if imageUrl is not null and ends with .mp4 -->
+          <video th:if="${post.imageUrl != null and #strings.endsWith(post.imageUrl, '.mp4')}"
                  width="320" height="240" controls>
             <source th:src="@{${post.imageUrl}}" type="video/mp4" />
           </video>
+
 
           <!-- Like/Dislike -->
           <div class="mb-3 d-flex align-items-center gap-2">

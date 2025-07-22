@@ -220,6 +220,19 @@ public class UserServiceImpl implements UserService {
     public void unfollow(User follower, User followed) {
         followRepository.deleteByFollowerAndFollowed(follower, followed);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public User findByUsername(String username) {
+        // First, try to find by username in the UserAccount table, which is the most direct way.
+        UserAccount account = userAccountRepository.findByUsername(username).orElse(null);
+        if (account != null && account.getUser() != null) {
+            return account.getUser();
+        }
+
+        // As a fallback, try to find by email, as username might be an email for some users.
+        return userRepository.findByEmail(username).orElse(null);
+    }
 }
 
 

@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 @Entity
-
+@Table(name="post_reaction")
 public class PostReaction {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

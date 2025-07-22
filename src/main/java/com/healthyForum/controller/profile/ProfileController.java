@@ -273,6 +273,14 @@ public class ProfileController {
         return "redirect:/profile";
     }
 
+    @GetMapping("/exercise-scheduler")
+    public String viewExerciseScheduler(Model model, Principal principal) {
+        if (principal == null) {
+            return "redirect:/login";
+        }
+        return "exercise/scheduler";
+    }
+
 //    @PostMapping("display-badge")
 //    @ResponseBody
 //    public ResponseEntity<?> addDisplayedBadge(@RequestParam int badgeId, Principal principal) {

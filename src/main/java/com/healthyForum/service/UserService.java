@@ -19,4 +19,5 @@ public interface UserService {
        boolean isFollowing(User follower, User followed);
        void follow(User follower, User followed);
        void unfollow(User follower, User followed);
+       User findByUsername(String username);
 }

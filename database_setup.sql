@@ -91,6 +91,24 @@ CREATE TABLE IF NOT EXISTS `meal_ingredient` (
     FOREIGN KEY (`meal_id`) REFERENCES `meal_planner`(`meal_id`)
 );
 
+-- Create Exercise Schedule table
+CREATE TABLE IF NOT EXISTS `exercise_schedule` (
+    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `user_id` BIGINT NOT NULL,
+    `date` DATE NOT NULL,
+    `time` TIME NOT NULL,
+    `type` VARCHAR(255) NOT NULL,
+    `name` VARCHAR(255) NOT NULL,
+    `duration` INT NOT NULL,
+    `intensity` VARCHAR(50) NOT NULL,
+    `calories` INT,
+    `is_calories_estimated` BOOLEAN DEFAULT TRUE,
+    `notes` TEXT,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (`user_id`) REFERENCES `user`(`id`)
+);
+
 -- Create Feedback table
 CREATE TABLE IF NOT EXISTS `feedback` (
     `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -220,11 +238,18 @@ CREATE TABLE challenge (
     type_id INT NOT NULL,
     category_id INT NOT NULL,
     duration_days INT NOT NULL,
-
     FOREIGN KEY (type_id) REFERENCES challenge_type(id),
     FOREIGN KEY (category_id) REFERENCES challenge_category(id)
 );
 
+-- Add creator_id to challenge and set default
+ALTER TABLE challenge
+ADD COLUMN creator_id BIGINT,
+ADD CONSTRAINT fk_challenge_creator FOREIGN KEY (creator_id) REFERENCES user(id);
+
+UPDATE challenge SET creator_id = 5 WHERE creator_id IS NULL;
+
+-- Create user_challenge table (must come before evidence_post)
 CREATE TABLE user_challenge (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id BIGINT NOT NULL,
@@ -232,50 +257,119 @@ CREATE TABLE user_challenge (
     join_date DATE,
     status VARCHAR(20),
     last_check_date DATE,
-
     FOREIGN KEY (user_id) REFERENCES user(id),
     FOREIGN KEY (challenge_id) REFERENCES challenge(id)
 );
 
--- Create Food Item table for nutrition lookup
-CREATE TABLE IF NOT EXISTS food_item (
-    food_id INT PRIMARY KEY,
-    name VARCHAR(255),
-    calories DECIMAL(10,2),
-    protein DECIMAL(10,2),
-    fat DECIMAL(10,2),
-    carbs DECIMAL(10,2),
-    fiber DECIMAL(10,2),
-    sugar DECIMAL(10,2),
-    sodium DECIMAL(10,2)
+-- Create evidence_post table (references user_challenge)
+CREATE TABLE IF NOT EXISTS evidence_post (
+    evidence_post_id INT PRIMARY KEY AUTO_INCREMENT,
+    post_id BIGINT NOT NULL,
+    user_challenge_id INT NOT NULL,
+    status ENUM('PENDING', 'APPROVED', 'REJECTED') NOT NULL DEFAULT 'PENDING',
+    vote_based BOOLEAN DEFAULT FALSE,
+    vote_timeout DATETIME,
+    fallback_to_admin BOOLEAN DEFAULT FALSE,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_evidence_post_post FOREIGN KEY (post_id) REFERENCES post(post_id),
+    CONSTRAINT fk_evidence_post_user_challenge FOREIGN KEY (user_challenge_id) REFERENCES user_challenge(id)
+);
+
+-- Create evidence_react table (references evidence_post)
+CREATE TABLE IF NOT EXISTS evidence_react (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    evidence_post_id INT NOT NULL,
+    reaction_type ENUM('LIKE', 'DISLIKE') NOT NULL,
+    UNIQUE KEY user_post_reaction (user_id, evidence_post_id),
+    FOREIGN KEY (user_id) REFERENCES user(id),
+    FOREIGN KEY (evidence_post_id) REFERENCES evidence_post(evidence_post_id)
+);
+
+-- Create Post Reaction table
+CREATE TABLE IF NOT EXISTS post_reaction (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    post_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    liked BOOLEAN NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (post_id) REFERENCES post(post_id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_user_post (user_id, post_id)
+);
+
+-- Create Comment table
+CREATE TABLE IF NOT EXISTS comment (
+    comment_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    post_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    content TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (post_id) REFERENCES post(post_id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
 );
 
 -- Insert initial roles
-INSERT INTO `role` (`role_name`) VALUES 
-('ADMIN'), 
-('USER');
+INSERT INTO `role` (`role_id`, `role_name`) VALUES 
+(1, 'ADMIN'), 
+(2, 'USER');
 
--- Insert sample users (updated structure)
-INSERT INTO `user` (`full_name`, `email`, `gender`, `dob`, `address`, `age`, `height`, `weight`, `role_id`) VALUES
-('Sarah Smith', 'sarah@example.com', 'Female', '1990-01-01', '123 Wellness St.', 34, 165.0, 60.0, 2),
-('Alice Johnson', 'alice@example.com', 'Female', '1995-06-12', '123 Main St', 29, 160.0, 55.0, 2),
-('Bob Smith', 'bob@example.com', 'Male', '1990-03-08', '456 Park Ave', 34, 175.0, 70.0, 2),
-('Carol Davis', 'carol@example.com', 'Female', '1988-11-22', '789 Elm Rd', 35, 170.0, 65.0, 2),
-('Alice Admin', 'alice@admin.com', 'Female', '1990-01-01', '123 Admin St', 34, 165.0, 60.0, 1),
-('Bob Mod', 'bob@mod.com', 'Male', '1992-02-02', '456 Mod Ave', 32, 180.0, 75.0, 2),
-('Charlie User', 'charlie@user.com', 'Male', '1995-03-03', '789 User Rd', 29, 170.0, 68.0, 2),
-('Dana User', 'dana@user.com', 'Female', '1998-04-04', '101 User Blvd', 26, 155.0, 50.0, 2);
+-- Insert sample users with explicit IDs
+INSERT INTO `user` (`id`, `full_name`, `email`, `gender`, `dob`, `address`, `age`, `height`, `weight`, `role_id`) VALUES
+(1, 'Sarah Smith', 'sarah@example.com', 'Female', '1990-01-01', '123 Wellness St.', 34, 165.0, 60.0, 2),
+(2, 'Alice Johnson', 'alice@example.com', 'Female', '1995-06-12', '123 Main St', 29, 160.0, 55.0, 2),
+(3, 'Bob Smith', 'bob@example.com', 'Male', '1990-03-08', '456 Park Ave', 34, 175.0, 70.0, 2),
+(4, 'Carol Davis', 'carol@example.com', 'Female', '1988-11-22', '789 Elm Rd', 35, 170.0, 65.0, 2),
+(5, 'Alice Admin', 'alice@admin.com', 'Female', '1990-01-01', '123 Admin St', 34, 165.0, 60.0, 1),
+(6, 'Bob Mod', 'bob@mod.com', 'Male', '1992-02-02', '456 Mod Ave', 32, 180.0, 75.0, 2),
+(7, 'Charlie User', 'charlie@user.com', 'Male', '1995-03-03', '789 User Rd', 29, 170.0, 68.0, 2),
+(8, 'Dana User', 'dana@user.com', 'Female', '1998-04-04', '101 User Blvd', 26, 155.0, 50.0, 2);
 
--- Insert sample user accounts
-INSERT INTO `user_accounts` (`user_id`, `username`, `password`, `provider`, `enabled`, `suspended`) VALUES
-(1, 'sarah1', '$2a$10$Zzs1kf5WAviVMIvbUSvsVen.uHWUTjb8Qn.bnKEI21jcBqphZEtPO', 'local', TRUE, FALSE),
-(2, 'alice123', '$2a$10$DdACFbPlEnoLMoNRT58rRezj9Mnchy.CVolTbxrOZmo7m4AwSalra', 'local', TRUE, FALSE),
-(3, 'bob456', '$2a$10$6ODmXZxJge8dvXWKSpE5RuU66tMP7guAROmGoYW2D1ABxw//YJq5u', 'local', TRUE, FALSE),
-(4, 'carol789', '$2a$10$4FjsyuABAig4nZTibDZXR.vMgFXmg55ubtdlre2efd17lqQdVqhwS', 'local', TRUE, FALSE),
-(5, 'admin1', '$2a$10$Qw8kZx3gqeeUXnIfwRS4l.9gHBvXwIBIsPNrKV86Xqx94H/46oQwe', 'local', TRUE, FALSE),
-(6, 'mod1', '$2a$10$fWIBxuIsvVpJ3s0jSBG.1.bN5Jb3Dq0yWRySyZxzkXN01H.WMlCZO', 'local', TRUE, FALSE),
-(7, 'user1', '$2a$10$9Y1AT//cDf.3AwoibVN6/ul8rGxUo.RAhGyElbLulcUblxN.O8mHK', 'local', TRUE, FALSE),
-(8, 'user2', '$2a$10$7bPNzIfN.fHo1Q7I0j5/OO8KyYNzgt5UQsIemZwFQPMWVt4SZTnNW', 'local', TRUE, TRUE);
+-- Insert sample user accounts with explicit IDs
+INSERT INTO `user_accounts` (`id`, `user_id`, `username`, `password`, `provider`, `enabled`, `suspended`) VALUES
+(1, 1, 'sarah1', '$2a$10$Zzs1kf5WAviVMIvbUSvsVen.uHWUTjb8Qn.bnKEI21jcBqphZEtPO', 'local', TRUE, FALSE),
+(2, 2, 'alice123', '$2a$10$DdACFbPlEnoLMoNRT58rRezj9Mnchy.CVolTbxrOZmo7m4AwSalra', 'local', TRUE, FALSE),
+(3, 3, 'bob456', '$2a$10$6ODmXZxJge8dvXWKSpE5RuU66tMP7guAROmGoYW2D1ABxw//YJq5u', 'local', TRUE, FALSE),
+(4, 4, 'carol789', '$2a$10$4FjsyuABAig4nZTibDZXR.vMgFXmg55ubtdlre2efd17lqQdVqhwS', 'local', TRUE, FALSE),
+(5, 5, 'admin1', '$2a$10$Qw8kZx3gqeeUXnIfwRS4l.9gHBvXwIBIsPNrKV86Xqx94H/46oQwe', 'local', TRUE, FALSE),
+(6, 6, 'mod1', '$2a$10$fWIBxuIsvVpJ3s0jSBG.1.bN5Jb3Dq0yWRySyZxzkXN01H.WMlCZO', 'local', TRUE, FALSE),
+(7, 7, 'user1', '$2a$10$9Y1AT//cDf.3AwoibVN6/ul8rGxUo.RAhGyElbLulcUblxN.O8mHK', 'local', TRUE, FALSE),
+(8, 8, 'user2', '$2a$10$7bPNzIfN.fHo1Q7I0j5/OO8KyYNzgt5UQsIemZwFQPMWVt4SZTnNW', 'local', TRUE, TRUE);
+
+-- Sample posts for feed testing
+INSERT INTO post (user_id, title, content, is_draft, visibility, created_at, updated_at, banned)
+VALUES
+(1, 'Morning Yoga Success', 'Just finished my 7-day yoga challenge!', FALSE, 'PUBLIC', '2024-06-01 08:00:00', '2024-06-01 08:00:00', FALSE),
+(2, 'Healthy Breakfast', 'Oatmeal and fruit to start the day.', FALSE, 'PUBLIC', '2024-06-02 07:30:00', '2024-06-02 07:30:00', FALSE),
+(3, 'Late Night Thoughts', 'Couldn''t sleep, so I wrote a poem.', FALSE, 'PUBLIC', '2024-06-02 23:45:00', '2024-06-02 23:45:00', FALSE),
+(4, 'Draft: My Fitness Plan', 'Still working on my new fitness plan.', TRUE, 'DRAFTS', '2024-06-03 10:00:00', '2024-06-03 10:00:00', FALSE),
+(5, 'Water Tracker', 'Drank 8 glasses today!', FALSE, 'PUBLIC', '2024-06-03 18:00:00', '2024-06-03 18:00:00', FALSE),
+(6, 'Evening Walk', 'Beautiful sunset during my walk.', FALSE, 'PUBLIC', '2024-06-04 19:30:00', '2024-06-04 19:30:00', FALSE);
+
+-- Sample post reactions (likes/dislikes)
+INSERT INTO post_reaction (post_id, user_id, liked)
+VALUES
+(1, 2, TRUE),
+(1, 3, TRUE),
+(2, 1, TRUE),
+(2, 3, FALSE),
+(3, 1, TRUE),
+(3, 2, FALSE),
+(5, 1, TRUE),
+(5, 2, TRUE),
+(5, 3, TRUE),
+(6, 1, FALSE);
+
+-- Sample comments
+INSERT INTO comment (post_id, user_id, content, created_at)
+VALUES
+(1, 2, 'Congrats on finishing!', '2024-06-01 09:00:00'),
+(1, 3, 'Great job!', '2024-06-01 09:15:00'),
+(2, 1, 'Looks delicious!', '2024-06-02 08:00:00'),
+(3, 2, 'Nice poem, share more!', '2024-06-03 00:10:00'),
+(5, 3, 'Keep it up!', '2024-06-03 19:00:00');
 
 -- Insert sample sleep entries
 INSERT INTO `sleep_entries` (`date`, `start_time`, `end_time`, `quality`, `notes`, `user_id`) VALUES
@@ -351,6 +445,14 @@ INSERT INTO `health_assessment` (`age`, `gender`, `height`, `weight`, `smoker`, 
 (32, 'Male', 180.0, 75.0, FALSE, 7, '7-8 hours', 'Low', 'Keep up the good work!', 6),
 (29, 'Male', 170.0, 68.0, FALSE, 5, '7-8 hours', 'Low', 'Keep up the good work!', 7),
 (26, 'Female', 155.0, 50.0, FALSE, 3, '7-8 hours', 'Low', 'Keep up the good work!', 8);
+
+-- Sample Exercise Schedules
+INSERT INTO `exercise_schedule` (`user_id`, `date`, `time`, `type`, `name`, `duration`, `intensity`, `calories`, `is_calories_estimated`, `notes`)
+VALUES
+(1, '2024-07-20', '07:00:00', 'Running', 'Morning Run', 30, 'Medium', 315, TRUE, 'Felt great, nice weather.'),
+(1, '2024-07-20', '18:00:00', 'Yoga', 'Evening Yoga', 45, 'Low', 110, TRUE, 'Relaxing session.'),
+(2, '2024-07-21', '06:30:00', 'Walking', 'Park Walk', 40, 'Low', 140, TRUE, 'Walked with a friend.'),
+(3, '2024-07-21', '19:00:00', 'Weight Lifting', 'Upper Body', 50, 'High', 350, TRUE, 'Intense workout.');
 
 -- Generated SQL for 30 Challenges and Badges
 -- Challenge: Morning Yoga 7 Days
@@ -478,38 +580,3 @@ INSERT INTO user_badge (user_id, badge_id, earned_at) VALUES
 (2, 1, '2024-06-02 11:00:00'),
 (2, 3, '2024-06-09 12:00:00'),
 (3, 4, '2024-06-15 09:00:00');
-
-USE healthyForum;
-
-	CREATE TABLE evidence_post (
-    evidence_post_id INT PRIMARY KEY AUTO_INCREMENT,
-    post_id BIGINT NOT NULL,
-    user_challenge_id INT NOT NULL,
-    status ENUM('PENDING', 'APPROVED', 'REJECTED') NOT NULL DEFAULT 'PENDING',
-    vote_based BOOLEAN DEFAULT FALSE,
-    vote_timeout DATETIME,
-    fallback_to_admin BOOLEAN DEFAULT FALSE,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_evidence_post_post FOREIGN KEY (post_id) REFERENCES post(post_id),
-    CONSTRAINT fk_evidence_post_user_challenge FOREIGN KEY (user_challenge_id) REFERENCES user_challenge(id)
-);
-
-CREATE TABLE evidence_react (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id BIGINT NOT NULL,
-    evidence_post_id INT NOT NULL,
-    reaction_type ENUM('LIKE', 'DISLIKE') NOT NULL,
-    UNIQUE KEY user_post_reaction (user_id, evidence_post_id),
-    FOREIGN KEY (user_id) REFERENCES user(id),
-    FOREIGN KEY (evidence_post_id) REFERENCES evidence_post(evidence_post_id)
-);
-
-ALTER TABLE challenge
-ADD COLUMN creator_id BIGINT,
-ADD CONSTRAINT fk_challenge_creator FOREIGN KEY (creator_id) REFERENCES user(id);
-
-UPDATE challenge SET creator_id = 5 WHERE creator_id IS NULL;
-
-

@@ -1,133 +1,119 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-  <meta name="description" content="Your small business website" />
-  <meta name="author" content="Your Name" />
-  <title>Small Business - Thymeleaf Template</title>
-  <!-- Favicon -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HealthyForum - Home</title>
   <link rel="icon" type="image/x-icon" th:href="@{/assets/favicon.ico}" />
   <!-- Bootstrap CSS -->
   <link th:href="@{/css/styles.css}" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
 </head>
 <body>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-    <div class="container-fluid">
-      <a class="navbar-brand" th:href="@{/}">HealthyForum</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item"><a class="nav-link" th:href="@{/}">Home</a></li>
-          <li class="nav-item"><a class="nav-link" th:href="@{/profile}">Profile</a></li>
-          <li class="nav-item"><a class="nav-link" th:href="@{/badge-display}">Badges</a></li>
-          <li class="nav-item"><a class="nav-link" th:href="@{/challenge}">Challenges</a></li>
-          <li class="nav-item"><a class="nav-link" th:href="@{/posts}">Posts</a></li>
-          <li class="nav-item"><a class="nav-link" th:href="@{/meal-planner}">Meal Planner</a></li>
-          <li class="nav-item"><a class="nav-link" th:href="@{/sleepTracker/list}">Sleep Tracker</a></li>
-          <li class="nav-item"><a class="nav-link" th:href="@{/health-assessment}">Health Assessment</a></li>
-          <li class="nav-item"><a class="nav-link" th:href="@{/Messaging}">Messaging</a></li>
-        </ul>
-        <ul class="navbar-nav mb-2 mb-lg-0">
-          <li class="nav-item" th:if="${#authorization.expression('isAuthenticated()')}">
-            <form th:action="@{/logout}" method="post" style="display:inline;">
-              <button class="btn btn-outline-light btn-sm" type="submit">Logout</button>
-            </form>
-          </li>
-          <li class="nav-item" th:if="${!#authorization.expression('isAuthenticated()')}">
-            <a class="nav-link" th:href="@{/login}">Login</a>
-          </li>
-        </ul>
-      </div>
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm mb-4">
+  <div class="container">
+    <a class="navbar-brand fw-bold text-success" th:href="@{/}">HealthyForum</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item"><a class="nav-link" th:href="@{/}">Home</a></li>
+        <li class="nav-item"><a class="nav-link" th:href="@{/profile}">Profile</a></li>
+        <li class="nav-item"><a class="nav-link" th:href="@{/badge-display}">Badges</a></li>
+        <li class="nav-item"><a class="nav-link" th:href="@{/challenge}">Challenges</a></li>
+        <li class="nav-item"><a class="nav-link" th:href="@{/posts}">Posts</a></li>
+        <li class="nav-item"><a class="nav-link" th:href="@{/meal-planner}">Meal Planner</a></li>
+        <li class="nav-item"><a class="nav-link" th:href="@{/sleepTracker/list}">Sleep Tracker</a></li>
+        <li class="nav-item"><a class="nav-link" th:href="@{/profile/exercise-scheduler}">Exercise Scheduler</a></li>
+        <li class="nav-item"><a class="nav-link" th:href="@{/health-assessment}">Health Assessment</a></li>
+        <li class="nav-item"><a class="nav-link" th:href="@{/Messaging}">Messaging</a></li>
+      </ul>
+      <ul class="navbar-nav">
+        <li class="nav-item" th:if="${#authorization.expression('isAuthenticated()')}">
+          <form th:action="@{/logout}" method="post">
+            <button class="btn btn-outline-success btn-sm" type="submit">Logout</button>
+          </form>
+        </li>
+        <li class="nav-item" th:if="${!#authorization.expression('isAuthenticated()')}">
+          <a class="nav-link text-success" th:href="@{/login}">Login</a>
+        </li>
+      </ul>
     </div>
-  </nav>
-  <!-- Page Content -->
-  <div class="container px-4 px-lg-5">
-    <!-- Search Bar Row -->
-    <div class="row mb-4">
-      <div class="col-12 col-md-8 mx-auto">
-        <div class="position-relative">
-          <input id="searchBar" type="text" class="form-control" placeholder="Search posts or users..." autocomplete="off" />
-          <button id="searchButton" class="btn btn-primary position-absolute end-0 top-0 mt-1 me-2 d-none d-md-block" style="z-index:2;">Search</button>
-          <!-- Results Dropdown -->
-          <div id="searchResultsDropdown" class="dropdown-menu w-100 mt-1 shadow" style="max-height: 350px; overflow-y: auto; display: none;"></div>
-          <!-- Error/No Results Messages -->
-          <div id="searchErrorMsg" class="alert alert-danger mt-2 d-none" role="alert"></div>
-          <div id="searchNoResultsMsg" class="alert alert-warning mt-2 d-none" role="alert"></div>
-        </div>
-      </div>
-    </div>
+  </div>
+</nav>
 
-    <!-- Hero Row -->
-    <div class="row gx-4 gx-lg-5 align-items-center my-5">
-      <div class="col-lg-7">
-        <img class="img-fluid rounded mb-4 mb-lg-0"
-             src="https://dummyimage.com/900x400/dee2e6/6c757d.jpg" alt="Hero image" />
-      </div>
-      <div class="col-lg-5">
-        <h1 class="font-weight-light">Business Name or Tagline</h1>
-        <p>This template is great for small businesses. Clean, simple, and easy to use!</p>
-        <a class="btn btn-primary" href="#">Call to Action!</a>
-      </div>
-    </div>
+<!-- Hero -->
+<section class="py-5 bg-light text-center">
+  <div class="container">
+    <h1 class="display-5 fw-bold text-success">Welcome to HealthyForum</h1>
+    <p class="lead text-muted">Connect, track your wellness, and grow stronger together.</p>
+    <a class="btn btn-success btn-lg" href="#feed">Explore Posts</a>
+  </div>
+</section>
 
-    <!-- CTA -->
-    <div class="card text-white bg-secondary my-5 py-4 text-center">
-      <div class="card-body">
-        <p class="text-white m-0">Showcase important info or a clever tagline here!</p>
+<!-- Search -->
+<div class="container my-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="input-group shadow-sm">
+        <input id="searchBar" type="text" class="form-control" placeholder="Search posts or users...">
+        <button id="searchButton" class="btn btn-outline-success">Search</button>
       </div>
+      <div id="searchResultsDropdown" class="dropdown-menu w-100 mt-1 shadow d-none"></div>
+      <div id="searchErrorMsg" class="alert alert-danger mt-2 d-none"></div>
+      <div id="searchNoResultsMsg" class="alert alert-warning mt-2 d-none"></div>
     </div>
+  </div>
+</div>
 
-    <!-- Cards -->
-    <div class="row gx-4 gx-lg-5">
-      <div class="col-md-4 mb-5">
-        <div class="card h-100">
-          <div class="card-body">
-            <h2 class="card-title">Card One</h2>
-            <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit...</p>
-          </div>
-          <div class="card-footer">
-            <a class="btn btn-primary btn-sm" href="#">More Info</a>
-          </div>
-        </div>
+<!-- Filter Buttons -->
+<div class="container text-center mb-4">
+  <a th:href="@{/}" class="btn btn-outline-success me-2" th:classappend="${filter} == null ? 'active' : ''">All</a>
+  <a th:href="@{/?filter=trending}" class="btn btn-outline-success me-2" th:classappend="${filter} == 'trending' ? 'active' : ''">Trending</a>
+  <a th:href="@{/?filter=following}" class="btn btn-outline-success" th:classappend="${filter} == 'following' ? 'active' : ''">Following</a>
+</div>
+
+<!-- Feed -->
+<div class="container" id="feed">
+  <div th:if="${feedError}" class="alert alert-danger" th:text="${feedError}"></div>
+
+  <div th:each="post : ${posts}" class="card mb-4 shadow-sm" style="cursor: pointer;" th:onclick="|window.location.href='/posts/' + [[${post.id}]]|">
+    <div class="card-body">
+      <h5 class="card-title" th:text="${post.title}"></h5>
+      <div class="mb-2 text-muted small">
+        <span th:text="${post.user.fullName}"></span> •
+        <span th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
       </div>
-      <div class="col-md-4 mb-5">
-        <div class="card h-100">
-          <div class="card-body">
-            <h2 class="card-title">Card Two</h2>
-            <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit...</p>
-          </div>
-          <div class="card-footer">
-            <a class="btn btn-primary btn-sm" href="#">More Info</a>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-4 mb-5">
-        <div class="card h-100">
-          <div class="card-body">
-            <h2 class="card-title">Card Three</h2>
-            <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit...</p>
-          </div>
-          <div class="card-footer">
-            <a class="btn btn-primary btn-sm" href="#">More Info</a>
-          </div>
+      <p class="card-text" th:text="${post.content}"></p>
+      <div class="d-flex justify-content-between align-items-center">
+        <a th:href="@{'/posts/' + ${post.id}}" class="btn btn-outline-success btn-sm" onclick="event.stopPropagation();">View</a>
+        <div>
+          <span class="me-3"><i class="bi bi-hand-thumbs-up"></i> <span th:text="${likeCounts[post.id]}">0</span></span>
+          <span><i class="bi bi-chat"></i> <span th:text="${#lists.size(post.comments)}">0</span></span>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Footer -->
-  <footer class="py-5 bg-dark">
+  <form th:if="${hasNext}" method="get" th:action="@{/}" class="text-center">
+    <input type="hidden" name="page" th:value="${currentPage + 1}" />
+    <input type="hidden" name="size" value="10" />
+    <input type="hidden" name="filter" th:value="${filter}" />
+    <button type="submit" class="btn btn-outline-success">Load More</button>
+  </form>
+</div>
 
-    <div class="container px-4 px-lg-5">
-      <p class="m-0 text-center text-white">&copy; Your Website 2025</p>
-    </div>
-  </footer>
+<!-- Footer -->
+<footer class="bg-white text-center py-4 border-top mt-5">
+  <div class="container">
+    <p class="mb-0 text-muted">&copy; HealthyForum 2025</p>
+  </div>
+</footer>
 
-  <!-- JS Files -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script th:src="@{/js/scripts.js}"></script>
+<!-- JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/scripts.js}"></script>
 </body>
 </html>
