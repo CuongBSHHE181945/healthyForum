@@ -1,11 +1,13 @@
 package com.healthyForum.model;
 
 import com.healthyForum.model.Post.Post;
+import com.healthyForum.model.Enum.Visibility;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -54,6 +56,10 @@ public class User {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private UserAccount account;
 
+    @Column(name = "profile_visibility")
+    @Enumerated(EnumType.STRING)
+    private Visibility profileVisibility = Visibility.PUBLIC;
+
     // Helper methods
     public int calculateAge() {
         if (dob != null) {
@@ -85,5 +91,17 @@ public class User {
 
     public String getUsername() {
         return account != null ? account.getUsername() : null;
+    }
+
+    public Double getWeight() {
+        return weight;
+    }
+
+    public void setWeight(Double weight) {
+        this.weight = weight;
+    }
+
+    public UserAccount getUserAccount() {
+        return account;
     }
 }

@@ -91,6 +91,24 @@ CREATE TABLE IF NOT EXISTS `meal_ingredient` (
     FOREIGN KEY (`meal_id`) REFERENCES `meal_planner`(`meal_id`)
 );
 
+-- Create Exercise Schedule table
+CREATE TABLE IF NOT EXISTS `exercise_schedule` (
+    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `user_id` BIGINT NOT NULL,
+    `date` DATE NOT NULL,
+    `time` TIME NOT NULL,
+    `type` VARCHAR(255) NOT NULL,
+    `name` VARCHAR(255) NOT NULL,
+    `duration` INT NOT NULL,
+    `intensity` VARCHAR(50) NOT NULL,
+    `calories` INT,
+    `is_calories_estimated` BOOLEAN DEFAULT TRUE,
+    `notes` TEXT,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (`user_id`) REFERENCES `user`(`id`)
+);
+
 -- Create Feedback table
 CREATE TABLE IF NOT EXISTS `feedback` (
     `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -427,6 +445,14 @@ INSERT INTO `health_assessment` (`age`, `gender`, `height`, `weight`, `smoker`, 
 (32, 'Male', 180.0, 75.0, FALSE, 7, '7-8 hours', 'Low', 'Keep up the good work!', 6),
 (29, 'Male', 170.0, 68.0, FALSE, 5, '7-8 hours', 'Low', 'Keep up the good work!', 7),
 (26, 'Female', 155.0, 50.0, FALSE, 3, '7-8 hours', 'Low', 'Keep up the good work!', 8);
+
+-- Sample Exercise Schedules
+INSERT INTO `exercise_schedule` (`user_id`, `date`, `time`, `type`, `name`, `duration`, `intensity`, `calories`, `is_calories_estimated`, `notes`)
+VALUES
+(1, '2024-07-20', '07:00:00', 'Running', 'Morning Run', 30, 'Medium', 315, TRUE, 'Felt great, nice weather.'),
+(1, '2024-07-20', '18:00:00', 'Yoga', 'Evening Yoga', 45, 'Low', 110, TRUE, 'Relaxing session.'),
+(2, '2024-07-21', '06:30:00', 'Walking', 'Park Walk', 40, 'Low', 140, TRUE, 'Walked with a friend.'),
+(3, '2024-07-21', '19:00:00', 'Weight Lifting', 'Upper Body', 50, 'High', 350, TRUE, 'Intense workout.');
 
 -- Generated SQL for 30 Challenges and Badges
 -- Challenge: Morning Yoga 7 Days
