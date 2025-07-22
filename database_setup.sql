@@ -479,4 +479,37 @@ INSERT INTO user_badge (user_id, badge_id, earned_at) VALUES
 (2, 3, '2024-06-09 12:00:00'),
 (3, 4, '2024-06-15 09:00:00');
 
+USE healthyForum;
+
+	CREATE TABLE evidence_post (
+    evidence_post_id INT PRIMARY KEY AUTO_INCREMENT,
+    post_id BIGINT NOT NULL,
+    user_challenge_id INT NOT NULL,
+    status ENUM('PENDING', 'APPROVED', 'REJECTED') NOT NULL DEFAULT 'PENDING',
+    vote_based BOOLEAN DEFAULT FALSE,
+    vote_timeout DATETIME,
+    fallback_to_admin BOOLEAN DEFAULT FALSE,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_evidence_post_post FOREIGN KEY (post_id) REFERENCES post(post_id),
+    CONSTRAINT fk_evidence_post_user_challenge FOREIGN KEY (user_challenge_id) REFERENCES user_challenge(id)
+);
+
+CREATE TABLE evidence_react (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    evidence_post_id INT NOT NULL,
+    reaction_type ENUM('LIKE', 'DISLIKE') NOT NULL,
+    UNIQUE KEY user_post_reaction (user_id, evidence_post_id),
+    FOREIGN KEY (user_id) REFERENCES user(id),
+    FOREIGN KEY (evidence_post_id) REFERENCES evidence_post(evidence_post_id)
+);
+
+ALTER TABLE challenge
+ADD COLUMN creator_id BIGINT,
+ADD CONSTRAINT fk_challenge_creator FOREIGN KEY (creator_id) REFERENCES user(id);
+
+UPDATE challenge SET creator_id = 5 WHERE creator_id IS NULL;
+
 
