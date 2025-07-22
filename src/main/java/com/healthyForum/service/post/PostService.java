@@ -7,13 +7,18 @@ import com.healthyForum.repository.Post.PostRepository;
 import com.healthyForum.repository.UserRepository;
 import com.healthyForum.repository.UserAccountRepository;
 import com.healthyForum.repository.keywordFiltering.KeywordRepository;
+import com.healthyForum.repository.Post.PostReactionRepository;
 import com.healthyForum.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 @Service
 public class PostService {
@@ -32,6 +37,9 @@ public class PostService {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private PostReactionRepository postReactionRepository;
 
     // Save a post (new or edited) with user from Principal
     public void savePost(Post post, Principal principal) {
@@ -150,6 +158,36 @@ public class PostService {
             return true;
         }
         return false;
+    }
+
+    public Page<Post> getAllVisiblePublicPosts(Pageable pageable) {
+        return postRepository.findByVisibilityAndBannedFalse(Visibility.PUBLIC, pageable);
+    }
+
+    public Page<Post> getTrendingPosts(Pageable pageable) {
+        // TODO: Implement trending logic (e.g., most liked or commented posts)
+        return getAllVisiblePublicPosts(pageable);
+    }
+
+    public Page<Post> getFollowingPosts(Pageable pageable, String username) {
+        // TODO: Implement following logic (e.g., posts from users the current user follows)
+        return getAllVisiblePublicPosts(pageable);
+    }
+
+    public Map<Long, Long> getLikeCounts(List<Post> posts) {
+        Map<Long, Long> likeCounts = new HashMap<>();
+        for (Post post : posts) {
+            likeCounts.put(post.getId(), postReactionRepository.countByPostAndLiked(post, true));
+        }
+        return likeCounts;
+    }
+
+    public Map<Long, Long> getDislikeCounts(List<Post> posts) {
+        Map<Long, Long> dislikeCounts = new HashMap<>();
+        for (Post post : posts) {
+            dislikeCounts.put(post.getId(), postReactionRepository.countByPostAndLiked(post, false));
+        }
+        return dislikeCounts;
     }
 }
 

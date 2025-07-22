@@ -117,3 +117,71 @@
     }
   });
 })();
+
+// --- FEED AJAX LOGIC ---
+document.addEventListener('DOMContentLoaded', function() {
+  const feed = document.getElementById('feed');
+  const networkErrorMsg = document.getElementById('networkErrorMsg');
+  const filterButtons = document.querySelectorAll('.btn-outline-primary');
+
+  // Helper to show/hide network error
+  function showNetworkError(show) {
+    if (networkErrorMsg) {
+      networkErrorMsg.classList.toggle('d-none', !show);
+    }
+  }
+
+  // AJAX load for filter buttons
+  filterButtons.forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      const url = btn.getAttribute('href');
+      fetch(url)
+        .then(res => {
+          if (!res.ok) throw new Error('Network');
+          return res.text();
+        })
+        .then(html => {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+          const newFeed = doc.getElementById('feed');
+          if (newFeed && feed) {
+            feed.innerHTML = newFeed.innerHTML;
+          }
+          showNetworkError(false);
+        })
+        .catch(() => {
+          showNetworkError(true);
+        });
+    });
+  });
+
+  // AJAX load for 'Load More' button
+  if (feed) {
+    feed.addEventListener('submit', function(e) {
+      if (e.target.matches('form')) {
+        e.preventDefault();
+        const form = e.target;
+        const url = form.getAttribute('action') + '?' + new URLSearchParams(new FormData(form)).toString();
+        fetch(url)
+          .then(res => {
+            if (!res.ok) throw new Error('Network');
+            return res.text();
+          })
+          .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newFeed = doc.getElementById('feed');
+            if (newFeed && feed) {
+              // Append new posts
+              feed.innerHTML += newFeed.innerHTML;
+            }
+            showNetworkError(false);
+          })
+          .catch(() => {
+            showNetworkError(true);
+          });
+      }
+    });
+  }
+});
