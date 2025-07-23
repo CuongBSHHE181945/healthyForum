@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Member Management</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Member Management</h2>
+    <a th:href="@{/groups/{id}(id=${group.id})}" class="btn btn-secondary">REturn Group</a>
+  </div>
+
+  <!-- Success/Error Messages -->
+  <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+    <span th:text="${successMessage}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+
+  <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+    <span th:text="${errorMessage}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+
+  <!-- Group Info -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <h5 class="card-title" th:text="${group.name}"></h5>
+      <p class="card-text" th:text="${group.description}"></p>
+      <div class="row">
+        <div class="col-md-3">
+          <strong>Quản trị viên:</strong> <span th:text="${adminCount}"></span>
+        </div>
+        <div class="col-md-3">
+          <strong>Điều hành viên:</strong> <span th:text="${moderatorCount}"></span>
+        </div>
+        <div class="col-md-3">
+          <strong>Thành viên:</strong> <span th:text="${memberCount}"></span>
+        </div>
+        <div class="col-md-3">
+          <strong>Tổng:</strong> <span th:text="${members.size()}"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Members Table -->
+  <div class="card">
+    <div class="card-header">
+      <h5 class="mb-0">Member list</h5>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-striped table-hover">
+          <thead class="table-dark">
+          <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Role</th>
+            <th>Joining date</th>
+            <th>Action</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="member : ${members}">
+            <td th:text="${member.id}"></td>
+            <td>
+              <div class="d-flex align-items-center">
+                <div>
+                  <strong th:text="${member.user.account.username}"></strong>
+                </div>
+              </div>
+            </td>
+            <td>
+                                <span class="badge"
+                                      th:classappend="${member.role.name() == 'ADMIN'} ? 'bg-danger' :
+                                                     (${member.role.name() == 'MODERATOR'} ? 'bg-warning' : 'bg-primary')"
+                                      th:text="${member.role.name() == 'ADMIN'} ? 'ADMIN' :
+                                               (${member.role.name() == 'MODERATOR'} ? 'MODERATOR' : 'Member')">
+                                </span>
+            </td>
+            <td>
+              <span th:text="${#temporals.format(member.joinedAt, 'dd/MM/yyyy HH:mm')}"></span>
+            </td>
+            <td>
+              <div class="btn-group" role="group" aria-label="Member actions">
+                <!-- Change Role Dropdown - Only show for ADMIN users -->
+                <div class="dropdown" th:if="${isCurrentUserAdmin and member.role.name() != 'ADMIN'}">
+                  <button class="btn btn-sm btn-outline-primary dropdown-toggle"
+                          type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Đổi vai trò
+                  </button>
+                  <ul class="dropdown-menu">
+                    <li th:each="role : ${roles}">
+                      <form th:action="@{/groups/{groupId}/members/{memberId}/role(groupId=${group.id}, memberId=${member.id})}"
+                            method="post" style="display: inline;">
+                        <input type="hidden" name="role" th:value="${role}">
+                        <button type="submit"
+                                class="dropdown-item"
+                                th:disabled="${member.role == role}"
+                                th:text="${role.name() == 'ADMIN'} ? 'Admin' :
+                                                     (${role.name() == 'MODERATOR'} ? 'Moderator' : 'Member')">
+                        </button>
+                      </form>
+                    </li>
+                  </ul>
+                </div>
+
+                <!-- Remove Member Button -->
+                <form th:if="${member.role != T(com.healthyForum.model.Group.GroupRole).ADMIN}"
+                      th:action="@{/groups/{groupId}/members/{memberId}/remove(groupId=${group.id}, memberId=${member.id})}"
+                      method="post" style="display: inline;"
+                      onsubmit="return confirm('Are you sure you want to remove this member?')">
+                  <button type="submit"
+                          class="btn btn-sm btn-outline-danger"
+                          th:disabled="${member.user.id == currentUser.id}">
+                    Loại bỏ
+                  </button>
+                </form>
+                </form>
+              </div>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Empty State -->
+      <div th:if="${members.isEmpty()}" class="text-center py-4">
+        <p class="text-muted">There are no members in the group..</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

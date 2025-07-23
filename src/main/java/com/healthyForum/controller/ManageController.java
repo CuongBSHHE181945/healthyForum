@@ -82,7 +82,6 @@ public class ManageController {
     }
 
 
-    // In src/main/java/com/healthyForum/controller/ManageController.java
 
 
     @GetMapping("/reports")

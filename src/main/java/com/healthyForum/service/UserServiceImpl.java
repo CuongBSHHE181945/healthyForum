@@ -12,6 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Optional;
+
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
@@ -178,6 +180,10 @@ public class UserServiceImpl implements UserService {
         }
         logger.warn("getCurrentUser(Object): user not found");
         return null;
+    }
+
+    public Optional<User> findById(Long userId) {
+        return userRepository.findById(userId);
     }
 }
 

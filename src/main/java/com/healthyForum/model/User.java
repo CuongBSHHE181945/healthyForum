@@ -86,4 +86,5 @@ public class User {
     public String getUsername() {
         return account != null ? account.getUsername() : null;
     }
+
 }
