@@ -30,7 +30,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Controller
-@RequestMapping("/sleepTracker")
+@RequestMapping("/sleep")
 public class SleepController {
     private final SleepRepository sleepRepository;
     private final UserRepository userRepository;
@@ -142,7 +142,7 @@ public class SleepController {
         SleepEntry saved = sleepRepository.save(sleepEntryToSave);
 
         // Build URI for newly created entry
-        URI location = ucb.path("/sleepTracker/sleep/{id}").buildAndExpand(saved.getId()).toUri();
+        URI location = ucb.path("/sleep/sleep/{id}").buildAndExpand(saved.getId()).toUri();
 
         return ResponseEntity.created(location).build();
     }
@@ -157,14 +157,14 @@ public class SleepController {
         // ❌ Reject future dates
         if (DateValidate.dateIsInFuture(sleepEntry.getDate())) {
             redirectAttributes.addFlashAttribute("errorMessage", "Sleep date cannot be in the future.");
-            return "redirect:/sleepTracker/form";
+            return "redirect:/sleep/form";
         }
 
         // ✅ Duration validation
         if (DateValidate.timeCalMin(sleepEntry.getStartTime(),sleepEntry.getEndTime(), sleepEntry.getDate()) > 960) { // e.g., more than 16 hours
             redirectAttributes.addFlashAttribute("errorMessage",
                     "Are you sure you slept that long?");
-            return "redirect:/sleepTracker/form";
+            return "redirect:/sleep/form";
         }
 
         if (sleepEntry.getId() == null) {
@@ -184,7 +184,7 @@ public class SleepController {
         }
 
         redirectAttributes.addFlashAttribute("successMessage", "Entry saved successfully!");
-        return "redirect:/sleepTracker/list";
+        return "redirect:/sleep/list";
     }
 
 //    public static void main(String[] args) {
