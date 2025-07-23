@@ -311,6 +311,77 @@ CREATE TABLE IF NOT EXISTS comment (
     FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
 );
 
+-- Create groups table
+CREATE TABLE `groups` (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    created_by BIGINT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    is_active BOOLEAN DEFAULT TRUE,
+    member_count INT DEFAULT 0,
+    FOREIGN KEY (created_by) REFERENCES user(id) ON DELETE CASCADE
+);
+
+-- Create group_members table for many-to-many relationship
+CREATE TABLE group_members (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    group_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    role ENUM('ADMIN', 'MODERATOR', 'MEMBER') DEFAULT 'MEMBER',
+    FOREIGN KEY (group_id) REFERENCES `groups`(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_group_member (group_id, user_id)
+);
+
+-- Tạo bảng group_posts
+CREATE TABLE group_posts (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    content TEXT NOT NULL,
+    group_id BIGINT NOT NULL,
+    author_id BIGINT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    is_active BOOLEAN DEFAULT TRUE,
+    like_count INT DEFAULT 0,
+    comment_count INT DEFAULT 0,
+    image_url VARCHAR(500),
+    
+    CONSTRAINT fk_group_posts_group_id 
+        FOREIGN KEY (group_id) REFERENCES `groups`(id) 
+        ON DELETE CASCADE,
+    CONSTRAINT fk_group_posts_author_id 
+        FOREIGN KEY (author_id) REFERENCES user(id) 
+        ON DELETE CASCADE,
+        
+    INDEX idx_group_posts_group_id (group_id),
+    INDEX idx_group_posts_author_id (author_id),
+    INDEX idx_group_posts_created_at (created_at)
+);
+
+-- Tạo bảng group_post_comments
+CREATE TABLE group_post_comments (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    content TEXT NOT NULL,
+    post_id BIGINT NOT NULL,
+    author_id BIGINT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    CONSTRAINT fk_group_post_comments_post_id 
+        FOREIGN KEY (post_id) REFERENCES group_posts(id) 
+        ON DELETE CASCADE,
+    CONSTRAINT fk_group_post_comments_author_id 
+        FOREIGN KEY (author_id) REFERENCES user(id) 
+        ON DELETE CASCADE,
+        
+    INDEX idx_group_post_comments_post_id (post_id),
+    INDEX idx_group_post_comments_author_id (author_id),
+    INDEX idx_group_post_comments_created_at (created_at)
+);
+
 -- Insert initial roles
 INSERT INTO `role` (`role_id`, `role_name`) VALUES 
 (1, 'ADMIN'), 
