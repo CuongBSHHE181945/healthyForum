@@ -10,14 +10,17 @@ import lombok.Data;
 public class PostReaction {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name="id")
     private Long id;
 
     private boolean liked; // true = like, false = dislike
 
     @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @ManyToOne
+    @JoinColumn(name = "post_id", nullable = false)
     private Post post;
 
 }
