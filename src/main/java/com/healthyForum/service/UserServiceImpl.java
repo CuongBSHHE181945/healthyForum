@@ -15,6 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Optional;
+
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
@@ -232,6 +234,10 @@ public class UserServiceImpl implements UserService {
 
         // As a fallback, try to find by email, as username might be an email for some users.
         return userRepository.findByEmail(username).orElse(null);
+    }
+
+    public Optional<User> findById(Long userId) {
+        return userRepository.findById(userId);
     }
 }
 

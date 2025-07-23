@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Tạo bài viết mới</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .form-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            padding: 2rem;
+            color: white;
+            margin-bottom: 2rem;
+        }
+        .form-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 2rem;
+            color: #333;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        .image-upload-area {
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            background-color: #f8f9fa;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .image-upload-area:hover {
+            border-color: #667eea;
+            background-color: #e7f3ff;
+        }
+        .image-upload-area.dragover {
+            border-color: #667eea;
+            background-color: #e7f3ff;
+        }
+        .preview-image {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+        .image-upload-tabs {
+            margin-bottom: 1rem;
+        }
+        .tab-content {
+            padding: 1rem 0;
+        }
+    </style>
+</head>
+<body class="bg-light">
+<div class="container mt-4">
+    <!-- Header -->
+    <div class="form-container">
+        <div class="text-center">
+            <h2 class="mb-3">
+                <i class="fas fa-plus-circle me-2"></i>
+                Tạo bài viết mới
+            </h2>
+            <p class="mb-0 opacity-75">Chia sẻ ý tưởng và kết nối với cộng đồng</p>
+        </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Main Form -->
+    <div class="form-card">
+        <form th:action="@{/groups/{groupId}/posts(groupId=${groupId})}"
+              method="post"
+              enctype="multipart/form-data">
+
+            <!-- Title Section -->
+            <div class="mb-4">
+                <label for="title" class="form-label fw-bold">
+                    <i class="fas fa-heading me-2 text-primary"></i>
+                    Tiêu đề bài viết
+                </label>
+                <input type="text"
+                       class="form-control form-control-lg"
+                       id="title"
+                       name="title"
+                       placeholder="Nhập tiêu đề hấp dẫn cho bài viết của bạn..."
+                       required
+                       maxlength="200">
+                <div class="d-flex justify-content-between mt-2">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Tiêu đề giúp thu hút sự chú ý của độc giả
+                    </small>
+                    <small class="char-counter">
+                        <span id="titleCount">0</span>/200
+                    </small>
+                </div>
+            </div>
+
+            <!-- Content Section -->
+            <div class="mb-4">
+                <label for="content" class="form-label fw-bold">
+                    <i class="fas fa-align-left me-2 text-primary"></i>
+                    Nội dung bài viết
+                </label>
+                <textarea class="form-control"
+                          id="content"
+                          name="content"
+                          rows="12"
+                          placeholder="Chia sẻ suy nghĩ, kinh nghiệm hoặc thông tin hữu ích của bạn..."
+                          required
+                          maxlength="5000"></textarea>
+                <div class="d-flex justify-content-between mt-2">
+                    <small class="text-muted">
+                        <i class="fas fa-markdown me-1"></i>
+                        Bạn có thể sử dụng ngắt dòng để định dạng văn bản
+                    </small>
+                    <small class="char-counter">
+                        <span id="contentCount">0</span>/5000
+                    </small>
+                </div>
+            </div>
+
+            <!-- Image Upload Section -->
+            <div class="mb-4">
+                <label class="form-label fw-bold">
+                    <i class="fas fa-image me-2 text-primary"></i>
+                    Hình ảnh (tùy chọn)
+                </label>
+
+                <!-- Image Upload Tabs -->
+                <ul class="nav nav-tabs image-upload-tabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="upload-tab" data-bs-toggle="tab"
+                                data-bs-target="#upload-pane" type="button">
+                            <i class="fas fa-upload me-2"></i>Upload File
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content">
+                    <!-- File Upload Tab -->
+                    <div class="tab-pane fade show active" id="upload-pane">
+                        <div class="image-upload-area" onclick="document.getElementById('imageFile').click();">
+                            <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Kéo thả hình ảnh vào đây</h5>
+                            <p class="text-muted mb-3">hoặc click để chọn file</p>
+                            <small class="text-muted">
+                                Hỗ trợ: JPG, PNG, GIF (tối đa 5MB)
+                            </small>
+                            <input type="file"
+                                   id="imageFile"
+                                   name="imageFile"
+                                   accept="image/*"
+                                   style="display: none;"
+                                   onchange="previewImage(this)">
+                        </div>
+                        <div id="imagePreview" style="display: none;">
+                            <img id="previewImg" class="preview-image" alt="Preview">
+                            <div class="mt-2">
+                                <button type="button" class="btn btn-sm btn-outline-danger"
+                                        onclick="removePreview()">
+                                    <i class="fas fa-trash me-1"></i>Xóa ảnh
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex gap-3 justify-content-end">
+                <a th:href="@{/groups/{groupId}(groupId=${groupId})}"
+                   class="btn btn-secondary">
+                    <i class="fas fa-times me-2"></i>
+                    Hủy bỏ
+                </a>
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-paper-plane me-2"></i>
+                    Đăng bài viết
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Character counters
+    document.getElementById('title').addEventListener('input', function() {
+        document.getElementById('titleCount').textContent = this.value.length;
+    });
+
+    document.getElementById('content').addEventListener('input', function() {
+        document.getElementById('contentCount').textContent = this.value.length;
+    });
+
+    // Image preview functions
+    function previewImage(input) {
+        const file = input.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('previewImg').src = e.target.result;
+                document.getElementById('imagePreview').style.display = 'block';
+                // Clear URL input when file is selected
+                document.getElementById('imageUrl').value = '';
+                document.getElementById('urlImagePreview').style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function removePreview() {
+        document.getElementById('imageFile').value = '';
+        document.getElementById('imagePreview').style.display = 'none';
+    }
+
+
+    // Drag and drop functionality
+    const uploadArea = document.querySelector('.image-upload-area');
+
+    uploadArea.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        this.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        this.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', function(e) {
+        e.preventDefault();
+        this.classList.remove('dragover');
+
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            const fileInput = document.getElementById('imageFile');
+            fileInput.files = files;
+            previewImage(fileInput);
+        }
+    });
+</script>
+</body>
+</html>
