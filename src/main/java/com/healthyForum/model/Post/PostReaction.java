@@ -20,6 +20,7 @@ public class PostReaction {
     private User user;
 
     @ManyToOne
+
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;
 
