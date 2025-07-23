@@ -6,7 +6,17 @@
     <link rel="stylesheet" th:href="@{/css/sleepList.css}">
 </head>
 <body>
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm mb-4">
+  <div class="container">
+    <a class="navbar-brand" href="/">HealthyForum</a>
+    <div>
+      <a class="nav-link d-inline" href="/health-assessment">Health Assessment</a>
+      <a class="nav-link d-inline" href="/health-assessment/history">Assessment History</a>
+    </div>
+  </div>
+</nav>
 <h2>Your Sleep Entries</h2>
+<a href="/health-assessment" class="btn btn-outline-primary mb-3">Go to Health Assessment</a>
 <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
 <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
 
