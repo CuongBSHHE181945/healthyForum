@@ -394,7 +394,13 @@ INSERT INTO `user` (`id`, `full_name`, `email`, `gender`, `dob`, `address`, `age
 (5, 'Alice Admin', 'alice@admin.com', 'Female', '1990-01-01', '123 Admin St', 34, 165.0, 60.0, 1),
 (6, 'Bob Mod', 'bob@mod.com', 'Male', '1992-02-02', '456 Mod Ave', 32, 180.0, 75.0, 2),
 (7, 'Charlie User', 'charlie@user.com', 'Male', '1995-03-03', '789 User Rd', 29, 170.0, 68.0, 2),
-(8, 'Dana User', 'dana@user.com', 'Female', '1998-04-04', '101 User Blvd', 26, 155.0, 50.0, 2);
+(8, 'Dana User', 'dana@user.com', 'Female', '1998-04-04', '101 User Blvd', 26, 155.0, 50.0, 2),
+(9, 'David Lee', 'david.lee@example.com', 'Male', '1992-09-15', '321 Oak Lane', 31, 178.0, 72.0, 2),
+(10, 'Emily Chen', 'emily.chen@example.com', 'Female', '1997-04-22', '654 Maple Ave', 27, 162.0, 54.0, 2),
+(11, 'Frank Miller', 'frank.miller@example.com', 'Male', '1985-12-05', '987 Pine St', 38, 182.0, 80.0, 2),
+(12, 'Grace Kim', 'grace.kim@example.com', 'Female', '1993-07-30', '246 Cedar Rd', 30, 158.0, 50.0, 2),
+(13, 'Henry Nguyen', 'henry.nguyen@example.com', 'Male', '1996-11-11', '135 Birch Blvd', 27, 170.0, 68.0, 2);
+
 
 -- Insert sample user accounts with explicit IDs
 INSERT INTO `user_accounts` (`id`, `user_id`, `username`, `password`, `provider`, `enabled`, `suspended`) VALUES
@@ -405,17 +411,23 @@ INSERT INTO `user_accounts` (`id`, `user_id`, `username`, `password`, `provider`
 (5, 5, 'admin1', '$2a$10$Qw8kZx3gqeeUXnIfwRS4l.9gHBvXwIBIsPNrKV86Xqx94H/46oQwe', 'local', TRUE, FALSE),
 (6, 6, 'mod1', '$2a$10$fWIBxuIsvVpJ3s0jSBG.1.bN5Jb3Dq0yWRySyZxzkXN01H.WMlCZO', 'local', TRUE, FALSE),
 (7, 7, 'user1', '$2a$10$9Y1AT//cDf.3AwoibVN6/ul8rGxUo.RAhGyElbLulcUblxN.O8mHK', 'local', TRUE, FALSE),
-(8, 8, 'user2', '$2a$10$7bPNzIfN.fHo1Q7I0j5/OO8KyYNzgt5UQsIemZwFQPMWVt4SZTnNW', 'local', TRUE, TRUE);
+(8, 8, 'user2', '$2a$10$7bPNzIfN.fHo1Q7I0j5/OO8KyYNzgt5UQsIemZwFQPMWVt4SZTnNW', 'local', TRUE, TRUE),
+(9, 9, 'davidlee', '$2a$10$DdACFbPlEnoLMoNRT58rRezj9Mnchy.CVolTbxrOZmo7m4AwSalra', 'local', TRUE, FALSE),
+(10, 10, 'emilychen', '$2a$10$DdACFbPlEnoLMoNRT58rRezj9Mnchy.CVolTbxrOZmo7m4AwSalra', 'local', TRUE, FALSE),
+(11, 11, 'frankmiller', '$2a$10$DdACFbPlEnoLMoNRT58rRezj9Mnchy.CVolTbxrOZmo7m4AwSalra', 'local', TRUE, FALSE),
+(12, 12, 'gracekim', '$2a$10$DdACFbPlEnoLMoNRT58rRezj9Mnchy.CVolTbxrOZmo7m4AwSalra', 'local', TRUE, FALSE),
+(13, 13, 'henrynguyen', '$2a$10$DdACFbPlEnoLMoNRT58rRezj9Mnchy.CVolTbxrOZmo7m4AwSalra', 'local', TRUE, FALSE);
+
 
 -- Sample posts for feed testing
 INSERT INTO post (user_id, title, content, is_draft, visibility, created_at, updated_at, banned)
 VALUES
-(1, 'Morning Yoga Success', 'Just finished my 7-day yoga challenge!', FALSE, 'PUBLIC', '2024-06-01 08:00:00', '2024-06-01 08:00:00', FALSE),
-(2, 'Healthy Breakfast', 'Oatmeal and fruit to start the day.', FALSE, 'PUBLIC', '2024-06-02 07:30:00', '2024-06-02 07:30:00', FALSE),
-(3, 'Late Night Thoughts', 'Couldn''t sleep, so I wrote a poem.', FALSE, 'PUBLIC', '2024-06-02 23:45:00', '2024-06-02 23:45:00', FALSE),
-(4, 'Draft: My Fitness Plan', 'Still working on my new fitness plan.', TRUE, 'DRAFTS', '2024-06-03 10:00:00', '2024-06-03 10:00:00', FALSE),
-(5, 'Water Tracker', 'Drank 8 glasses today!', FALSE, 'PUBLIC', '2024-06-03 18:00:00', '2024-06-03 18:00:00', FALSE),
-(6, 'Evening Walk', 'Beautiful sunset during my walk.', FALSE, 'PUBLIC', '2024-06-04 19:30:00', '2024-06-04 19:30:00', FALSE);
+(1, 'Morning Yoga Success', 'Just finished my 7-day yoga challenge!', FALSE, 'PUBLIC', '2025-06-01 08:00:00', '2025-06-01 08:00:00', FALSE),
+(2, 'Healthy Breakfast', 'Oatmeal and fruit to start the day.', FALSE, 'PUBLIC', '2025-06-02 07:30:00', '2025-06-02 07:30:00', FALSE),
+(3, 'Late Night Thoughts', 'Couldn''t sleep, so I wrote a poem.', FALSE, 'PUBLIC', '2025-06-02 23:45:00', '2025-06-02 23:45:00', FALSE),
+(4, 'Draft: My Fitness Plan', 'Still working on my new fitness plan.', TRUE, 'DRAFTS', '2025-06-03 10:00:00', '2025-06-03 10:00:00', FALSE),
+(5, 'Water Tracker', 'Drank 8 glasses today!', FALSE, 'PUBLIC', '2025-06-03 18:00:00', '2025-06-03 18:00:00', FALSE),
+(6, 'Evening Walk', 'Beautiful sunset during my walk.', FALSE, 'PUBLIC', '2025-06-04 19:30:00', '2025-06-04 19:30:00', FALSE);
 
 -- Sample post reactions (likes/dislikes)
 INSERT INTO post_reaction (post_id, user_id, liked)
@@ -434,21 +446,21 @@ VALUES
 -- Sample comments
 INSERT INTO comment (post_id, user_id, content, created_at)
 VALUES
-(1, 2, 'Congrats on finishing!', '2024-06-01 09:00:00'),
-(1, 3, 'Great job!', '2024-06-01 09:15:00'),
-(2, 1, 'Looks delicious!', '2024-06-02 08:00:00'),
-(3, 2, 'Nice poem, share more!', '2024-06-03 00:10:00'),
-(5, 3, 'Keep it up!', '2024-06-03 19:00:00');
+(1, 2, 'Congrats on finishing!', '2025-06-01 09:00:00'),
+(1, 3, 'Great job!', '2025-06-01 09:15:00'),
+(2, 1, 'Looks delicious!', '2025-06-02 08:00:00'),
+(3, 2, 'Nice poem, share more!', '2025-06-03 00:10:00'),
+(5, 3, 'Keep it up!', '2025-06-03 19:00:00');
 
 -- Insert sample sleep entries
 INSERT INTO `sleep_entries` (`date`, `start_time`, `end_time`, `quality`, `notes`, `user_id`) VALUES
-('2024-03-15', '22:00:00', '06:00:00', 8, 'Good night sleep', 1),
-('2024-03-16', '23:00:00', '07:00:00', 7, 'Decent sleep', 1);
+('2025-03-15', '22:00:00', '06:00:00', 8, 'Good night sleep', 1),
+('2025-03-16', '23:00:00', '07:00:00', 7, 'Decent sleep', 1);
 
 -- Insert sample meal plans
 INSERT INTO `meal_planner` (`meal_name`, `meal_date`, `meal_type`, `meal_description`, `meal_calories`, `meal_proteins`, `meal_carbs`, `meal_fats`, `user_id`) VALUES
-('Healthy Breakfast', '2024-03-15', 'Breakfast', 'Nutritious morning meal', 500.00, 20.00, 60.00, 15.00, 1),
-('Light Lunch', '2024-03-15', 'Lunch', 'Balanced lunch meal', 600.00, 25.00, 70.00, 20.00, 1);
+('Healthy Breakfast', '2025-03-15', 'Breakfast', 'Nutritious morning meal', 500.00, 20.00, 60.00, 15.00, 1),
+('Light Lunch', '2025-03-15', 'Lunch', 'Balanced lunch meal', 600.00, 25.00, 70.00, 20.00, 1);
 
 -- Insert sample meal ingredients
 INSERT INTO `meal_ingredient` (`ingredient_name`, `ingredient_quantity`, `ingredient_unit`, `meal_id`) VALUES
@@ -459,8 +471,8 @@ INSERT INTO `meal_ingredient` (`ingredient_name`, `ingredient_quantity`, `ingred
 
 -- Sample meal plans for user_id 2 (Alice Johnson)
 INSERT INTO `meal_planner` (`meal_id`, `meal_name`, `meal_date`, `meal_type`, `meal_description`, `meal_calories`, `meal_proteins`, `meal_carbs`, `meal_fats`, `user_id`) VALUES
-(3, 'Power Lunch', '2024-03-16', 'Lunch', 'Protein-packed lunch', 700.00, 35.00, 80.00, 25.00, 2),
-(4, 'Evening Salad', '2024-03-16', 'Dinner', 'Fresh veggie salad', 350.00, 8.00, 40.00, 15.00, 2);
+(3, 'Power Lunch', '2025-03-16', 'Lunch', 'Protein-packed lunch', 700.00, 35.00, 80.00, 25.00, 2),
+(4, 'Evening Salad', '2025-03-16', 'Dinner', 'Fresh veggie salad', 350.00, 8.00, 40.00, 15.00, 2);
 
 INSERT INTO `meal_ingredient` (`ingredient_id`, `ingredient_name`, `ingredient_quantity`, `ingredient_unit`, `meal_id`) VALUES
 (5, 'Grilled Chicken Breast', 150, 'grams', 3),
@@ -472,8 +484,8 @@ INSERT INTO `meal_ingredient` (`ingredient_id`, `ingredient_name`, `ingredient_q
 
 -- Insert sample meal plans for user_id 3 (Bob Smith)
 INSERT INTO `meal_planner` (`meal_id`, `meal_name`, `meal_date`, `meal_type`, `meal_description`, `meal_calories`, `meal_proteins`, `meal_carbs`, `meal_fats`, `user_id`) VALUES
-(5, 'Morning Oats', '2024-03-17', 'Breakfast', 'Oatmeal with fruit', 400.00, 12.00, 60.00, 8.00, 3),
-(6, 'Steak Dinner', '2024-03-17', 'Dinner', 'Classic steak and potatoes', 800.00, 40.00, 70.00, 35.00, 3);
+(5, 'Morning Oats', '2025-03-17', 'Breakfast', 'Oatmeal with fruit', 400.00, 12.00, 60.00, 8.00, 3),
+(6, 'Steak Dinner', '2025-03-17', 'Dinner', 'Classic steak and potatoes', 800.00, 40.00, 70.00, 35.00, 3);
 
 INSERT INTO `meal_ingredient` (`ingredient_id`, `ingredient_name`, `ingredient_quantity`, `ingredient_unit`, `meal_id`) VALUES
 (11, 'Oatmeal', 60, 'grams', 5),
@@ -492,8 +504,8 @@ INSERT INTO `blog` (`title`, `content`, `created_at`, `author_username`, `suspen
 
 -- Insert sample feedbacks
 INSERT INTO `feedback` (`user_id`, `message`, `submitted_at`, `response`) VALUES
-(2, 'Great site, very helpful!', '2024-06-01 10:15:00', NULL),
-(3, 'I found a bug in the forum.', '2024-06-02 14:30:00', NULL);
+(2, 'Great site, very helpful!', '2025-06-01 10:15:00', NULL),
+(3, 'I found a bug in the forum.', '2025-06-02 14:30:00', NULL);
 
 -- Insert sample messages
 INSERT INTO `messages` (`sender_id`, `receiver_id`, `content`, `is_read`) VALUES
@@ -518,10 +530,10 @@ INSERT INTO `health_assessment` (`bmi`, `sleep_score`, `nutrition_score`, `exerc
 -- Sample Exercise Schedules
 INSERT INTO `exercise_schedule` (`user_id`, `date`, `time`, `type`, `name`, `duration`, `intensity`, `calories`, `is_calories_estimated`, `notes`)
 VALUES
-(1, '2024-07-20', '07:00:00', 'Running', 'Morning Run', 30, 'Medium', 315, TRUE, 'Felt great, nice weather.'),
-(1, '2024-07-20', '18:00:00', 'Yoga', 'Evening Yoga', 45, 'Low', 110, TRUE, 'Relaxing session.'),
-(2, '2024-07-21', '06:30:00', 'Walking', 'Park Walk', 40, 'Low', 140, TRUE, 'Walked with a friend.'),
-(3, '2024-07-21', '19:00:00', 'Weight Lifting', 'Upper Body', 50, 'High', 350, TRUE, 'Intense workout.');
+(1, '2025-07-20', '07:00:00', 'Running', 'Morning Run', 30, 'Medium', 315, TRUE, 'Felt great, nice weather.'),
+(1, '2025-07-20', '18:00:00', 'Yoga', 'Evening Yoga', 45, 'Low', 110, TRUE, 'Relaxing session.'),
+(2, '2025-07-21', '06:30:00', 'Walking', 'Park Walk', 40, 'Low', 140, TRUE, 'Walked with a friend.'),
+(3, '2025-07-21', '19:00:00', 'Weight Lifting', 'Upper Body', 50, 'High', 350, TRUE, 'Intense workout.');
 
 -- Generated SQL for 30 Challenges and Badges
 -- Challenge: Morning Yoga 7 Days
@@ -646,11 +658,11 @@ INSERT INTO badge_requirement (badge_id, source_id, source_type_id) VALUES
 
 -- Insert user_badge assignments
 INSERT INTO user_badge (user_id, badge_id, earned_at) VALUES
-(1, 1, '2024-06-01 10:00:00'),
-(1, 2, '2024-06-08 10:00:00'),
-(2, 1, '2024-06-02 11:00:00'),
-(2, 3, '2024-06-09 12:00:00'),
-(3, 4, '2024-06-15 09:00:00');
+(1, 1, '2025-06-01 10:00:00'),
+(1, 2, '2025-06-08 10:00:00'),
+(2, 1, '2025-06-02 11:00:00'),
+(2, 3, '2025-06-09 12:00:00'),
+(3, 4, '2025-06-15 09:00:00');
 
 -- Add more sample sleep entries for users 1, 2, 3 (2025-07-01 to 2025-07-30)
 INSERT INTO `sleep_entries` (`date`, `start_time`, `end_time`, `quality`, `notes`, `user_id`) VALUES
@@ -1148,3 +1160,75 @@ INSERT INTO `exercise_schedule` (`user_id`, `date`, `time`, `type`, `name`, `dur
 (3, '2025-07-30', '18:00:00', 'Weight Lifting', 'Strength', 50, 'High', 350, TRUE, 'Nice weather'),
 (3, '2025-07-31', '07:00:00', 'Cycling', 'Morning Ride', 40, 'Medium', 250, TRUE, 'Nice weather'),
 (3, '2025-07-31', '18:00:00', 'Yoga', 'Evening Yoga', 45, 'Low', 110, TRUE, 'Intense');
+
+-- Additional posts by new users
+-- David Lee (user_id 9)
+INSERT INTO post (user_id, title, content, is_draft, visibility, created_at, updated_at, banned) VALUES
+(9, 'Morning Run Reflections', 'Had a great run today! Feeling energized.', FALSE, 'PUBLIC', '2025-07-01 07:30:00', '2025-07-01 07:30:00', FALSE),
+(9, 'Is Keto Diet Overrated?', 'Tried keto for a month, not sure it''s worth the hype. Thoughts?', FALSE, 'PUBLIC', '2025-07-02 09:00:00', '2025-07-02 09:00:00', FALSE);
+
+-- Emily Chen (user_id 10)
+INSERT INTO post (user_id, title, content, is_draft, visibility, created_at, updated_at, banned) VALUES
+(10, 'Yoga for Beginners', 'Started yoga this week. Any tips for newbies?', FALSE, 'PUBLIC', '2025-07-03 08:00:00', '2025-07-03 08:00:00', FALSE),
+(10, 'Sugar-Free Challenge', 'Going sugar-free for 7 days. Wish me luck!', FALSE, 'PUBLIC', '2025-07-04 10:00:00', '2025-07-04 10:00:00', FALSE);
+
+-- Frank Miller (user_id 11)
+INSERT INTO post (user_id, title, content, is_draft, visibility, created_at, updated_at, banned) VALUES
+(11, 'Weight Lifting Progress', 'Hit a new PR today! Consistency pays off.', FALSE, 'PUBLIC', '2025-07-05 18:00:00', '2025-07-05 18:00:00', FALSE),
+(11, 'Why Cardio is Overrated', 'I think cardio is not as important as people say. Agree or disagree?', FALSE, 'PUBLIC', '2025-07-06 19:00:00', '2025-07-06 19:00:00', FALSE);
+
+-- Grace Kim (user_id 12)
+INSERT INTO post (user_id, title, content, is_draft, visibility, created_at, updated_at, banned) VALUES
+(12, 'Healthy Meal Prep', 'Meal prepping saves so much time and money!', FALSE, 'PUBLIC', '2025-07-07 12:00:00', '2025-07-07 12:00:00', FALSE),
+(12, 'Vegan Diet Struggles', 'Finding it hard to get enough protein on a vegan diet. Suggestions?', FALSE, 'PUBLIC', '2025-07-08 13:00:00', '2025-07-08 13:00:00', FALSE);
+
+-- Henry Nguyen (user_id 13)
+INSERT INTO post (user_id, title, content, is_draft, visibility, created_at, updated_at, banned) VALUES
+(13, 'Running in the Rain', 'Ran 5k in the rain today. Felt amazing!', FALSE, 'PUBLIC', '2025-07-09 07:00:00', '2025-07-09 07:00:00', FALSE),
+(13, 'Supplements: Yay or Nay?', 'Do you use supplements? Are they really necessary?', FALSE, 'PUBLIC', '2025-07-10 11:00:00', '2025-07-10 11:00:00', FALSE);
+
+-- Comments on new posts
+-- On David Lee's "Is Keto Diet Overrated?" (assume post_id 7)
+INSERT INTO comment (post_id, user_id, content, created_at) VALUES
+(7, 10, 'I had the same experience. It''s not for everyone.', '2025-07-02 10:00:00'),
+(7, 11, 'Keto worked wonders for me! Maybe you need to tweak your macros.', '2025-07-02 11:00:00'),
+(7, 12, 'I think balance is key. Extreme diets rarely last.', '2025-07-02 12:00:00'),
+(7, 13, 'Totally overrated. Just eat healthy and move!', '2025-07-02 13:00:00');
+
+-- On Frank Miller's "Why Cardio is Overrated" (assume post_id 11)
+INSERT INTO comment (post_id, user_id, content, created_at) VALUES
+(11, 9, 'Disagree! Cardio is essential for heart health.', '2025-07-06 20:00:00'),
+(11, 10, 'I prefer strength training too, but a little cardio helps.', '2025-07-06 20:30:00'),
+(11, 12, 'Interesting take. I do both.', '2025-07-06 21:00:00');
+
+-- On Emily Chen's "Yoga for Beginners" (assume post_id 9)
+INSERT INTO comment (post_id, user_id, content, created_at) VALUES
+(9, 12, 'Try focusing on your breath. It helps a lot!', '2025-07-03 09:00:00'),
+(9, 13, 'Don''t push too hard at first. Enjoy the process!', '2025-07-03 09:30:00');
+
+-- On Grace Kim's "Vegan Diet Struggles" (assume post_id 13)
+INSERT INTO comment (post_id, user_id, content, created_at) VALUES
+(13, 9, 'Beans and lentils are great sources of protein.', '2025-07-08 14:00:00'),
+(13, 10, 'Try tofu and tempeh!', '2025-07-08 14:30:00');
+
+-- On Henry Nguyen's "Supplements: Yay or Nay?" (assume post_id 15)
+INSERT INTO comment (post_id, user_id, content, created_at) VALUES
+(15, 11, 'I use a multivitamin, but food comes first.', '2025-07-10 12:00:00'),
+(15, 12, 'Supplements are helpful if you have deficiencies.', '2025-07-10 12:30:00');
+
+-- Engagement (likes/dislikes) on controversial posts
+-- "Is Keto Diet Overrated?" (post_id 7)
+INSERT INTO post_reaction (post_id, user_id, liked) VALUES
+(7, 9, TRUE),  -- David Lee likes his own post
+(7, 10, FALSE), -- Emily Chen dislikes
+(7, 11, TRUE),  -- Frank Miller likes
+(7, 12, FALSE), -- Grace Kim dislikes
+(7, 13, TRUE);  -- Henry Nguyen likes
+
+-- "Why Cardio is Overrated" (post_id 11)
+INSERT INTO post_reaction (post_id, user_id, liked) VALUES
+(11, 9, FALSE), -- David Lee dislikes
+(11, 10, TRUE), -- Emily Chen likes
+(11, 11, TRUE), -- Frank Miller likes his own post
+(11, 12, FALSE), -- Grace Kim dislikes
+(11, 13, TRUE); -- Henry Nguyen likes

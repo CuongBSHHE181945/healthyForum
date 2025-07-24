@@ -48,7 +48,7 @@ public class LoginController {
         // Check if user is authenticated (not anonymous)
         if (authentication != null && authentication.isAuthenticated() && 
             !"anonymousUser".equals(authentication.getName())) {
-            return "homePage"; // User is authenticated, show homepage
+            return "redirect:/"; // User is authenticated, show homepage
         } else {
             return "redirect:/login"; // User is not authenticated, redirect to login
         }

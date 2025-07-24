@@ -12,10 +12,14 @@ import java.util.List;
 import java.util.Map;
 import com.healthyForum.model.Enum.Visibility;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Page;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class SearchServiceImpl implements SearchService {
 
+    private static final Logger logger = LoggerFactory.getLogger(SearchServiceImpl.class);
     private final PostRepository postRepository;
     private final UserRepository userRepository;
 
@@ -30,11 +34,14 @@ public class SearchServiceImpl implements SearchService {
         Map<String, Object> results = new HashMap<>();
         // Search posts
         String pattern = "%" + query.toLowerCase() + "%";
-        List<Post> postEntities = postRepository.searchPosts(
+        logger.info("[SearchService] Searching posts and users for query: '{}' (pattern: '{}')", query, pattern);
+        Page<Post> postPage = postRepository.searchPosts(
                 pattern,
                 Visibility.PUBLIC,
                 PageRequest.of(0, 5)
         );
+        List<Post> postEntities = postPage.getContent();
+        logger.info("[SearchService] Found {} post(s) for query: '{}'", postEntities.size(), query);
         List<Map<String, Object>> posts = postEntities.stream().map(post -> {
             Map<String, Object> map = new HashMap<>();
             map.put("id", post.getId());
@@ -51,6 +58,7 @@ public class SearchServiceImpl implements SearchService {
                 query,
                 PageRequest.of(0, 5)
         );
+        logger.info("[SearchService] Found {} user(s) for query: '{}'", userEntities.size(), query);
         List<Map<String, Object>> users = userEntities.stream().map(user -> {
             Map<String, Object> map = new HashMap<>();
             map.put("id", user.getId());

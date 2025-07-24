@@ -18,9 +18,11 @@
   function clearDropdown() {
     resultsDropdown.innerHTML = '';
     resultsDropdown.style.display = 'none';
+    resultsDropdown.classList.add('d-none');
   }
 
   function showDropdown() {
+    resultsDropdown.classList.remove('d-none');
     resultsDropdown.style.display = 'block';
   }
 

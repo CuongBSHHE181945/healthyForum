@@ -12,10 +12,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RequestMapping("/")
 @Controller
 public class IndexController {
+    private static final Logger logger = LoggerFactory.getLogger(IndexController.class);
     private final PostService postService;
 
     public IndexController(PostService postService) {
@@ -28,6 +31,7 @@ public class IndexController {
                        @RequestParam(value = "size", defaultValue = "10") int size,
                        @RequestParam(value = "filter", required = false) String filter) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        logger.info("[IndexController] index() called. Authenticated: {}", authentication != null && authentication.isAuthenticated());
         if (authentication != null && authentication.isAuthenticated() && 
             !"anonymousUser".equals(authentication.getName())) {
             try {
@@ -40,6 +44,7 @@ public class IndexController {
                 } else {
                     postPage = postService.getAllVisiblePublicPosts(pageable);
                 }
+                logger.info("[IndexController] Adding {} posts to model.", postPage.getContent().size());
                 model.addAttribute("posts", postPage.getContent());
                 model.addAttribute("likeCounts", postService.getLikeCounts(postPage.getContent()));
                 model.addAttribute("dislikeCounts", postService.getDislikeCounts(postPage.getContent()));
@@ -49,10 +54,12 @@ public class IndexController {
                 model.addAttribute("hasPrevious", postPage.hasPrevious());
                 model.addAttribute("filter", filter);
             } catch (Exception e) {
+                logger.error("[IndexController] Exception: ", e);
                 model.addAttribute("feedError", "Unable to load feed. Please try again later");
             }
             return "homePage";
         } else {
+            logger.info("[IndexController] Not authenticated, redirecting to login.");
             return "redirect:/login";
         }
     }
