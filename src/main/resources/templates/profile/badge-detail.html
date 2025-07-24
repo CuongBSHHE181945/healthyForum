@@ -1,33 +1,33 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Badge Detail</title>
-    <link rel="stylesheet" th:href="@{/css/styles.css}">
-    <link rel="stylesheet" th:href="@{/css/profile.css}">
-</head>
+<head th:replace="fragments/header :: head"></head>
 <body>
-<h2>🎖 Badge Detail</h2>
-
-<div class="badge-detail">
-    <img th:src="@{${unlocked} ? ${badge.icon} : ${badge.lockedIcon}}" class="badge-icon-large" />
-    <h3 th:text="${badge.name}"></h3>
-    <p th:text="${badge.description}"></p>
-
-    <div th:if="${unlocked}">
-        <p><strong>Status:</strong> <span class="unlocked">✅ Unlocked</span></p>
-        <p><strong>Earned At:</strong> <span th:text="${earnedAt}"></span></p>
-    </div>
-    <div th:if="${!unlocked}">
-        <p><strong>Status:</strong> <span class="locked">🔒 Locked</span></p>
-    </div>
-
-    <h4>🔍 Requirements:</h4>
-    <ul>
+  <nav th:replace="fragments/header :: navbar"></nav>
+  <div class="container py-4">
+    <div class="card p-4 mb-4 shadow-sm">
+      <h2 class="mb-4">🎖 Badge Detail</h2>
+      <div class="badge-detail text-center mb-4">
+        <img th:src="@{${unlocked} ? ${badge.icon} : ${badge.lockedIcon}}"
+             class="rounded-circle shadow mb-3"
+             style="width:48px;height:48px;object-fit:cover;border:2px solid #dee2e6;background:#fff;" />
+        <h3 th:text="${badge.name}" class="mb-2"></h3>
+        <p th:text="${badge.description}" class="mb-3"></p>
+        <div th:if="${unlocked}">
+          <p><strong>Status:</strong> <span class="unlocked text-success">✅ Unlocked</span></p>
+          <p><strong>Earned At:</strong> <span th:text="${earnedAt}"></span></p>
+        </div>
+        <div th:if="${!unlocked}">
+          <p><strong>Status:</strong> <span class="locked text-secondary">🔒 Locked</span></p>
+        </div>
+      </div>
+      <h4 class="mb-2">🔍 Requirements:</h4>
+      <ul class="mb-4">
         <li th:each="challenge : ${challengeNames}" th:if="${challenge} != null" th:text="'Challenge: ' + ${challenge}"></li>
-    </ul>
-</div>
-
-<a href="/profile">⬅ Back to Profile</a>
+      </ul>
+      <a href="/profile" class="btn btn-outline-secondary">⬅ Back to Profile</a>
+    </div>
+  </div>
+  <footer th:replace="fragments/footer :: footer"></footer>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

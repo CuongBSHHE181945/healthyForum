@@ -1,151 +1,137 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>My Profile</title>
-    <link rel="stylesheet" th:href="@{/css/styles.css}">
-    <link rel="stylesheet" th:href="@{/css/registration.css}">
-    <link rel="stylesheet" th:href="@{/css/profile.css}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-</head>
+<head th:replace="fragments/header :: head"></head>
 <body>
-
-<div class="container">
-    <!-- Profile Header -->
-    <div class="profile-header">
-        <div class="profile-avatar">
-            <i class="fas fa-user"></i>
+  <nav th:replace="fragments/header :: navbar"></nav>
+  <div class="container py-4">
+    <div class="card p-4 mb-4 shadow-sm">
+      <!-- Profile Header -->
+      <div class="profile-header text-center mb-4">
+        <div class="profile-avatar mb-2">
+          <i class="fas fa-user fa-3x"></i>
         </div>
         <h2>My Profile</h2>
         <p>Welcome back, <span th:text="${user.fullName}"></span>!</p>
-    </div>
-
-    <!-- Flash & error messages -->
-    <div th:if="${param.error}" class="alert alert-danger"
-         th:text="${param.error == 'google_user' ? 'Google users cannot change their password here.' : param.error}">
-    </div>
-    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
-
-    <!-- Basic Profile Information -->
-    <div class="profile-info">
-        <h3><i class="fas fa-user-circle"></i> Basic Information</h3>
-        <div class="info-grid">
-            <div class="info-item">
-                <i class="fas fa-user"></i>
-                <strong>Username:</strong> <span th:text="${user.account.username}"></span>
-            </div>
-            <div class="info-item">
-                <i class="fas fa-id-card"></i>
-                <strong>Full Name:</strong> <span th:text="${user.fullName}"></span>
-            </div>
-            <div class="info-item">
-                <i class="fas fa-envelope"></i>
-                <strong>Email:</strong> <span th:text="${user.email}"></span>
-            </div>
+      </div>
+      <!-- Flash & error messages -->
+      <div th:if="${param.error}" class="alert alert-danger"
+           th:text="${param.error == 'google_user' ? 'Google users cannot change their password here.' : param.error}"></div>
+      <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+      <!-- Basic Profile Information -->
+      <div class="profile-info mb-4">
+        <h3 class="mb-3"><i class="fas fa-user-circle"></i> Basic Information</h3>
+        <div class="row g-3">
+          <div class="col-md-4 info-item">
+            <i class="fas fa-user"></i>
+            <strong>Username:</strong> <span th:text="${user.account.username}"></span>
+          </div>
+          <div class="col-md-4 info-item">
+            <i class="fas fa-id-card"></i>
+            <strong>Full Name:</strong> <span th:text="${user.fullName}"></span>
+          </div>
+          <div class="col-md-4 info-item">
+            <i class="fas fa-envelope"></i>
+            <strong>Email:</strong> <span th:text="${user.email}"></span>
+          </div>
         </div>
-    </div>
-
-    <!-- Action Buttons -->
-    <div class="action-buttons" th:if="${isOwner}">
-        <a th:href="@{/profile/edit}" class="btn btn-primary">
-            <i class="fas fa-edit"></i> Edit Profile
+      </div>
+      <!-- Action Buttons -->
+      <div class="action-buttons mb-4" th:if="${isOwner}">
+        <a th:href="@{/profile/edit}" class="btn btn-primary me-2 mb-2">
+          <i class="fas fa-edit"></i> Edit Profile
         </a>
         <a th:if="${user.account.provider == null or user.account.provider == 'local'}"
-           th:href="@{/profile/change-password}" class="btn btn-primary">
-            <i class="fas fa-key"></i> Change Password
+           th:href="@{/profile/change-password}" class="btn btn-primary mb-2">
+          <i class="fas fa-key"></i> Change Password
         </a>
-    </div>
-    <!-- Personal & Health Information -->
-    <div class="profile-info">
-        <h3><i class="fas fa-heartbeat"></i> Personal & Health Information</h3>
-        <div class="info-grid">
-            <div class="info-item">
-                <i class="fas fa-birthday-cake"></i>
-                <strong>Date of Birth:</strong> <span th:text="${user.dob != null ? #temporals.format(user.dob, 'dd-MM-yyyy') : 'N/A'}"></span>
-            </div>
-            <div class="info-item">
-                <i class="fas fa-calendar-alt"></i>
-                <strong>Age:</strong> <span th:text="${user.age != null ? user.age + ' years' : 'N/A'}"></span>
-            </div>
-            <div class="info-item">
-                <i class="fas fa-venus-mars"></i>
-                <strong>Gender:</strong> <span th:text="${user.gender ?: 'N/A'}"></span>
-            </div>
-            <div class="info-item">
-                <i class="fas fa-map-marker-alt"></i>
-                <strong>Address:</strong> <span th:text="${user.address ?: 'N/A'}"></span>
-            </div>
-            <div class="info-item">
-                <i class="fas fa-ruler-vertical"></i>
-                <strong>Height:</strong> <span th:text="${user.height != null ? user.height + ' cm' : 'N/A'}"></span>
-            </div>
-            <div class="info-item">
-                <i class="fas fa-weight"></i>
-                <strong>Weight:</strong> <span th:text="${user.weight != null ? user.weight + ' kg' : 'N/A'}"></span>
-            </div>
+      </div>
+      <!-- Personal & Health Information -->
+      <div class="profile-info mb-4">
+        <h3 class="mb-3"><i class="fas fa-heartbeat"></i> Personal & Health Information</h3>
+        <div class="row g-3">
+          <div class="col-md-4 info-item">
+            <i class="fas fa-birthday-cake"></i>
+            <strong>Date of Birth:</strong> <span th:text="${user.dob != null ? #temporals.format(user.dob, 'dd-MM-yyyy') : 'N/A'}"></span>
+          </div>
+          <div class="col-md-4 info-item">
+            <i class="fas fa-calendar-alt"></i>
+            <strong>Age:</strong> <span th:text="${user.age != null ? user.age + ' years' : 'N/A'}"></span>
+          </div>
+          <div class="col-md-4 info-item">
+            <i class="fas fa-venus-mars"></i>
+            <strong>Gender:</strong> <span th:text="${user.gender ?: 'N/A'}"></span>
+          </div>
+          <div class="col-md-4 info-item">
+            <i class="fas fa-map-marker-alt"></i>
+            <strong>Address:</strong> <span th:text="${user.address ?: 'N/A'}"></span>
+          </div>
+          <div class="col-md-4 info-item">
+            <i class="fas fa-ruler-vertical"></i>
+            <strong>Height:</strong> <span th:text="${user.height != null ? user.height + ' cm' : 'N/A'}"></span>
+          </div>
+          <div class="col-md-4 info-item">
+            <i class="fas fa-weight"></i>
+            <strong>Weight:</strong> <span th:text="${user.weight != null ? user.weight + ' kg' : 'N/A'}"></span>
+          </div>
         </div>
-    </div>
-
-    <!-- Badges Section -->
-    <div class="badge-section">
-        <h2><i class="fas fa-trophy"></i> Displayed Badges</h2>
-        <div id="display-zone" class="drop-zone">
-            <div th:if="${#lists.isEmpty(displayedBadges)}" style="color: #666; font-style: italic;">
-                No badges displayed yet. <a th:if="${isOwner}" th:href="@{/badge-display}" style="color: #667eea;">Configure your badges</a>
-            </div>
-            <div th:each="badge : ${displayedBadges}">
-                <a th:href="@{'/badges/' + ${badge.id}}">
-                    <img th:src="@{${badge.icon}}" class="badge-icon" th:title="${badge.name}" />
-                </a>
-            </div>
+      </div>
+      <!-- Badges Section -->
+      <div class="badge-section mb-4">
+        <h2 class="mb-3"><i class="fas fa-trophy"></i> Displayed Badges</h2>
+        <div id="display-zone" class="drop-zone mb-3 d-flex flex-wrap gap-2 justify-content-center">
+          <div th:if="${#lists.isEmpty(displayedBadges)}" class="text-muted fst-italic">
+            No badges displayed yet. <a th:if="${isOwner}" th:href="@{/badge-display}" class="text-primary">Configure your badges</a>
+          </div>
+          <div th:each="badge : ${displayedBadges}">
+            <a th:href="@{'/badges/' + ${badge.id}}">
+              <img th:src="@{${badge.icon}}" class="badge-icon" th:title="${badge.name}" style="width: 40px; height: 40px; object-fit: contain; margin: 2px;" />
+            </a>
+          </div>
         </div>
-        <a th:if="${isOwner}" th:href="@{/badge-display}" class="btn btn-primary" style="text-decoration: none;">
-            <i class="fas fa-cog"></i> Edit Displayed Badges
+        <a th:if="${isOwner}" th:href="@{/badge-display}" class="btn btn-outline-primary mb-3">
+          <i class="fas fa-cog"></i> Edit Displayed Badges
         </a>
-
-        <h3><i class="fas fa-medal"></i> Unlocked Badges</h3>
-        <div id="unlocked-badges" class="badge-list">
-            <div th:if="${#lists.isEmpty(unlockedBadges)}" style="color: #666; font-style: italic; width: 100%;">
-                No badges unlocked yet. Start completing challenges to earn badges!
-            </div>
-            <div th:each="badge : ${unlockedBadges}" th:title="${badge.name}">
-                <a th:href="@{'/badges/' + ${badge.id}}">
-                    <img th:src="@{${badge.icon}}" class="badge-icon"/>
-                </a>
-            </div>
+        <h3 class="mb-2"><i class="fas fa-medal"></i> Unlocked Badges</h3>
+        <div id="unlocked-badges" class="badge-list d-flex flex-wrap gap-1 mb-3" style="min-height: 44px;">
+          <div th:if="${#lists.isEmpty(unlockedBadges)}" class="text-muted fst-italic w-100">
+            No badges unlocked yet. Start completing challenges to earn badges!
+          </div>
+          <div th:each="badge : ${unlockedBadges}" th:title="${badge.name}">
+            <a th:href="@{'/badges/' + ${badge.id}}">
+              <img th:src="@{${badge.icon}}" class="badge-icon" style="width: 32px; height: 32px; object-fit: contain; margin: 1px;"/>
+            </a>
+          </div>
         </div>
-
-        <h3><i class="fas fa-lock"></i> Locked Badges</h3>
-        <div id="locked-badges" class="badge-list locked">
-            <div th:each="badge : ${lockedBadges}" th:title="${badge.name}">
-                <a th:href="@{'/badges/' + ${badge.id}}">
-                    <img th:src="@{${badge.lockedIcon}}" class="badge-icon grayscale"/>
-                </a>
-            </div>
+        <h3 class="mb-2"><i class="fas fa-lock"></i> Locked Badges</h3>
+        <div id="locked-badges" class="badge-list locked d-flex flex-wrap gap-1" style="min-height: 44px;">
+          <div th:each="badge : ${lockedBadges}" th:title="${badge.name}">
+            <a th:href="@{'/badges/' + ${badge.id}}">
+              <img th:src="@{${badge.lockedIcon}}" class="badge-icon grayscale" style="width: 32px; height: 32px; object-fit: contain; margin: 1px;"/>
+            </a>
+          </div>
         </div>
-    </div>
-    <div>
-    <p th:text="'Followers: ' + ${followerCount}"></p>
-    <p th:text="'Following: ' + ${followingCount}"></p>
-
+      </div>
+      <div class="mb-4">
+        <p th:text="'Followers: ' + ${followerCount}"></p>
+        <p th:text="'Following: ' + ${followingCount}"></p>
         <form th:if="${isFollowing != null and !isFollowing}"
               th:action="@{'/users/' + ${targetUser.id} + '/follow'}" method="post">
-            <button type="submit" class="btn btn-primary">Follow</button>
+          <button type="submit" class="btn btn-primary">Follow</button>
         </form>
-
         <form th:if="${isFollowing != null and isFollowing}"
               th:action="@{'/users/' + ${targetUser.id} + '/unfollow'}" method="post">
-            <button type="submit" class="btn btn-secondary">Unfollow</button>
+          <button type="submit" class="btn btn-secondary">Unfollow</button>
         </form>
-    </div>
-
-    <!-- Back to Home Button -->
-    <div class="back-to-home">
+      </div>
+      <!-- Back to Home Button -->
+      <div class="back-to-home text-center">
         <a th:href="@{/}" class="btn btn-secondary">
-            <i class="fas fa-home"></i> Back to Home
+          <i class="fas fa-home"></i> Back to Home
         </a>
+      </div>
     </div>
-</div>
-
+  </div>
+  <footer th:replace="fragments/footer :: footer"></footer>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

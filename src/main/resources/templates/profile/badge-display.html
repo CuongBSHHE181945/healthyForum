@@ -1,33 +1,33 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <title>Select Displayed Badges</title>
-    <link rel="stylesheet" th:href="@{/css/styles.css}">
-    <link rel="stylesheet" th:href="@{/css/profile.css}">
-</head>
+<head th:replace="fragments/header :: head"></head>
 <body>
-
-<h2>Select badges to display on your profile</h2>
-
-<div th:if="${#lists.isEmpty(userBadges)}">
-    <p>you dont have any badge</p>
-</div>
-<form th:if="${!#lists.isEmpty(userBadges)}" th:action="@{badge-display}" method="post">
-    <div>
-        <div th:each="userBadge : ${userBadges}" class="badge-container">
-            <img th:src="@{${userBadge.badge.icon}}" th:alt="${userBadge.badge.name}" class="badge-icon"/>
+  <nav th:replace="fragments/header :: navbar"></nav>
+  <div class="container py-4">
+    <div class="card p-4 mb-4 shadow-sm">
+      <h2 class="mb-4">Select badges to display on your profile</h2>
+      <div th:if="${#lists.isEmpty(userBadges)}" class="alert alert-info">
+        <p>you dont have any badge</p>
+      </div>
+      <form th:if="${!#lists.isEmpty(userBadges)}" th:action="@{badge-display}" method="post">
+        <div class="d-flex flex-wrap gap-3 mb-3">
+          <div th:each="userBadge : ${userBadges}" class="badge-container text-center">
+            <img th:src="@{${userBadge.badge.icon}}" th:alt="${userBadge.badge.name}"
+                 class="rounded-circle shadow mb-2"
+                 style="width:40px;height:40px;object-fit:cover;border:2px solid #dee2e6;background:#fff;"/>
             <div>
-                <input type="checkbox" name="displayedBadgeIds"
-                       th:value="${userBadge.badge.id}"
-                       th:checked="${userBadge.displayed}"/> Display
+              <input type="checkbox" name="displayedBadgeIds"
+                     th:value="${userBadge.badge.id}"
+                     th:checked="${userBadge.displayed}"/> Display
             </div>
+          </div>
         </div>
+        <button type="submit" class="btn btn-success"> 4be Save Display</button>
+      </form>
+      <a th:href="@{/profile}" class="btn btn-secondary mt-3">Return to Profile</a>
     </div>
-    <br/>
-    <button type="submit">💾 Save Display</button>
-</form>
-
-<a th:href="@{/profile}" class="button">Return to Profile</a>
-
+  </div>
+  <footer th:replace="fragments/footer :: footer"></footer>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

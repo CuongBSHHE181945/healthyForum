@@ -1,46 +1,55 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head><title>My Challenges</title>
-    <link rel="stylesheet" th:href="@{/css/styles.css}">
-    <link rel="stylesheet" th:href="@{/css/challenge.css}">
-</head>
+<head th:replace="fragments/header :: head"></head>
 <body>
-<div class="back">
-    <a href="/challenge" class="back-link">← Back to list</a>
-</div>
-<h2 class="page-title">✅ My Active Challenges</h2>
-<table>
-    <thead>
-    <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Category</th>
-        <th>Join Date</th>
-        <th>Status</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="uc : ${myChallenges}">
-        <td th:text="${uc.challenge.name}">Name</td>
-        <td th:text="${uc.challenge.type != null ? uc.challenge.type.name : 'Unknown'}">Type</td>
-        <td th:text="${uc.challenge.category != null ? uc.challenge.category.name : 'Uncategorized'}"></td>
-        <td th:text="${uc.joinDate}">Date</td>
-        <td th:text="${uc.status}">ACTIVE</td>
-        <td>
-            <span th:switch="${uc.challenge.type != null ? uc.challenge.type.name : 'Unknown'}">
+  <nav th:replace="fragments/header :: navbar"></nav>
+  <div class="container py-4">
+    <div class="card p-4 mb-4 shadow-sm">
+      <div class="back mb-3">
+        <a href="/challenge" class="back-link">← Back to list</a>
+      </div>
+      <h2 class="page-title mb-4">✅ My Active Challenges</h2>
+      <div class="table-responsive">
+        <table class="table table-striped table-hover align-middle">
+          <thead>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Category</th>
+            <th>Join Date</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="uc : ${myChallenges}">
+            <td th:text="${uc.challenge.name}">Name</td>
+            <td th:text="${uc.challenge.type != null ? uc.challenge.type.name : 'Unknown'}">Type</td>
+            <td th:text="${uc.challenge.category != null ? uc.challenge.category.name : 'Uncategorized'}"></td>
+            <td th:text="${uc.joinDate}">Date</td>
+            <td th:text="${uc.status}">ACTIVE</td>
+            <td>
+              <span th:switch="${uc.challenge.type != null ? uc.challenge.type.name : 'Unknown'}">
                 <span th:case="'PERSONAL'">
-                    <a th:if="${uc.status != 'COMPLETED'}"
-                       th:href="@{'/challenge/progress/' + ${uc.id}}">📅 View Progress</a>
-                    <span th:if="${uc.status == 'COMPLETED'}" style="color:gray;">✅ Completed</span>
+                  <a th:if="${uc.status != 'COMPLETED'}"
+                     th:href="@{'/challenge/progress/' + ${uc.id}}" class="btn btn-outline-success btn-sm">📅 View Progress</a>
+                  <span th:if="${uc.status == 'COMPLETED'}" style="color:gray;">
+                    ✅ Completed
+                  </span>
                 </span>
                 <span th:case="'PUBLIC'">
-                    <a th:href="@{'/challenge/public/' + ${uc.id}}">🌍 View Event</a>
+                  <a th:href="@{'/challenge/public/' + ${uc.id}}" class="btn btn-outline-info btn-sm">🌍 View Event</a>
                 </span>
-            </span>
-        </td>
-    </tr>
-    </tbody>
-</table>
-<a href="/challenge" class="back-link">← Back to All Challenges</a>
+              </span>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+      <a href="/challenge" class="btn btn-outline-secondary mt-3">← Back to All Challenges</a>
+    </div>
+  </div>
+  <footer th:replace="fragments/footer :: footer"></footer>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

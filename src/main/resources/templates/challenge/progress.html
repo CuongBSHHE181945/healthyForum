@@ -1,78 +1,61 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-  <title>Challenge Progress</title>
-  <link rel="stylesheet" th:href="@{/css/styles.css}">
-  <link rel="stylesheet" th:href="@{/css/challenge.css}">
-</head>
+<head th:replace="fragments/header :: head"></head>
 <body>
-<div th:if="${successMessage}" class="alert alert-success">
-  <p th:text="${successMessage}"></p>
-</div>
-<h2 th:text="'📅 Progress for: ' + ${userChallenge.challenge != null ? userChallenge.challenge.name : 'Unknown Challenge'}"></h2>
-
-<div th:if="${tickMessage}">
-  <p th:text="${tickMessage}"></p>
-</div>
-
-<a th:href="@{'/evidence/review/' + ${userChallenge.id}}" class="forward-link">
-  → Approve Peers' Evidence
-</a>
-
-<th:block th:switch="${evidenceAction}">
-  <a th:case="'upload'"
-     th:href="@{/evidence/create(userChallengeId=${userChallenge.id})}"
-     class="btn btn-primary">Upload Evidence for today</a>
-
-  <a th:case="'edit'"
-     th:href="@{/evidence/edit/{id}(id=${todayEvidence.id})}"
-     class="btn btn-warning">Edit Evidence</a>
-
-  <a th:case="'retry'"
-     th:href="@{/evidence/retry/{id}(id=${userChallenge.id})}"
-     class="btn btn-danger">Retry Challenge for today</a>
-</th:block>
-
-<h1>My Posted Evidence</h1>
-
-<div th:if="${evidence.isEmpty()}">
-  <p>You haven’t posted any evidence yet.</p>
-</div>
-
-<!-- Challenge Group Header Tracking -->
-<div th:each="evidence : ${evidence}">
-
-    <!-- Evidence Entry -->
-    <div class="evidence-entry">
-      <strong th:text="${#temporals.format(evidence.createdAt, 'dd MMM yyyy')}">Date</strong>
-      <span>Status: <em th:text="${evidence.status}"></em></span><br/>
-      <span th:text="${evidence.post.content}">Caption</span><br/>
-      <!-- Show image if extension is .png, .jpg, or .jpeg -->
-      <img th:if="${#strings.endsWith(evidence.post.imageUrl, '.png') or
-             #strings.endsWith(evidence.post.imageUrl, '.jpg') or
-             #strings.endsWith(evidence.post.imageUrl, '.jpeg')}"
-           th:src="@{${evidence.post.imageUrl}}"
-           style="width: 200px;" />
-
-      <!-- Show video if extension is .mp4 -->
-      <video th:if="${#strings.endsWith(evidence.post.imageUrl, '.mp4')}"
-             width="320" height="240" controls>
-        <source th:src="@{${evidence.post.imageUrl}}" type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
-
-      <hr/>
+  <nav th:replace="fragments/header :: navbar"></nav>
+  <div class="container py-4">
+    <div class="card p-4 mb-4 shadow-sm">
+      <div th:if="${successMessage}" class="alert alert-success">
+        <p th:text="${successMessage}"></p>
+      </div>
+      <h2 th:text="'📅 Progress for: ' + ${userChallenge.challenge != null ? userChallenge.challenge.name : 'Unknown Challenge'}"></h2>
+      <div th:if="${tickMessage}">
+        <p th:text="${tickMessage}"></p>
+      </div>
+      <a th:href="@{'/evidence/review/' + ${userChallenge.id}}" class="forward-link mb-3 d-block">
+        → Approve Peers' Evidence
+      </a>
+      <th:block th:switch="${evidenceAction}">
+        <a th:case="'upload'"
+           th:href="@{/evidence/create(userChallengeId=${userChallenge.id})}"
+           class="btn btn-primary mb-2">Upload Evidence for today</a>
+        <a th:case="'edit'"
+           th:href="@{/evidence/edit/{id}(id=${todayEvidence.id})}"
+           class="btn btn-warning mb-2">Edit Evidence</a>
+        <a th:case="'retry'"
+           th:href="@{/evidence/retry/{id}(id=${userChallenge.id})}"
+           class="btn btn-danger mb-2">Retry Challenge for today</a>
+      </th:block>
+      <h1 class="h4 mt-4 mb-3">My Posted Evidence</h1>
+      <div th:if="${evidence.isEmpty()}">
+        <p>You haven’t posted any evidence yet.</p>
+      </div>
+      <div th:each="evidence : ${evidence}">
+        <div class="evidence-entry mb-3">
+          <strong th:text="${#temporals.format(evidence.createdAt, 'dd MMM yyyy')}">Date</strong>
+          <span>Status: <em th:text="${evidence.status}"></em></span><br/>
+          <span th:text="${evidence.post.content}">Caption</span><br/>
+          <img th:if="${#strings.endsWith(evidence.post.imageUrl, '.png') or #strings.endsWith(evidence.post.imageUrl, '.jpg') or #strings.endsWith(evidence.post.imageUrl, '.jpeg')}"
+               th:src="@{${evidence.post.imageUrl}}"
+               style="width: 200px;" class="img-fluid rounded mb-2" />
+          <video th:if="${#strings.endsWith(evidence.post.imageUrl, '.mp4')}"
+                 width="320" height="240" controls class="mb-2">
+            <source th:src="@{${evidence.post.imageUrl}}" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+          <hr/>
+        </div>
+      </div>
+      <p class="mt-3">Total Days Completed: <strong th:text="${total}"></strong> / <span th:text="${target}"></span></p>
+      <p>🔥 Current Streak: <strong th:text="${streak}"></strong> day(s)</p>
+      <h3 class="h5 mt-4 mb-2">📖 History</h3>
+      <ul class="mb-3">
+        <li th:each="log : ${logs}" th:text="${log.date}"></li>
+      </ul>
+      <a href="/challenge/joined" class="btn btn-outline-secondary">← Back to My Challenges</a>
     </div>
   </div>
-
-<p>Total Days Completed: <strong th:text="${total}"></strong> / <span th:text="${target}"></span></p>
-<p>🔥 Current Streak: <strong th:text="${streak}"></strong> day(s)</p>
-
-<h3>📖 History</h3>
-<ul>
-  <li th:each="log : ${logs}" th:text="${log.date}"></li>
-</ul>
-
-<a href="/challenge/joined" class="back-link">← Back to My Challenges</a>
+  <footer th:replace="fragments/footer :: footer"></footer>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -1,81 +1,70 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <title>Sleep Entry Form</title>
-    <link rel="stylesheet" th:href="@{/css/styles.css}">
-    <link rel="stylesheet" th:href="@{/css/sleepForm.css}">
-</head>
+<head th:replace="fragments/header :: head"></head>
 <body>
-<div class="container">
-    <h2>Log Your Sleep</h2>
-    <div th:if="${errorMessage}" class="alert alert-danger">
+  <nav th:replace="fragments/header :: navbar"></nav>
+  <div class="container py-4">
+    <div class="card p-4 mb-4 shadow-sm">
+      <h2 class="mb-4">Log Your Sleep</h2>
+      <div th:if="${errorMessage}" class="alert alert-danger mb-3">
         <p th:text="${errorMessage}"></p>
-    </div>
-    <form th:action="@{/sleep/form/submit}" th:object="${sleepEntry}" method="post">
-        <!-- For new entry (no ID) — editable inputs -->
+      </div>
+      <form th:action="@{/sleep/form/submit}" th:object="${sleepEntry}" method="post">
         <div th:unless="${sleepEntry.id != null}">
-            <div class="form-group">
-                <label for="date">Date</label>
-                <input type="date" id="date" th:field="*{date}" required />
-            </div>
-
-            <div class="form-group">
-                <label for="startTime">Start Time</label>
-                <input type="time" id="startTime" th:field="*{startTime}" required />
-            </div>
-
-            <div class="form-group">
-                <label for="endTime">End Time</label>
-                <input type="time" id="endTime" th:field="*{endTime}" required />
-            </div>
+          <div class="mb-3">
+            <label for="date" class="form-label">Date</label>
+            <input type="date" id="date" th:field="*{date}" class="form-control" required />
+          </div>
+          <div class="mb-3">
+            <label for="startTime" class="form-label">Start Time</label>
+            <input type="time" id="startTime" th:field="*{startTime}" class="form-control" required />
+          </div>
+          <div class="mb-3">
+            <label for="endTime" class="form-label">End Time</label>
+            <input type="time" id="endTime" th:field="*{endTime}" class="form-control" required />
+          </div>
         </div>
-
-        <!-- For edit mode (ID exists) — read-only values -->
         <div th:if="${sleepEntry.id != null}">
-            <input type="hidden" th:field="*{id}" />
-
-            <div class="form-group">
-                <label>Date</label>
-                <div class="readonly-value" th:text="${sleepEntry.date}"></div>
-                <input type="hidden" th:field="*{date}" />
-            </div>
-
-            <div class="form-group">
-                <label>Start Time</label>
-                <div class="readonly-value" th:text="${sleepEntry.startTime}"></div>
-                <input type="hidden" th:field="*{startTime}" />
-            </div>
-
-            <div class="form-group">
-                <label>End Time</label>
-                <div class="readonly-value" th:text="${sleepEntry.endTime}"></div>
-                <input type="hidden" th:field="*{endTime}" />
-            </div>
+          <input type="hidden" th:field="*{id}" />
+          <div class="mb-3">
+            <label class="form-label">Date</label>
+            <div class="form-control-plaintext" th:text="${sleepEntry.date}"></div>
+            <input type="hidden" th:field="*{date}" />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Start Time</label>
+            <div class="form-control-plaintext" th:text="${sleepEntry.startTime}"></div>
+            <input type="hidden" th:field="*{startTime}" />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">End Time</label>
+            <div class="form-control-plaintext" th:text="${sleepEntry.endTime}"></div>
+            <input type="hidden" th:field="*{endTime}" />
+          </div>
         </div>
-
-        <!-- Editable fields -->
-        <div class="form-group">
-            <label for="quality">Sleep Quality (1-10)</label>
-            <select id="quality" th:field="*{quality}" required>
-                <option th:value="5" disabled selected>-- Select --</option>
-                <option th:each="i : ${#numbers.sequence(1,10)}" 
-                        th:value="${i}" 
-                        th:text="${i}"
-                        th:selected="${i == sleepEntry.quality}">
-                </option>
-            </select>
+        <div class="mb-3">
+          <label for="quality" class="form-label">Sleep Quality (1-10)</label>
+          <select id="quality" th:field="*{quality}" class="form-select" required>
+            <option th:value="5" disabled selected>-- Select --</option>
+            <option th:each="i : ${#numbers.sequence(1,10)}" 
+                    th:value="${i}" 
+                    th:text="${i}"
+                    th:selected="${i == sleepEntry.quality}">
+            </option>
+          </select>
         </div>
-
-        <div class="form-group">
-            <label for="notes">Notes</label>
-            <textarea id="notes" rows="3" th:field="*{notes}" placeholder="Optional notes about your sleep..."></textarea>
+        <div class="mb-3">
+          <label for="notes" class="form-label">Notes</label>
+          <textarea id="notes" rows="3" th:field="*{notes}" class="form-control" placeholder="Optional notes about your sleep..."></textarea>
         </div>
-
-        <div class="button-group">
-            <button type="submit" class="btn btn-primary" th:text="${sleepEntry.id != null ? 'Update' : 'Submit'}"></button>
-            <a href="/sleep/list" class="btn btn-secondary">Cancel</a>
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-primary" th:text="${sleepEntry.id != null ? 'Update' : 'Submit'}"></button>
+          <a href="/sleep/list" class="btn btn-secondary">Cancel</a>
         </div>
-    </form>
-</div>
+      </form>
+    </div>
+  </div>
+  <footer th:replace="fragments/footer :: footer"></footer>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

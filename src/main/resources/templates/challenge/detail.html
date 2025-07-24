@@ -1,27 +1,28 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-  <title>Challenge Detail</title>
-  <link rel="stylesheet" th:href="@{/css/styles.css}">
-  <link rel="stylesheet" th:href="@{/css/challenge.css}">
-</head>
+<head th:replace="fragments/header :: head"></head>
 <body>
-<div class="container">
-  <div class="back">
-    <a href="/challenge" class="back-link">← Back to list</a>
+  <nav th:replace="fragments/header :: navbar"></nav>
+  <div class="container py-4">
+    <div class="card p-4 mb-4 shadow-sm">
+      <div class="back mb-3">
+        <a href="/challenge" class="back-link">← Back to list</a>
+      </div>
+      <h2 th:text="${challenge.name}" class="mb-3"></h2>
+      <p><strong>Type:</strong> <span th:text="${challenge.type != null ? challenge.type.name : 'Unknown'}"></span></p>
+      <p><strong>Category:</strong> <span th:text="${challenge.category != null ? challenge.category.name : 'Uncategorized'}"></span></p>
+      <p><strong>Duration:</strong> <span th:text="${challenge.durationDays}"></span> days</p>
+      <p><strong>Description:</strong></p>
+      <p th:text="${challenge.description}"></p>
+      <form th:action="@{'/challenge/join/' + ${challenge.id}}" method="post" class="mt-3">
+        <button type="submit"
+                th:disabled="${joinedIds.contains(challenge.id)}"
+                th:text="${joinedIds.contains(challenge.id) ? 'Joined' : 'Join'}"
+                class="btn btn-outline-success"></button>
+      </form>
+    </div>
   </div>
-  <h2 th:text="${challenge.name}"></h2>
-  <p><strong>Type:</strong> <span th:text="${challenge.type != null ? challenge.type.name : 'Unknown'}"></span></p>
-  <p><strong>Category:</strong> <span th:text="${challenge.category != null ? challenge.category.name : 'Uncategorized'}"></span></p>
-  <p><strong>Duration:</strong> <span th:text="${challenge.durationDays}"></span> days</p>
-  <p><strong>Description:</strong></p>
-  <p th:text="${challenge.description}"></p>
-
-  <form th:action="@{'/challenge/join/' + ${challenge.id}}" method="post">
-    <button type="submit"
-            th:disabled="${joinedIds.contains(challenge.id)}"
-            th:text="${joinedIds.contains(challenge.id) ? 'Joined' : 'Join'}"></button>
-  </form>
-</div>
+  <footer th:replace="fragments/footer :: footer"></footer>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

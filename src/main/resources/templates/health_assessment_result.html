@@ -1,122 +1,91 @@
 <!-- health_assessment_result.html -->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-  <title>Health Assessment Results</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-  <style>
-    .result-container {
-      max-width: 700px;
-      margin: 0 auto;
-      padding: 20px;
-    }
-    .result-card {
-      background-color: #fff;
-      border-radius: 10px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.1);
-      margin-bottom: 25px;
-    }
-    .score-box {
-      background: #f8f9fa;
-      border-radius: 8px;
-      padding: 10px 15px;
-      margin-bottom: 10px;
-    }
-  </style>
-</head>
+<head th:replace="fragments/header :: head"></head>
 <body class="bg-light">
-<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm mb-4">
-  <div class="container">
-    <a class="navbar-brand" href="/">HealthyForum</a>
-    <div>
-      <a class="nav-link d-inline" href="/health-assessment">Assessment Form</a>
-      <a class="nav-link d-inline" href="/health-assessment/history">Assessment History</a>
-    </div>
-  </div>
-</nav>
-<div class="container result-container">
-  <div class="text-center mb-4">
-    <h2 class="display-6">Your Health Assessment Results</h2>
-    <p class="text-muted">Based on your recent data</p>
-  </div>
-
-  <div class="result-card p-4" th:object="${result}">
-    <div class="row g-4">
-      <div class="col-12">
-        <div th:class="${'alert ' +
-                    (result.riskLevel == 'High' ? 'alert-danger' :
-                    (result.riskLevel == 'Moderate' ? 'alert-warning' : 'alert-success'))}">
-          <h4 class="alert-heading">
-            <i class="bi bi-exclamation-triangle me-2"></i>
-            Risk Level: <span th:text="*{riskLevel}"></span>
-          </h4>
-          <p class="mb-0"><strong>Date:</strong> <span th:text="*{#dates.format(assessmentDate, 'dd-MM-yyyy HH:mm')}"></span></p>
-        </div>
+  <nav th:replace="fragments/header :: navbar"></nav>
+  <div class="container py-4">
+    <div class="card p-4 mb-4 shadow-sm result-container mx-auto" style="max-width: 700px;">
+      <div class="text-center mb-4">
+        <h2 class="display-6">Your Health Assessment Results</h2>
+        <p class="text-muted">Based on your recent data</p>
       </div>
-      <div class="col-md-6">
-        <div class="score-box mb-2">
-          <i class="bi bi-person-badge me-2 text-primary"></i>
-          <strong>BMI:</strong> <span th:text="*{bmi}"></span>
-        </div>
-        <div class="score-box mb-2">
-          <i class="bi bi-moon-stars me-2 text-info"></i>
-          <strong>Sleep Score:</strong> <span th:text="*{sleepScore}"></span>
-        </div>
-        <div class="score-box mb-2">
-          <i class="bi bi-egg-fried me-2 text-success"></i>
-          <strong>Nutrition Score:</strong> <span th:text="*{nutritionScore}"></span>
-        </div>
-      </div>
-      <div class="col-md-6">
-        <div class="score-box mb-2">
-          <i class="bi bi-bicycle me-2 text-warning"></i>
-          <strong>Exercise Score:</strong> <span th:text="*{exerciseScore}"></span>
-        </div>
-        <div class="score-box mb-2">
-          <i class="bi bi-bar-chart-line me-2 text-secondary"></i>
-          <strong>Overall Score:</strong> <span th:text="*{overallScore}"></span>
-        </div>
-      </div>
-    </div>
-    <div class="mt-4">
-      <h5><i class="bi bi-lightbulb me-2 text-success"></i>Recommendations</h5>
-      <p th:text="*{recommendations}"></p>
-    </div>
-
-    <!-- Health Trends Charts -->
-    <div class="mt-5">
-      <h4 class="mb-3">Your Health Trends</h4>
-      <div class="row g-4">
-        <div class="col-md-12 mb-4">
-          <div class="card p-3">
-            <h6 class="mb-2"><i class="bi bi-moon-stars me-2 text-info"></i>Sleep Duration (hours per day)</h6>
-            <canvas id="sleepChart" height="100"></canvas>
+      <div class="result-card p-4 bg-white rounded shadow-sm" th:object="${result}">
+        <div class="row g-4">
+          <div class="col-12">
+            <div th:class="${'alert ' + (result.riskLevel == 'High' ? 'alert-danger' : (result.riskLevel == 'Moderate' ? 'alert-warning' : 'alert-success'))}">
+              <h4 class="alert-heading">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                Risk Level: <span th:text="*{riskLevel}"></span>
+              </h4>
+              <p class="mb-0"><strong>Date:</strong> <span th:text="*{#dates.format(assessmentDate, 'dd-MM-yyyy HH:mm')}"></span></p>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="score-box mb-2 p-2 bg-light rounded">
+              <i class="bi bi-person-badge me-2 text-primary"></i>
+              <strong>BMI:</strong> <span th:text="*{bmi}"></span>
+            </div>
+            <div class="score-box mb-2 p-2 bg-light rounded">
+              <i class="bi bi-moon-stars me-2 text-info"></i>
+              <strong>Sleep Score:</strong> <span th:text="*{sleepScore}"></span>
+            </div>
+            <div class="score-box mb-2 p-2 bg-light rounded">
+              <i class="bi bi-egg-fried me-2 text-success"></i>
+              <strong>Nutrition Score:</strong> <span th:text="*{nutritionScore}"></span>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="score-box mb-2 p-2 bg-light rounded">
+              <i class="bi bi-bicycle me-2 text-warning"></i>
+              <strong>Exercise Score:</strong> <span th:text="*{exerciseScore}"></span>
+            </div>
+            <div class="score-box mb-2 p-2 bg-light rounded">
+              <i class="bi bi-bar-chart-line me-2 text-secondary"></i>
+              <strong>Overall Score:</strong> <span th:text="*{overallScore}"></span>
+            </div>
           </div>
         </div>
-        <div class="col-md-12 mb-4">
-          <div class="card p-3">
-            <h6 class="mb-2"><i class="bi bi-egg-fried me-2 text-success"></i>Nutrition: Calories per Day</h6>
-            <canvas id="nutritionChart" height="100"></canvas>
+        <div class="mt-4">
+          <h5><i class="bi bi-lightbulb me-2 text-success"></i>Recommendations</h5>
+          <p th:text="*{recommendations}"></p>
+        </div>
+        <!-- Health Trends Charts -->
+        <div class="mt-5">
+          <h4 class="mb-3">Your Health Trends</h4>
+          <div class="row g-4">
+            <div class="col-md-12 mb-4">
+              <div class="card p-3">
+                <h6 class="mb-2"><i class="bi bi-moon-stars me-2 text-info"></i>Sleep Duration (hours per day)</h6>
+                <canvas id="sleepChart" height="100"></canvas>
+              </div>
+            </div>
+            <div class="col-md-12 mb-4">
+              <div class="card p-3">
+                <h6 class="mb-2"><i class="bi bi-egg-fried me-2 text-success"></i>Nutrition: Calories per Day</h6>
+                <canvas id="nutritionChart" height="100"></canvas>
+              </div>
+            </div>
+            <div class="col-md-12 mb-4">
+              <div class="card p-3">
+                <h6 class="mb-2"><i class="bi bi-bicycle me-2 text-warning"></i>Exercise Minutes per Day</h6>
+                <canvas id="exerciseChart" height="100"></canvas>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="col-md-12 mb-4">
-          <div class="card p-3">
-            <h6 class="mb-2"><i class="bi bi-bicycle me-2 text-warning"></i>Exercise Minutes per Day</h6>
-            <canvas id="exerciseChart" height="100"></canvas>
-          </div>
+        <div class="d-grid gap-2 mt-4">
+          <a href="/health-assessment" class="btn btn-primary">Back to Assessment Form</a>
+          <a href="/health-assessment/history" class="btn btn-outline-secondary">View Assessment History</a>
+          <a href="/" class="btn btn-outline-secondary">Back to Home</a>
         </div>
       </div>
     </div>
-    <div class="d-grid gap-2 mt-4">
-      <a href="/health-assessment" class="btn btn-primary">Back to Assessment Form</a>
-      <a href="/health-assessment/history" class="btn btn-outline-secondary">View Assessment History</a>
-      <a href="/" class="btn btn-outline-secondary">Back to Home</a>
-    </div>
   </div>
-</div>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script th:inline="javascript">
+  <footer th:replace="fragments/footer :: footer"></footer>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script th:inline="javascript">
     // Sleep Chart
     const sleepLabels = /*[[${sleepLabels}]]*/ [];
     const sleepData = /*[[${sleepData}]]*/ [];
@@ -174,6 +143,6 @@
             plugins: { legend: { display: false } }
         }
     });
-</script>
+  </script>
 </body>
 </html>
