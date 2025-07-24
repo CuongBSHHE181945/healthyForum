@@ -14,19 +14,19 @@
 
 <div class="container py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
-    <div class="mb-4">
-        <a href="/" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left"></i> Back to Homepage
-        </a>
-        <a href="/posts/my-post" class="btn btn-outline-secondary ms-2">
-            <i class="bi bi-journal-text"></i> My Posts
-        </a>
-        <a href="/posts/drafts" class="btn btn-outline-secondary ms-2">
-            <i class="bi bi-file-earmark"></i> Drafts
-        </a>
-        <a href="/posts/my-reports" class="btn btn-outline-secondary ms-2">
-            <i class="bi bi-flag"></i> My Reports
-        </a>
+        <div class="mb-4">
+            <a href="/posts/my-post" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back to My post
+            </a>
+            <a href="/posts/my-post" class="btn btn-outline-secondary ms-2">
+                <i class="bi bi-journal-text"></i> My Posts
+            </a>
+            <a href="/posts/drafts" class="btn btn-outline-secondary ms-2">
+                <i class="bi bi-file-earmark"></i> Drafts
+            </a>
+            <a href="/posts/my-reports" class="btn btn-outline-secondary ms-2">
+                <i class="bi bi-flag"></i> My Reports
+            </a>
         </div>
     </div>
 
@@ -36,23 +36,23 @@
 
             <!-- Post content -->
             <p class="card-text" th:text="${post.content}">Post content goes here...</p>
+
             <!-- Post image -->
-            <!-- Show image if imageUrl is not null and ends with .png/.jpg/.jpeg -->
-            <img th:if="${post.imageUrl != null and (#strings.endsWith(post.imageUrl, '.png') or
+            <div class="mb-3">
+                <img th:if="${post.imageUrl != null and (#strings.endsWith(post.imageUrl, '.png') or
                                          #strings.endsWith(post.imageUrl, '.jpg') or
                                          #strings.endsWith(post.imageUrl, '.jpeg'))}"
-                 th:src="@{${post.imageUrl}}"
-                 style="width: 200px;" />
+                     th:src="@{${post.imageUrl}}"
+                     class="img-fluid rounded" style="max-width: 200px;" />
 
-            <!-- Show video if imageUrl is not null and ends with .mp4 -->
-            <video th:if="${post.imageUrl != null and #strings.endsWith(post.imageUrl, '.mp4')}"
-                   width="320" height="240" controls>
-                <source th:src="@{${post.imageUrl}}" type="video/mp4" />
-            </video>
-
+                <video th:if="${post.imageUrl != null and #strings.endsWith(post.imageUrl, '.mp4')}"
+                       class="mt-2" width="320" height="240" controls>
+                    <source th:src="@{${post.imageUrl}}" type="video/mp4" />
+                </video>
+            </div>
 
             <!-- Like/Dislike -->
-            <div class="mb-3 d-flex align-items-center gap-2">
+            <div class="mb-3 d-flex align-items-center gap-3">
                 <form th:action="@{'/posts/' + ${post.id} + '/like'}" method="post">
                     <button type="submit" class="btn btn-outline-success" th:disabled="${likedByUser}">
                         <i class="bi bi-hand-thumbs-up"></i> Like
@@ -64,92 +64,96 @@
                     </button>
                 </form>
                 <span class="ms-3 text-muted">
-        👍 <span th:text="${likeCount}">0</span> &nbsp; 👎 <span th:text="${dislikeCount}">0</span>
-    </span>
+                    👍 <span th:text="${likeCount}">0</span> &nbsp; 👎 <span th:text="${dislikeCount}">0</span>
+                </span>
             </div>
 
             <!-- Danh sách bình luận -->
             <ul class="list-group mb-3" th:if="${commentPage != null}">
-                <li class="list-group-item" th:each="comment : ${commentPage.content}">
+                <li class="list-group-item position-relative" th:each="comment : ${commentPage.content}">
                     <strong th:text="${comment.user.fullName}">User</strong>:
 
-                    <!-- Nếu đang sửa bình luận -->
+                    <!-- Dropdown menu for edit/delete (top-right) -->
+                    <div th:if="${currentUserId != null and comment.user != null and currentUserId == comment.user.id}" class="dropdown position-absolute top-0 end-0">
+                        <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-three-dots-vertical"></i>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a class="dropdown-item" th:href="@{'/posts/' + ${post.id} + '/comments/' + ${comment.id} + '/edit'}">
+                                    <i class="bi bi-pencil"></i> Edit
+                                </a>
+                            </li>
+                            <li>
+                                <form th:action="@{'/posts/comments/' + ${comment.id} + '/delete'}" method="post" onsubmit="return confirm('Are you sure to delete this?')">
+                                    <button type="submit" class="dropdown-item text-danger">
+                                        <i class="bi bi-trash"></i> Delete
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+
                     <div th:if="${editingCommentIds != null and editingCommentIds.contains(comment.id)}">
                         <form th:action="@{'/posts/comments/' + ${comment.id} + '/edit'}" method="post" class="mt-2">
                             <div class="mb-2">
                                 <textarea name="content" rows="3" class="form-control" th:text="${comment.content}"></textarea>
                             </div>
                             <button type="submit" class="btn btn-sm btn-primary">
-                                <i class="bi bi-save"></i> Cập nhật
+                                <i class="bi bi-save"></i> Save
                             </button>
-                            <a th:href="@{'/posts/' + ${post.id}}" class="btn btn-sm btn-secondary ms-2">Hủy</a>
+                            <a th:href="@{'/posts/' + ${post.id}}" class="btn btn-sm btn-secondary ms-2">Cancel</a>
                         </form>
                     </div>
 
-                    <!-- Nếu không phải comment đang sửa -->
                     <div th:if="${editingCommentIds == null or !editingCommentIds.contains(comment.id)}">
                         <span th:text="${comment.content}">Comment content</span><br>
-                        <small class="text-muted"
-                               th:text="${#temporals.format(comment.createdAt, 'dd/MM/yyyy HH:mm')}">Date</small>
-
-                        <!-- Nút chỉnh sửa chỉ hiển thị nếu là chủ comment -->
-                        <div th:if="${currentUserId != null and comment.user != null and currentUserId == comment.user.id}" class="mt-1">
-                            <a th:href="@{'/posts/' + ${post.id} + '/comments/' + ${comment.id} + '/edit'}"
-                               class="btn btn-sm btn-outline-secondary">
-                                <i class="bi bi-pencil"></i> Sửa
-                            </a>
-                        </div>
+                        <small class="text-muted" th:text="${#temporals.format(comment.createdAt, 'dd/MM/yyyy HH:mm')}">Date</small>
                     </div>
                 </li>
             </ul>
 
+            <div class="text-center" th:if="${commentPage.hasNext()}">
+                <a th:href="@{'/posts/' + ${post.id} + '?page=' + ${currentPage + 1}}" class="btn btn-outline-primary">
+                    <i class="bi bi-chat-left-text"></i> More comment
+                </a>
+            </div>
 
-
-
-                <!-- Nút xem thêm -->
-                <div class="text-center" th:if="${commentPage.hasNext()}">
-                    <a th:href="@{'/posts/' + ${post.id} + '?page=' + ${currentPage + 1}}" class="btn btn-outline-primary">
-                        <i class="bi bi-chat-left-text"></i> More comment
-                    </a>
+            <!-- Form bình luận -->
+            <form th:action="@{'/posts/' + ${post.id} + '/comment'}" method="post">
+                <div class="mb-3">
+                    <textarea name="content" class="form-control" rows="3" placeholder="Enter comment..." required></textarea>
                 </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-send"></i> Send comment
+                </button>
+            </form>
+        </div>
 
-                <!-- Form bình luận -->
-                <form th:action="@{'/posts/' + ${post.id} + '/comment'}" method="post">
-                    <div class="mb-3">
-                        <textarea name="content" class="form-control" rows="3" placeholder="Enter comment..." required></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-send"></i> Send comment
-                    </button>
-                </form>
-            </div>
-            <!-- Post info -->
-            <div class="text-muted small mt-3">
-                <span>
-                    <i class="bi bi-person"></i>
-                    <strong th:text="${post.user.fullName}">Author</strong>
-                </span>
-                <span class="ms-3">
-                    <i class="bi bi-clock"></i>
-                    Posted on <span th:text="${#temporals.format(post.createdAt, 'dd/MM/yyyy HH:mm')}">createdAt</span>
-
-                </span>
-                <span class="ms-3" th:if="${post.updatedAt != null}">
-                    <i class="bi bi-arrow-repeat"></i>
-                    Updated on <span th:text="${#temporals.format(post.updatedAt, 'dd/MM/yyyy HH:mm')}">updatedAt</span>
-
-                </span>
-                <span class="ms-3">
-                    <i class="bi bi-eye"></i>
-                    <span th:text="${post.visibility}">Visibility</span>
-                </span>
-                <span class="ms-3" th:if="${post.draft}">
-                    <i class="bi bi-file-earmark"></i> Draft
-                </span>
-                <span class="ms-3 text-danger fw-bold" th:if="${post.banned}">
-                    <i class="bi bi-ban"></i> Banned
-                </span>
-            </div>
+        <!-- Post info -->
+        <div class="text-muted small mt-3">
+            <span>
+                <i class="bi bi-person"></i>
+                <strong th:text="${post.user.fullName}">Author</strong>
+            </span>
+            <span class="ms-3">
+                <i class="bi bi-clock"></i>
+                Posted on <span th:text="${#temporals.format(post.createdAt, 'dd/MM/yyyy HH:mm')}">createdAt</span>
+            </span>
+            <span class="ms-3" th:if="${post.updatedAt != null}">
+                <i class="bi bi-arrow-repeat"></i>
+                Updated on <span th:text="${#temporals.format(post.updatedAt, 'dd/MM/yyyy HH:mm')}">updatedAt</span>
+            </span>
+            <span class="ms-3">
+                <i class="bi bi-eye"></i>
+                <span th:text="${post.visibility}">Visibility</span>
+            </span>
+            <span class="ms-3" th:if="${post.draft}">
+                <i class="bi bi-file-earmark"></i> Draft
+            </span>
+            <span class="ms-3 text-danger fw-bold" th:if="${post.banned}">
+                <i class="bi bi-ban"></i> Banned
+            </span>
         </div>
 
         <!-- Action buttons (Edit / Delete) -->
@@ -164,6 +168,7 @@
                 </button>
             </form>
         </div>
+
         <!-- Report button - only show if user is not the author -->
         <div th:if="${isOwner != null and !isOwner}" class="ms-auto">
             <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#reportModal">
@@ -171,8 +176,8 @@
             </button>
         </div>
     </div>
-
 </div>
+
 <!-- Report Modal -->
 <div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
     <div class="modal-dialog">
