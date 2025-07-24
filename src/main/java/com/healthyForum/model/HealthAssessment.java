@@ -10,32 +10,27 @@ public class HealthAssessment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private int age;
+    // New assessment result fields
+    @Column(name = "bmi")
+    private Double bmi;
 
-    @Column(nullable = false)
-    private String gender;
+    @Column(name = "sleep_score")
+    private Double sleepScore;
 
-    @Column(nullable = false)
-    private double height;
+    @Column(name = "nutrition_score")
+    private Double nutritionScore;
 
-    @Column(nullable = false)
-    private double weight;
+    @Column(name = "exercise_score")
+    private Double exerciseScore;
 
-    @Column(nullable = false)
-    private boolean smoker;
-
-    @Column(name = "exercise_days_per_week", nullable = false)
-    private int exerciseDaysPerWeek;
-
-    @Column(name = "sleep_pattern", nullable = false)
-    private String sleepPattern;
+    @Column(name = "overall_score")
+    private Double overallScore;
 
     @Column(name = "risk_level")
     private String riskLevel;
 
-    @Column(name = "health_suggestions", columnDefinition = "TEXT")
-    private String healthSuggestions;
+    @Column(name = "recommendations", columnDefinition = "TEXT")
+    private String recommendations;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -48,17 +43,15 @@ public class HealthAssessment {
     public HealthAssessment() {
     }
 
-    public HealthAssessment(Long id, int age, String gender, double height, double weight, boolean smoker, int exerciseDaysPerWeek, String sleepPattern, String riskLevel, String healthSuggestions, User user, Date assessmentDate) {
+    public HealthAssessment(Long id, Double bmi, Double sleepScore, Double nutritionScore, Double exerciseScore, Double overallScore, String riskLevel, String recommendations, User user, Date assessmentDate) {
         this.id = id;
-        this.age = age;
-        this.gender = gender;
-        this.height = height;
-        this.weight = weight;
-        this.smoker = smoker;
-        this.exerciseDaysPerWeek = exerciseDaysPerWeek;
-        this.sleepPattern = sleepPattern;
+        this.bmi = bmi;
+        this.sleepScore = sleepScore;
+        this.nutritionScore = nutritionScore;
+        this.exerciseScore = exerciseScore;
+        this.overallScore = overallScore;
         this.riskLevel = riskLevel;
-        this.healthSuggestions = healthSuggestions;
+        this.recommendations = recommendations;
         this.user = user;
         this.assessmentDate = assessmentDate;
     }
@@ -71,60 +64,44 @@ public class HealthAssessment {
         this.id = id;
     }
 
-    public int getAge() {
-        return age;
+    public Double getBmi() {
+        return bmi;
     }
 
-    public void setAge(int age) {
-        this.age = age;
+    public void setBmi(Double bmi) {
+        this.bmi = bmi;
     }
 
-    public String getGender() {
-        return gender;
+    public Double getSleepScore() {
+        return sleepScore;
     }
 
-    public void setGender(String gender) {
-        this.gender = gender;
+    public void setSleepScore(Double sleepScore) {
+        this.sleepScore = sleepScore;
     }
 
-    public double getHeight() {
-        return height;
+    public Double getNutritionScore() {
+        return nutritionScore;
     }
 
-    public void setHeight(double height) {
-        this.height = height;
+    public void setNutritionScore(Double nutritionScore) {
+        this.nutritionScore = nutritionScore;
     }
 
-    public double getWeight() {
-        return weight;
+    public Double getExerciseScore() {
+        return exerciseScore;
     }
 
-    public void setWeight(double weight) {
-        this.weight = weight;
+    public void setExerciseScore(Double exerciseScore) {
+        this.exerciseScore = exerciseScore;
     }
 
-    public boolean isSmoker() {
-        return smoker;
+    public Double getOverallScore() {
+        return overallScore;
     }
 
-    public void setSmoker(boolean smoker) {
-        this.smoker = smoker;
-    }
-
-    public int getExerciseDaysPerWeek() {
-        return exerciseDaysPerWeek;
-    }
-
-    public void setExerciseDaysPerWeek(int exerciseDaysPerWeek) {
-        this.exerciseDaysPerWeek = exerciseDaysPerWeek;
-    }
-
-    public String getSleepPattern() {
-        return sleepPattern;
-    }
-
-    public void setSleepPattern(String sleepPattern) {
-        this.sleepPattern = sleepPattern;
+    public void setOverallScore(Double overallScore) {
+        this.overallScore = overallScore;
     }
 
     public String getRiskLevel() {
@@ -135,12 +112,12 @@ public class HealthAssessment {
         this.riskLevel = riskLevel;
     }
 
-    public String getHealthSuggestions() {
-        return healthSuggestions;
+    public String getRecommendations() {
+        return recommendations;
     }
 
-    public void setHealthSuggestions(String healthSuggestions) {
-        this.healthSuggestions = healthSuggestions;
+    public void setRecommendations(String recommendations) {
+        this.recommendations = recommendations;
     }
 
     public User getUser() {
