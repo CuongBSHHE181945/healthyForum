@@ -12,6 +12,7 @@ import com.healthyForum.repository.UserAccountRepository;
 import com.healthyForum.repository.keywordFiltering.KeywordRepository;
 import com.healthyForum.repository.Post.PostReactionRepository;
 import com.healthyForum.service.UserService;
+import com.healthyForum.service.challenge.EvidenceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -47,6 +48,9 @@ public class PostService {
 
     @Autowired
     private CommentRepository commentRepository;
+
+    @Autowired
+    private EvidenceService evidenceService;
 
     // Save a post (new or edited) with user from Principal
     public void savePost(Post post, Principal principal) {
@@ -110,6 +114,9 @@ public class PostService {
 
         post.setBanned(true);
         post.setUpdatedAt(LocalDateTime.now());
+
+        if (evidenceService.isEvidence(post))
+            evidenceService.rejectEvidence(evidenceService.findByPost(post));
 
         return postRepository.save(post);
     }

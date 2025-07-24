@@ -107,7 +107,8 @@ public class EvidenceService {
                 evidencePost.setStatus(EvidenceStatus.APPROVED);
                 autoTickProgress(evidencePost); // ✅ add this line
             } else if (dislikeCount + likeCount >= 4) {
-                evidencePost.setStatus(EvidenceStatus.REJECTED);
+                rejectEvidence(evidencePost);
+                return;
             }
         } else if (currentStatus == EvidenceStatus.APPROVED && dislikeCount > likeCount) {
             evidencePost.setStatus(EvidenceStatus.UNDER_REVIEW); // status downgrade
@@ -137,5 +138,20 @@ public class EvidenceService {
     public Optional<EvidencePost> getLatestEvidence(Integer userChallengeId) {
         return evidencePostRepository
                 .findTopByUserChallengeIdOrderByCreatedAtDesc(userChallengeId);
+    }
+
+    public boolean isEvidence(Post post){
+        Optional<EvidencePost> evidenceOpt = evidencePostRepository.findByPost(post);
+        return evidenceOpt.isPresent();
+    }
+
+    public void rejectEvidence(EvidencePost evidencePost){
+        evidencePost.setStatus(EvidenceStatus.REJECTED);
+        evidencePostRepository.save(evidencePost);
+    }
+
+    public EvidencePost findByPost(Post post){
+        Optional<EvidencePost> evidenceOpt = evidencePostRepository.findByPost(post);
+        return evidenceOpt.orElse(null);
     }
 }
