@@ -13,6 +13,7 @@ public class Report {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "report_id")
     private Long reportId;
 
     @ManyToOne
