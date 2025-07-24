@@ -20,6 +20,8 @@ public class Comment {
 
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    private LocalDateTime updatedAt = LocalDateTime.now();
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
