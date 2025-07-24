@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title th:text="${post.title} + ' - Detail post'">Detail post</title>
+    <title th:text="${post.title} + ' - Chi tiết bài viết'">Chi tiết bài viết</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -49,14 +49,13 @@
     </style>
 </head>
 <body class="bg-light">
-
 <div class="container mt-4">
     <!-- Breadcrumb -->
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a th:href="@{/groups}">Groups</a></li>
-            <li class="breadcrumb-item"><a th:href="@{/groups/{id}(id=${group.id})}" th:text="${group.name}">Groups</a></li>
-            <li class="breadcrumb-item active">Detail post</li>
+            <li class="breadcrumb-item"><a th:href="@{/groups}">Nhóm</a></li>
+            <li class="breadcrumb-item"><a th:href="@{/groups/{id}(id=${group.id})}" th:text="${group.name}">Nhóm</a></li>
+            <li class="breadcrumb-item active">Chi tiết bài viết</li>
         </ol>
     </nav>
 
@@ -81,7 +80,7 @@
                 <div class="author-info">
                     <i class="fas fa-user-circle fa-2x text-primary"></i>
                     <div>
-                        <h6 class="mb-0" th:text="${post.author != null and post.author.account != null and post.author.account.username != null ? post.author.account.username : (post.author != null and post.author.fullName != null ? post.author.fullName : 'User')}">Author</h6>
+                        <h6 class="mb-0" th:text="${post.author != null and post.author.account != null and post.author.account.username != null ? post.author.account.username : (post.author != null and post.author.fullName != null ? post.author.fullName : 'Người dùng')}">Tác giả</h6>
                         <small class="text-muted" th:text="${#temporals.format(post.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2024 12:00</small>
                     </div>
                 </div>
@@ -91,24 +90,24 @@
                     <form th:action="@{/groups/{groupId}/posts/{postId}/delete(groupId=${group.id}, postId=${post.id})}"
                           method="post" class="d-inline">
                         <button type="submit" class="dropdown-item text-danger"
-                                onclick="return confirm('Are you sure you want to delete this post??')">
-                            <i class="fas fa-trash me-2"></i>Deltete Post
+                                onclick="return confirm('Bạn có chắc muốn xóa bài viết này?')">
+                            <i class="fas fa-trash me-2"></i>Xóa
                         </button>
                     </form>
                 </div>
             </div>
 
             <!-- Post Title -->
-            <h2 class="mb-3" th:text="${post.title}">Title post</h2>
+            <h2 class="mb-3" th:text="${post.title}">Tiêu đề bài viết</h2>
 
             <!-- Post Content -->
-            <div class="mb-3" style="white-space: pre-line;" th:text="${post.content}">Content post</div>
+            <div class="mb-3" style="white-space: pre-line;" th:text="${post.content}">Nội dung bài viết</div>
 
             <!-- Post Image - Improved Display -->
             <div th:if="${post.img != null and !#strings.isEmpty(post.img)}" class="image-container">
                 <img th:src="${post.img}"
                      class="post-image"
-                     alt="Post Image"
+                     alt="Hình ảnh bài viết"
                      data-bs-toggle="modal"
                      data-bs-target="#imageModal"
                      onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
@@ -116,7 +115,7 @@
                 <!-- Fallback for broken images -->
                 <div class="alert alert-warning" style="display: none;">
                     <i class="fas fa-exclamation-triangle me-2"></i>
-                    Cannot load image
+                    Không thể tải hình ảnh
                 </div>
             </div>
 
@@ -125,16 +124,16 @@
                 <div class="d-flex gap-3">
                     <span class="text-muted">
                         <i class="fas fa-heart text-danger"></i>
-                        <span th:text="${post.likeCount ?: 0}">0</span> Like
+                        <span th:text="${post.likeCount ?: 0}">0</span> thích
                     </span>
                     <span class="text-muted">
                         <i class="fas fa-comment text-primary"></i>
-                        <span th:text="${post.commentCount ?: 0}">0</span> Comment
+                        <span th:text="${post.commentCount ?: 0}">0</span> bình luận
                     </span>
                 </div>
                 <small class="text-muted">
                     <i class="fas fa-clock"></i>
-                    Posted: <span th:text="${#temporals.format(post.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
+                    Đã đăng: <span th:text="${#temporals.format(post.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
                 </small>
             </div>
 
@@ -143,11 +142,11 @@
                 <form th:action="@{/groups/{groupId}/posts/{postId}/like(groupId=${group.id}, postId=${post.id})}"
                       method="post" class="d-inline">
                     <button type="submit" class="btn btn-outline-danger btn-sm">
-                        <i class="fas fa-heart"></i> Like
+                        <i class="fas fa-heart"></i> Thích
                     </button>
                 </form>
                 <button class="btn btn-outline-primary btn-sm" onclick="document.getElementById('commentForm').scrollIntoView(); document.getElementById('commentContent').focus();">
-                    <i class="fas fa-comment"></i> Comment
+                    <i class="fas fa-comment"></i> Bình luận
                 </button>
             </div>
         </div>
@@ -158,7 +157,7 @@
         <div class="card-header">
             <h5 class="mb-0">
                 <i class="fas fa-comments me-2"></i>
-                Comment (<span th:text="${#lists.size(comments)}">0</span>)
+                Bình luận (<span th:text="${#lists.size(comments)}">0</span>)
             </h5>
         </div>
         <div class="card-body">
@@ -168,10 +167,10 @@
                       method="post">
                     <div class="mb-3">
                         <textarea class="form-control" id="commentContent" name="content" rows="3"
-                                  placeholder="Write your comment..." required></textarea>
+                                  placeholder="Viết bình luận của bạn..." required></textarea>
                     </div>
                     <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-paper-plane me-2"></i>Submit a comment
+                        <i class="fas fa-paper-plane me-2"></i>Gửi bình luận
                     </button>
                 </form>
             </div>
@@ -184,7 +183,7 @@
                             <i class="fas fa-user-circle fa-lg text-secondary"></i>
                             <div>
                                 <!-- Safe access to username with fallback -->
-                                <h6 class="mb-0" th:text="${comment.author != null and comment.author.account != null and comment.author.account.username != null ? comment.author.account.username : (comment.author != null and comment.author.fullName != null ? comment.author.fullName : 'User')}">Author</h6>
+                                <h6 class="mb-0" th:text="${comment.author != null and comment.author.account != null and comment.author.account.username != null ? comment.author.account.username : (comment.author != null and comment.author.fullName != null ? comment.author.fullName : 'Người dùng')}">Tác giả</h6>
                                 <small class="text-muted" th:text="${#temporals.format(comment.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2024 12:00</small>
                             </div>
                         </div>
@@ -194,20 +193,20 @@
                             <form th:action="@{/groups/{groupId}/posts/{postId}/comments/{commentId}/delete(groupId=${group.id}, postId=${post.id}, commentId=${comment.id})}"
                                   method="post" class="d-inline">
                                 <button type="submit" class="btn btn-outline-danger btn-sm"
-                                        onclick="return confirm('Are you sure you want to delete this comment?')">
+                                        onclick="return confirm('Bạn có chắc muốn xóa bình luận này?')">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </form>
                         </div>
                     </div>
-                    <div class="mt-2" style="white-space: pre-line;" th:text="${comment.content}">Content comment</div>
+                    <div class="mt-2" style="white-space: pre-line;" th:text="${comment.content}">Nội dung bình luận</div>
                 </div>
             </div>
             <!-- No Comments Message -->
             <div th:if="${#lists.size(comments) == 0}" class="text-center py-4">
                 <i class="fas fa-comment-slash fa-2x text-muted mb-3"></i>
-                <h6 class="text-muted">No comments yet</h6>
-                <p class="text-muted">Be the first to comment on this post!</p>
+                <h6 class="text-muted">Chưa có bình luận nào</h6>
+                <p class="text-muted">Hãy là người đầu tiên bình luận bài viết này!</p>
             </div>
         </div>
     </div>
@@ -215,10 +214,11 @@
     <!-- Back to Group Button -->
     <div class="text-center mt-4">
         <a th:href="@{/groups/{id}(id=${group.id})}" class="btn btn-secondary">
-            <i class="fas fa-arrow-left me-2"></i>Return to Group
+            <i class="fas fa-arrow-left me-2"></i>Quay lại nhóm
         </a>
     </div>
 </div>
+
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>

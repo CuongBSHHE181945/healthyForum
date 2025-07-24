@@ -9,7 +9,7 @@
 <div class="container mt-4">
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>Member Management</h2>
-    <a th:href="@{/groups/{id}(id=${group.id})}" class="btn btn-secondary">Return Group</a>
+    <a th:href="@{/groups/{id}(id=${group.id})}" class="btn btn-secondary">REturn Group</a>
   </div>
 
   <!-- Success/Error Messages -->
@@ -30,16 +30,16 @@
       <p class="card-text" th:text="${group.description}"></p>
       <div class="row">
         <div class="col-md-3">
-          <strong>Admin:</strong> <span th:text="${adminCount}"></span>
+          <strong>Quản trị viên:</strong> <span th:text="${adminCount}"></span>
         </div>
         <div class="col-md-3">
-          <strong>Moderator:</strong> <span th:text="${moderatorCount}"></span>
+          <strong>Điều hành viên:</strong> <span th:text="${moderatorCount}"></span>
         </div>
         <div class="col-md-3">
-          <strong>Member:</strong> <span th:text="${memberCount}"></span>
+          <strong>Thành viên:</strong> <span th:text="${memberCount}"></span>
         </div>
         <div class="col-md-3">
-          <strong>Total Member:</strong> <span th:text="${members.size()}"></span>
+          <strong>Tổng:</strong> <span th:text="${members.size()}"></span>
         </div>
       </div>
     </div>
@@ -89,7 +89,7 @@
                 <div class="dropdown" th:if="${isCurrentUserAdmin and member.role.name() != 'ADMIN'}">
                   <button class="btn btn-sm btn-outline-primary dropdown-toggle"
                           type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    Change Role
+                    Đổi vai trò
                   </button>
                   <ul class="dropdown-menu">
                     <li th:each="role : ${roles}">
@@ -115,7 +115,7 @@
                   <button type="submit"
                           class="btn btn-sm btn-outline-danger"
                           th:disabled="${member.user.id == currentUser.id}">
-                    Delete
+                    Loại bỏ
                   </button>
                 </form>
                 </form>
