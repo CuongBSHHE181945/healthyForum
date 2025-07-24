@@ -28,6 +28,8 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.authentication.LockedException;
 
 @Configuration
 @EnableWebSecurity
@@ -46,6 +48,17 @@ public class SecurityConfig {
     private CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
 
     @Bean
+    public AuthenticationFailureHandler customAuthenticationFailureHandler() {
+        return (request, response, exception) -> {
+            if (exception instanceof LockedException) {
+                response.sendRedirect("/login?suspended=true");
+            } else {
+                response.sendRedirect("/login?error=true");
+            }
+        };
+    }
+
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(authz -> authz
@@ -58,7 +71,7 @@ public class SecurityConfig {
             .formLogin(form -> form
                 .loginPage("/login")
                 .successHandler(customAuthenticationSuccessHandler)
-                .failureUrl("/login?error=true")
+                .failureHandler(customAuthenticationFailureHandler())
                 .permitAll()
             )
             .oauth2Login(oauth2 -> oauth2

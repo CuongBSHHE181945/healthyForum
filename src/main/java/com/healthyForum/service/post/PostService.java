@@ -8,6 +8,7 @@ import com.healthyForum.repository.UserRepository;
 import com.healthyForum.repository.UserAccountRepository;
 import com.healthyForum.repository.keywordFiltering.KeywordRepository;
 import com.healthyForum.repository.Post.PostReactionRepository;
+import com.healthyForum.repository.FollowRepository;
 import com.healthyForum.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -40,6 +41,9 @@ public class PostService {
 
     @Autowired
     private PostReactionRepository postReactionRepository;
+
+    @Autowired
+    private com.healthyForum.repository.FollowRepository followRepository;
 
     // Save a post (new or edited) with user from Principal
     public void savePost(Post post, Principal principal) {
@@ -165,13 +169,24 @@ public class PostService {
     }
 
     public Page<Post> getTrendingPosts(Pageable pageable) {
-        // TODO: Implement trending logic (e.g., most liked or commented posts)
-        return getAllVisiblePublicPosts(pageable);
+        List<Post> trendingPosts = postRepository.findTrendingPostsSimple(pageable);
+        return new org.springframework.data.domain.PageImpl<>(trendingPosts, pageable, trendingPosts.size());
     }
 
     public Page<Post> getFollowingPosts(Pageable pageable, String username) {
-        // TODO: Implement following logic (e.g., posts from users the current user follows)
-        return getAllVisiblePublicPosts(pageable);
+        User currentUser = userService.findByUsername(username);
+        if (currentUser == null) {
+            return Page.empty(pageable);
+        }
+        // Get the list of users this user follows
+        List<com.healthyForum.model.Follow> follows = followRepository.findByFollower(currentUser);
+        if (follows.isEmpty()) {
+            return Page.empty(pageable);
+        }
+        List<Long> followedUserIds = follows.stream()
+                .map(f -> f.getFollowed().getId())
+                .toList();
+        return postRepository.findFollowingPosts(followedUserIds, pageable);
     }
 
     public Map<Long, Long> getLikeCounts(List<Post> posts) {
