@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<!-- Head Section -->
+<head th:fragment="head" th:replace="~{fragments/header :: head}"></head>
+
+<!-- Navigation -->
+<nav th:fragment="navbar" th:replace="~{fragments/header :: navbar}"></nav>
+
+<!-- Footer -->
+<footer th:fragment="footer" th:replace="~{fragments/footer :: main-footer}"></footer>
+
+<!-- Scripts -->
+<div th:fragment="scripts" th:replace="~{fragments/footer :: scripts}"></div>
+</html>

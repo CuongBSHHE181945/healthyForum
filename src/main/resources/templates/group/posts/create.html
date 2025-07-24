@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Tạo bài viết mới</title>
+    <title>Create new post</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -58,9 +58,9 @@
         <div class="text-center">
             <h2 class="mb-3">
                 <i class="fas fa-plus-circle me-2"></i>
-                Tạo bài viết mới
+                Create new post
             </h2>
-            <p class="mb-0 opacity-75">Chia sẻ ý tưởng và kết nối với cộng đồng</p>
+            <p class="mb-0 opacity-75">Share ideas and connect with the community</p>
         </div>
     </div>
 
@@ -87,19 +87,19 @@
             <div class="mb-4">
                 <label for="title" class="form-label fw-bold">
                     <i class="fas fa-heading me-2 text-primary"></i>
-                    Tiêu đề bài viết
+                    Title post
                 </label>
                 <input type="text"
                        class="form-control form-control-lg"
                        id="title"
                        name="title"
-                       placeholder="Nhập tiêu đề hấp dẫn cho bài viết của bạn..."
+                       placeholder="Enter a catchy title for your post..."
                        required
                        maxlength="200">
                 <div class="d-flex justify-content-between mt-2">
                     <small class="text-muted">
                         <i class="fas fa-info-circle me-1"></i>
-                        Tiêu đề giúp thu hút sự chú ý của độc giả
+                        Headlines help attract readers' attention
                     </small>
                     <small class="char-counter">
                         <span id="titleCount">0</span>/200
@@ -111,7 +111,7 @@
             <div class="mb-4">
                 <label for="content" class="form-label fw-bold">
                     <i class="fas fa-align-left me-2 text-primary"></i>
-                    Nội dung bài viết
+                    Content post
                 </label>
                 <textarea class="form-control"
                           id="content"
@@ -123,8 +123,6 @@
                 <div class="d-flex justify-content-between mt-2">
                     <small class="text-muted">
                         <i class="fas fa-markdown me-1"></i>
-                        Bạn có thể sử dụng ngắt dòng để định dạng văn bản
-                    </small>
                     <small class="char-counter">
                         <span id="contentCount">0</span>/5000
                     </small>
@@ -135,7 +133,7 @@
             <div class="mb-4">
                 <label class="form-label fw-bold">
                     <i class="fas fa-image me-2 text-primary"></i>
-                    Hình ảnh (tùy chọn)
+                    Image (optional)
                 </label>
 
                 <!-- Image Upload Tabs -->
@@ -153,10 +151,10 @@
                     <div class="tab-pane fade show active" id="upload-pane">
                         <div class="image-upload-area" onclick="document.getElementById('imageFile').click();">
                             <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
-                            <h5 class="text-muted">Kéo thả hình ảnh vào đây</h5>
-                            <p class="text-muted mb-3">hoặc click để chọn file</p>
+                            <h5 class="text-muted">Drag and drop images here</h5>
+                            <p class="text-muted mb-3">or click to select file</p>
                             <small class="text-muted">
-                                Hỗ trợ: JPG, PNG, GIF (tối đa 5MB)
+                                Support: JPG, PNG, GIF (max 5MB)
                             </small>
                             <input type="file"
                                    id="imageFile"
@@ -170,7 +168,7 @@
                             <div class="mt-2">
                                 <button type="button" class="btn btn-sm btn-outline-danger"
                                         onclick="removePreview()">
-                                    <i class="fas fa-trash me-1"></i>Xóa ảnh
+                                    <i class="fas fa-trash me-1"></i>Delete images
                                 </button>
                             </div>
                         </div>
@@ -183,12 +181,12 @@
                 <a th:href="@{/groups/{groupId}(groupId=${groupId})}"
                    class="btn btn-secondary">
                     <i class="fas fa-times me-2"></i>
-                    Hủy bỏ
+                    Cancel
                 </a>
 
                 <button type="submit" class="btn btn-primary">
                     <i class="fas fa-paper-plane me-2"></i>
-                    Đăng bài viết
+                    Post
                 </button>
             </div>
         </form>
