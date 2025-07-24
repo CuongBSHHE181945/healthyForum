@@ -112,6 +112,7 @@ public class PostService {
         existingPost.setContent(updatedPost.getContent());
         existingPost.setVisibility(updatedPost.getVisibility());
         existingPost.setImageUrl(updatedPost.getImageUrl());
+        existingPost.setVideoUrl(updatedPost.getVideoUrl());
         existingPost.setUpdatedAt(LocalDateTime.now()); // optional
         postRepository.save(existingPost);
     }
