@@ -4,14 +4,15 @@ import com.healthyForum.model.*;
 import com.healthyForum.model.Enum.EvidenceStatus;
 import com.healthyForum.model.Enum.ReactionType;
 import com.healthyForum.model.Enum.Visibility;
+import com.healthyForum.model.Post.PostReaction;
 import com.healthyForum.model.challenge.EvidencePost;
 import com.healthyForum.model.challenge.*;
 import com.healthyForum.model.Post.*;
+import com.healthyForum.repository.Post.PostReactionRepository;
 import com.healthyForum.repository.Post.PostRepository;
 import com.healthyForum.repository.UserRepository;
 import com.healthyForum.repository.challenge.ChallengeRepository;
 import com.healthyForum.repository.challenge.EvidencePostRepository;
-import com.healthyForum.repository.challenge.EvidenceReactionRepository;
 import com.healthyForum.repository.challenge.UserChallengeRepository;
 import com.healthyForum.service.UserService;
 import com.healthyForum.service.challenge.ChallengeTrackingService;
@@ -44,10 +45,10 @@ public class PostEvidenceController {
     private final UserRepository userRepository;
     private final UserService userService;
     private final EvidenceService evidenceService;
-    private final EvidenceReactionRepository evidenceReactionRepository;
     private final ChallengeTrackingService challengeTrackingService;
+    private final PostReactionRepository postReactionRepository;
 
-    public PostEvidenceController(PostRepository postRepository, EvidencePostRepository evidencePostRepository, ChallengeRepository challengeRepository, UserChallengeRepository userChallengeRepository, UserRepository userRepository, UserService userService, EvidenceService evidenceService, EvidenceReactionRepository evidenceReactionRepository, ChallengeTrackingService challengeTrackingService) {
+    public PostEvidenceController(PostRepository postRepository, EvidencePostRepository evidencePostRepository, ChallengeRepository challengeRepository, UserChallengeRepository userChallengeRepository, UserRepository userRepository, UserService userService, EvidenceService evidenceService, ChallengeTrackingService challengeTrackingService, PostReactionRepository postReactionRepository) {
         this.postRepository = postRepository;
         this.evidencePostRepository = evidencePostRepository;
         this.challengeRepository = challengeRepository;
@@ -55,8 +56,8 @@ public class PostEvidenceController {
         this.userRepository = userRepository;
         this.userService = userService;
         this.evidenceService = evidenceService;
-        this.evidenceReactionRepository = evidenceReactionRepository;
         this.challengeTrackingService = challengeTrackingService;
+        this.postReactionRepository = postReactionRepository;
     }
 
     @GetMapping("/review/{userChallengeId}")
@@ -70,12 +71,13 @@ public class PostEvidenceController {
 
         for (EvidencePost evidence : evidenceList) {
             Long postId = evidence.getPost().getId();
-            likeCounts.put(postId, evidenceReactionRepository.countByPostIdAndReactionType(postId, ReactionType.LIKE));
-            dislikeCounts.put(postId, evidenceReactionRepository.countByPostIdAndReactionType(postId, ReactionType.DISLIKE));
+            Post post = evidence.getPost();
+            likeCounts.put(postId, postReactionRepository.countByPostAndType(post, ReactionType.LIKE));
+            dislikeCounts.put(postId, postReactionRepository.countByPostAndType(post, ReactionType.DISLIKE));
 
-            Optional<EvidenceReaction> optionalReaction = evidenceReactionRepository.findByPostIdAndUserId(postId, user.getId());
+            Optional<PostReaction> optionalReaction = postReactionRepository.findByUserAndPost(user, post);
             if (optionalReaction.isPresent()) {
-                userReactions.put(postId, optionalReaction.get().getReactionType());
+                userReactions.put(postId, optionalReaction.get().getType());
             }
         }
 

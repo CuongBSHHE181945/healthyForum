@@ -7,11 +7,14 @@ import com.healthyForum.model.Post.PostReaction;
 import com.healthyForum.model.Report;
 import com.healthyForum.model.User;
 import com.healthyForum.model.Enum.Visibility;
+import com.healthyForum.model.challenge.EvidencePost;
 import com.healthyForum.repository.Post.CommentRepository;
 import com.healthyForum.repository.Post.PostReactionRepository;
 import com.healthyForum.repository.Post.PostRepository;
 import com.healthyForum.repository.UserAccountRepository;
 import com.healthyForum.repository.UserRepository;
+import com.healthyForum.repository.challenge.EvidencePostRepository;
+import com.healthyForum.service.challenge.EvidenceService;
 import com.healthyForum.service.post.CommentService;
 import com.healthyForum.service.post.FileStorageService;
 import com.healthyForum.service.post.PostService;
@@ -55,10 +58,14 @@ public class PostController {
 
     private final CommentService commentService;
 
+    private final EvidencePostRepository evidencePostRepository;
+
+    private final EvidenceService evidenceService;
+
     private final String uploadDir = "C:/Users/admin/Downloads/healthyForum/healthyForum/healthyForum/Uploads/";
 
     @Autowired
-    public PostController(PostService postService, UserRepository userRepository, PostRepository postRepository, ReportService reportService, UserAccountRepository userAccountRepository, UserService userService, PostReactionRepository postReactionRepository, CommentRepository commentRepository, FileStorageService fileStorageService, CommentService commentService) {
+    public PostController(PostService postService, UserRepository userRepository, PostRepository postRepository, ReportService reportService, UserAccountRepository userAccountRepository, UserService userService, PostReactionRepository postReactionRepository, CommentRepository commentRepository, FileStorageService fileStorageService, CommentService commentService, EvidencePostRepository evidencePostRepository, EvidenceService evidenceService) {
         this.postService = postService;
         this.userRepository = userRepository;
         this.postRepository = postRepository;
@@ -69,6 +76,8 @@ public class PostController {
         this.commentRepository = commentRepository;
         this.fileStorageService = fileStorageService;
         this.commentService = commentService;
+        this.evidencePostRepository = evidencePostRepository;
+        this.evidenceService = evidenceService;
     }
 
     /**
@@ -336,6 +345,11 @@ public class PostController {
                 postReactionRepository.save(newReaction);
             }
         }
+        //check if evidence post to update accordingly
+        Optional<EvidencePost> evidenceOpt = evidencePostRepository.findByPost(post);
+        if (evidenceOpt.isPresent()){
+            evidenceService.reactToEvidence(user, evidenceOpt.get().getId(), "LIKE");
+        }
 
         return "redirect:/posts/" + id;
     }
@@ -362,6 +376,12 @@ public class PostController {
                 newReaction.setType(ReactionType.DISLIKE);
                 postReactionRepository.save(newReaction);
             }
+        }
+
+        //check if evidence post to update accordingly
+        Optional<EvidencePost> evidenceOpt = evidencePostRepository.findByPost(post);
+        if (evidenceOpt.isPresent()){
+            evidenceService.reactToEvidence(user, evidenceOpt.get().getId(), "DISLIKE");
         }
 
         return "redirect:/posts/" + id;

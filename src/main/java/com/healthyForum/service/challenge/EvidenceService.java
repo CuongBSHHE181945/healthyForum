@@ -2,21 +2,20 @@ package com.healthyForum.service.challenge;
 
 import com.healthyForum.model.Enum.EvidenceStatus;
 import com.healthyForum.model.Enum.ReactionType;
+import com.healthyForum.model.Post.Post;
 import com.healthyForum.model.challenge.EvidencePost;
 import com.healthyForum.model.User;
 import com.healthyForum.model.challenge.UserChallenge;
 import com.healthyForum.model.challenge.UserChallengeProgress;
+import com.healthyForum.repository.Post.PostReactionRepository;
 import com.healthyForum.repository.challenge.EvidencePostRepository;
-import com.healthyForum.repository.challenge.EvidenceReactionRepository;
 import com.healthyForum.repository.challenge.UserChallengeProgressRepository;
 import com.healthyForum.repository.challenge.UserChallengeRepository;
-import com.healthyForum.service.post.FileStorageService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,14 +33,14 @@ public class EvidenceService {
     private final EvidencePostRepository evidencePostRepository;
     private final ReactionService reactionService;
     private final UserChallengeProgressRepository userChallengeProgressRepository;
-    private final EvidenceReactionRepository evidenceReactionRepository;
+    private final PostReactionRepository postReactionRepository;
 
-    public EvidenceService(UserChallengeRepository userChallengeRepository, EvidencePostRepository evidencePostRepository, ReactionService reactionService, UserChallengeProgressRepository userChallengeProgressRepository, EvidenceReactionRepository evidenceReactionRepository) {
+    public EvidenceService(UserChallengeRepository userChallengeRepository, EvidencePostRepository evidencePostRepository, ReactionService reactionService, UserChallengeProgressRepository userChallengeProgressRepository,PostReactionRepository postReactionRepository) {
         this.userChallengeRepository = userChallengeRepository;
         this.evidencePostRepository = evidencePostRepository;
         this.reactionService = reactionService;
         this.userChallengeProgressRepository = userChallengeProgressRepository;
-        this.evidenceReactionRepository = evidenceReactionRepository;
+        this.postReactionRepository = postReactionRepository;
     }
 
     public String saveEvidenceImage(MultipartFile file, String username) throws IOException {
@@ -89,31 +88,32 @@ public class EvidenceService {
     }
 
     public void reactToEvidence(User user, Integer evidenceId, String reactionType) {
-        EvidencePost post = evidencePostRepository.findById(evidenceId)
+        EvidencePost evidencePost = evidencePostRepository.findById(evidenceId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        Long postId = post.getPost().getId();
+        Long postId = evidencePost.getPost().getId();
+        Post post = evidencePost.getPost();
 
         // Save or update user reaction (LIKE or DISLIKE)
         reactionService.saveOrUpdateReaction(user, evidenceId, reactionType);
 
         // Recalculate total reactions
-        long likeCount = evidenceReactionRepository.countByPostIdAndReactionType(postId, ReactionType.LIKE);
-        long dislikeCount = evidenceReactionRepository.countByPostIdAndReactionType(postId, ReactionType.DISLIKE);
+        long likeCount = postReactionRepository.countByPostAndType(post, ReactionType.LIKE);
+        long dislikeCount = postReactionRepository.countByPostAndType(post, ReactionType.DISLIKE);
 
-        EvidenceStatus currentStatus = post.getStatus();
+        EvidenceStatus currentStatus = evidencePost.getStatus();
         // Evaluate status based on current counts
         if (currentStatus == EvidenceStatus.PENDING) {
             if (likeCount >= 3 && (likeCount >= (dislikeCount*3))) {
-                post.setStatus(EvidenceStatus.APPROVED);
-                autoTickProgress(post); // ✅ add this line
+                evidencePost.setStatus(EvidenceStatus.APPROVED);
+                autoTickProgress(evidencePost); // ✅ add this line
             } else if (dislikeCount + likeCount >= 4) {
-                post.setStatus(EvidenceStatus.REJECTED);
+                evidencePost.setStatus(EvidenceStatus.REJECTED);
             }
         } else if (currentStatus == EvidenceStatus.APPROVED && dislikeCount > likeCount) {
-            post.setStatus(EvidenceStatus.UNDER_REVIEW); // status downgrade
+            evidencePost.setStatus(EvidenceStatus.UNDER_REVIEW); // status downgrade
         }
 
-        evidencePostRepository.save(post);
+        evidencePostRepository.save(evidencePost);
     }
 
     public void autoTickProgress(EvidencePost post) {

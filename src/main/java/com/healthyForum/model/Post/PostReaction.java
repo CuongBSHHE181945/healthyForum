@@ -26,5 +26,4 @@ public class PostReaction {
 
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;
-
 }

@@ -1,6 +1,7 @@
 package com.healthyForum.repository.challenge;
 
 import com.healthyForum.model.Enum.EvidenceStatus;
+import com.healthyForum.model.Post.Post;
 import com.healthyForum.model.challenge.EvidencePost;
 import com.healthyForum.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -36,4 +37,6 @@ public interface EvidencePostRepository extends JpaRepository<EvidencePost, Inte
                                                             @Param("date") LocalDate date);
 
     Optional<EvidencePost> findTopByUserChallengeIdOrderByCreatedAtDesc(Integer userChallengeId);
+
+    Optional<EvidencePost> findByPost(Post post);
 }
