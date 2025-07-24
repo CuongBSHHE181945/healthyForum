@@ -53,6 +53,19 @@ import java.util.Optional;
     public Optional<Comment> findById(Long commentId) {
         return commentRepository.findById(commentId);
     }
+
+    public Long deleteComment(Long commentId, String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Comment comment = commentRepository.findByIdAndUserId(commentId, user.getId())
+                .orElseThrow(() -> new RuntimeException("You dont have the permission to delete this comment"));
+
+        Long postId = comment.getPost().getId();
+        commentRepository.delete(comment);
+        return postId;
+    }
+
     }
 
 

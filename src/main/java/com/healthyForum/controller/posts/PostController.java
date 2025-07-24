@@ -94,7 +94,11 @@ public class PostController {
      */
     @GetMapping("/my-post")
     public String listMyPosts(Model model, Principal principal) {
-        model.addAttribute("posts", postService.getPostsByCurrentUser(principal));
+        List<Post> myPosts = postService.getPostsByCurrentUser(principal);
+        if (!myPosts.isEmpty()) {
+            model.addAttribute("post", myPosts.get(0));
+        }
+        model.addAttribute("posts", myPosts);
         return "posts/my_post";
     }
 
@@ -179,12 +183,12 @@ public class PostController {
 
         if (existingPost == null || !postService.isOwner(existingPost, principal)) {
             redirectAttributes.addFlashAttribute("error", "You do not have permission to update this post.");
-            return "redirect:/posts";
+            return "redirect:/posts/my-post";
         }
 
         postService.updatePost(existingPost, updatedPost);
         redirectAttributes.addFlashAttribute("success", updatedPost.getVisibility() == Visibility.DRAFTS ? "Draft updated." : "Post updated.");
-        return "redirect:/posts";
+        return "redirect:/posts/my-post";
     }
 
     @GetMapping("/{id}/draft-edit")
@@ -213,7 +217,7 @@ public class PostController {
 
         if (existingPost == null || !postService.isOwner(existingPost, principal)) {
             redirectAttributes.addFlashAttribute("error", "You do not have permission to update this post.");
-            return "redirect:/posts";
+            return "redirect:/posts/my-post";
         }
 
         postService.updatePost(existingPost, updatedPost);
@@ -473,6 +477,21 @@ public class PostController {
         // Redirect về bài viết gốc sau khi sửa comment
         Long postId = commentService.getPostIdByCommentId(commentId);
         return "redirect:/posts/" + postId;
+    }
+
+    @PostMapping("/comments/{commentId}/delete")
+    public String deleteComment(@PathVariable("commentId") Long commentId,
+                                Principal principal,
+                                RedirectAttributes redirectAttributes) {
+        try {
+            String username = principal.getName();
+            Long postId = commentService.deleteComment(commentId, username);
+            redirectAttributes.addFlashAttribute("success", "Bình luận đã bị xóa.");
+            return "redirect:/posts/" + postId;
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/";
+        }
     }
 
 }
