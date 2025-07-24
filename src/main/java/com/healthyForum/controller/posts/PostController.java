@@ -234,12 +234,12 @@ public class PostController {
 
         // Don't allow users to report their own posts
         if (reportedUser.getId().equals(currentUser.getId())) {
-            redirectAttributes.addFlashAttribute("error", "Bạn không thể báo cáo bài viết của chính mình");
+            redirectAttributes.addFlashAttribute("error", "You cannot report your own posts.");
             return "redirect:/posts/" + id;
         }
 
         reportService.createPostReport(currentUser, reportedUser, post, reason);
-        redirectAttributes.addFlashAttribute("success", "Báo cáo đã được gửi và sẽ được xem xét");
+        redirectAttributes.addFlashAttribute("success", "The report has been submitted and will be reviewed.");
         return "redirect:/posts/" + id;
     }
 
