@@ -2,16 +2,18 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>Danh Sách Nhóm</title>
+  <title>List group</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
+
+
 <div class="container mt-4">
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Danh Sách Nhóm</h2>
+    <h2>List group</h2>
     <div>
-      <a th:href="@{/groups/create}" class="btn btn-primary">Tạo nhóm mới</a>
-      <a th:href="@{/groups/my-groups}" class="btn btn-outline-secondary">Nhóm của tôi</a>
+      <a th:href="@{/groups/create}" class="btn btn-primary">Create a new group</a>
+      <a th:href="@{/groups/my-groups}" class="btn btn-outline-secondary">My group</a>
     </div>
   </div>
 
@@ -30,10 +32,10 @@
   <form th:action="@{/groups/search}" method="get" class="mb-4">
     <div class="row">
       <div class="col-md-10">
-        <input type="text" class="form-control" name="keyword" placeholder="Tìm kiếm nhóm theo tên hoặc mô tả...">
+        <input type="text" class="form-control" name="keyword" placeholder="Search for groups by name or description...">
       </div>
       <div class="col-md-2">
-        <button type="submit" class="btn btn-outline-primary w-100">Tìm kiếm</button>
+        <button type="submit" class="btn btn-outline-primary w-100">Search</button>
       </div>
     </div>
   </form>
@@ -50,33 +52,28 @@
           </h5>
 
           <p class="card-text flex-grow-1"
-             th:text="${group.description != null ? #strings.abbreviate(group.description, 100) : 'Không có mô tả'}"></p>
+             th:text="${group.description != null ? #strings.abbreviate(group.description, 100) : 'Not description'}"></p>
 
           <div class="card-info mb-2">
             <small class="text-muted">
-              Tạo bởi: <span th:text="${group.createdBy != null ? group.createdBy.username : 'Unknown'}"></span>
+              Create by: <span th:text="${group.createdBy != null ? group.createdBy.username : 'Unknown'}"></span>
             </small>
             <br>
             <small class="text-muted" th:if="${group.createdAt != null}">
-              Ngày tạo: <span th:text="${#temporals.format(group.createdAt, 'dd/MM/yyyy')}"></span>
+              Date create: <span th:text="${#temporals.format(group.createdAt, 'dd/MM/yyyy')}"></span>
             </small>
           </div>
 
           <div class="d-flex justify-content-between align-items-center mt-auto">
             <small class="text-muted">
-              <span th:text="${group.memberCount != null ? group.memberCount : 0}"></span> thành viên
+              <span th:text="${group.memberCount != null ? group.memberCount : 0}"></span> Member
             </small>
             <a th:href="@{/groups/{id}(id=${group.id})}" class="btn btn-sm btn-outline-primary">
-              Xem chi tiết
+              View detail
             </a>
           </div>
         </div>
 
-        <!-- Group Status Badge -->
-        <div class="card-footer bg-transparent border-0 p-2" th:if="${group.isActive != null}">
-          <span class="badge bg-success w-100" th:if="${group.isActive}">Hoạt động</span>
-          <span class="badge bg-warning w-100" th:if="${!group.isActive}">Không hoạt động</span>
-        </div>
       </div>
     </div>
   </div>
@@ -84,9 +81,9 @@
   <!-- Empty State -->
   <div th:if="${groups == null or #lists.isEmpty(groups)}" class="text-center mt-5">
     <div class="empty-state">
-      <h4 class="text-muted">Chưa có nhóm nào</h4>
-      <p class="text-muted">Hãy là người đầu tiên tạo một nhóm mới!</p>
-      <a th:href="@{/groups/create}" class="btn btn-primary btn-lg">Tạo nhóm đầu tiên</a>
+      <h4 class="text-muted">There are no groups yet</h4>
+      <p class="text-muted">Be the first to create a new group!</p>
+      <a th:href="@{/groups/create}" class="btn btn-primary btn-lg">Create group</a>
     </div>
   </div>
 
@@ -95,15 +92,15 @@
     <div class="row text-center">
       <div class="col-md-4">
         <h5 class="text-primary" th:text="${#lists.size(groups)}">0</h5>
-        <small class="text-muted">Tổng số nhóm</small>
+        <small class="text-muted">Total group</small>
       </div>
       <div class="col-md-4">
         <h5 class="text-success">0</h5>
-        <small class="text-muted">Tổng thành viên</small>
+        <small class="text-muted">Total member</small>
       </div>
       <div class="col-md-4">
         <h5 class="text-info">0</h5>
-        <small class="text-muted">Tổng bài viết</small>
+        <small class="text-muted">Total post</small>
       </div>
     </div>
   </div>
@@ -111,10 +108,16 @@
   <!-- Quick Actions -->
   <div class="mt-4 text-center">
     <div class="btn-group" role="group">
-      <a th:href="@{/groups}" class="btn btn-outline-secondary active">Tất cả nhóm</a>
-      <a th:href="@{/groups/my-groups}" class="btn btn-outline-secondary">Của tôi</a>
+      <a th:href="@{/groups}" class="btn btn-outline-secondary active">All groups</a>
+      <a th:href="@{/groups/my-groups}" class="btn btn-outline-secondary">My group</a>
     </div>
   </div>
+</div>
+<!-- Back to Home Button -->
+<div class="back-to-home">
+  <a th:href="@{/}" class="btn btn-secondary">
+    <i class="fas fa-home"></i> Back to Home
+  </a>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>

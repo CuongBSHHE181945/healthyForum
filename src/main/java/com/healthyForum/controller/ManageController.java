@@ -59,25 +59,43 @@ public class ManageController {
     }
 
 
-    // Change these mappings from @GetMapping to @PostMapping
+
 
     @PostMapping("/suspend/{userId}")
-    public String suspendUser(@PathVariable Long userId) {
+    public String suspendUser(@PathVariable Long userId, RedirectAttributes redirectAttributes) {
         try {
+            // Check if the user being suspended is an admin
+            com.healthyForum.model.User targetUser = userService.getUserById(userId);
+            if (targetUser.getRole().getRoleName().equals("ADMIN")) {
+                redirectAttributes.addFlashAttribute("error", "Cannot suspend admin users");
+                return "redirect:/admin/users";
+            }
+
             userService.suspendUser(userId);
+            redirectAttributes.addFlashAttribute("success", "User suspended successfully");
             return "redirect:/admin/users";
         } catch (Exception e) {
-            return "redirect:/admin/users?error=Failed to suspend user";
+            redirectAttributes.addFlashAttribute("error", "Failed to suspend user");
+            return "redirect:/admin/users";
         }
     }
 
     @PostMapping("/unsuspend/{userId}")
-    public String unsuspendUser(@PathVariable Long userId) {
+    public String unsuspendUser(@PathVariable Long userId, RedirectAttributes redirectAttributes) {
         try {
+            // Check if the user being unsuspended is an admin
+            com.healthyForum.model.User targetUser = userService.getUserById(userId);
+            if (targetUser.getRole().getRoleName().equals("ADMIN")) {
+                redirectAttributes.addFlashAttribute("error", "Cannot modify admin user status");
+                return "redirect:/admin/users";
+            }
+
             userService.unsuspendUser(userId);
+            redirectAttributes.addFlashAttribute("success", "User unsuspended successfully");
             return "redirect:/admin/users";
         } catch (Exception e) {
-            return "redirect:/admin/users?error=Failed to unsuspend user";
+            redirectAttributes.addFlashAttribute("error", "Failed to unsuspend user");
+            return "redirect:/admin/users";
         }
     }
 
@@ -115,13 +133,13 @@ public class ManageController {
         // Handle post banning if requested
         if (banPost != null && banPost && report.getReportedPost() != null) {
             Post bannedPost = postService.banPost(report.getReportedPost().getId());
-            resolution += " (Bài viết đã bị cấm)";
+            resolution += " (Post banned)";
         }
 
         // Resolve the report
         reportService.resolveReport(id, resolution);
 
-        redirectAttributes.addFlashAttribute("success", "Báo cáo đã được xử lý thành công");
+        redirectAttributes.addFlashAttribute("success", "Report processed successfully");
         return "redirect:/admin/reports";
     }
 
@@ -132,7 +150,7 @@ public class ManageController {
 
         reportService.rejectReport(id, resolution);
 
-        redirectAttributes.addFlashAttribute("success", "Báo cáo đã được từ chối");
+        redirectAttributes.addFlashAttribute("success", "Report rejected successfully");
         return "redirect:/admin/reports";
     }
 
@@ -145,12 +163,12 @@ public class ManageController {
             postService.banPost(report.getReportedPost().getId());
 
             // Also resolve the report with auto-generated resolution
-            String resolution = "Bài viết đã bị cấm do vi phạm quy định cộng đồng.";
+            String resolution = "This post has been banned for violating community rules..";
             reportService.resolveReport(id, resolution);
 
-            redirectAttributes.addFlashAttribute("success", "Bài viết đã bị cấm và báo cáo đã được xử lý");
+            redirectAttributes.addFlashAttribute("success", "The post has been banned and the report has been processed.");
         } else {
-            redirectAttributes.addFlashAttribute("error", "Không thể thực hiện - báo cáo này không liên quan đến bài viết");
+            redirectAttributes.addFlashAttribute("error", "Unable to act - this report is not relevant to the article");
         }
 
         return "redirect:/admin/reports";
@@ -159,7 +177,7 @@ public class ManageController {
     @GetMapping("/posts/{id}/unban")
     public String unbanPost(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         postService.unbanPost(id);
-        redirectAttributes.addFlashAttribute("success", "Bài viết đã được bỏ cấm thành công");
+        redirectAttributes.addFlashAttribute("success", "The article has been successfully unbanned.");
         return "redirect:/admin/posts";
     }
 

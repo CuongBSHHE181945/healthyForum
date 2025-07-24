@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý người dùng - Healthy Forum</title>
+    <title>Manage User - Healthy Forum</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -12,34 +12,45 @@
 <body>
 <div class="d-flex">
     <!-- Sidebar -->
+    <!-- Sidebar -->
     <nav class="admin-sidebar d-flex flex-column">
         <div class="logo">
             <span class="logo-text">Healthy Forum</span>
         </div>
         <div class="px-3 py-2">
-            <small class="text-uppercase text-muted fw-bold">Quản trị</small>
+            <small class="text-uppercase text-muted fw-bold">Administrator</small>
         </div>
         <ul class="nav flex-column mb-auto px-2">
             <li class="nav-item">
-                <a href="/admin" class="nav-link">
-                    <i class="bi bi-speedometer2"></i> Tổng quan
+                <a href="/admin" class="nav-link active">
+                    <i class="bi bi-speedometer2"></i> Overview
                 </a>
             </li>
             <li class="nav-item">
-                <a href="/admin/users" class="nav-link active">
-                    <i class="bi bi-people"></i> Người dùng
+                <a href="/admin/users" class="nav-link">
+                    <i class="bi bi-people"></i> User
                 </a>
             </li>
             <li class="nav-item">
                 <a href="/admin/reports" class="nav-link">
-                    <i class="bi bi-flag"></i> Báo cáo
+                    <i class="bi bi-flag"></i> Report
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/admin/personal-challenge" class="nav-link">
+                    <i class="bi bi-flag"></i> Personal challenge
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/admin/keywords" class="nav-link">
+                    <i class="bi bi-flag"></i> Keyword Filtering
                 </a>
             </li>
         </ul>
         <div class="divider"></div>
         <div class="sidebar-footer">
             <a href="/" class="btn btn-light btn-sm w-100">
-                <i class="bi bi-house-door"></i> Về trang chủ
+                <i class="bi bi-house-door"></i> Back to home page
             </a>
         </div>
     </nav>
@@ -47,7 +58,7 @@
     <!-- Main Content -->
     <div class="admin-content">
         <div class="admin-topbar">
-            <h4 class="mb-0">Quản lý người dùng</h4>
+            <h4 class="mb-0">Manage User</h4>
             <div>
                 <button class="btn btn-light sidebar-toggle d-lg-none">
                     <i class="bi bi-list"></i>
@@ -61,10 +72,10 @@
 
         <div class="admin-card">
             <div class="card-header">
-                <h6 class="m-0 font-weight-bold">Danh sách người dùng</h6>
+                <h6 class="m-0 font-weight-bold">List user</h6>
                 <div class="d-flex">
                     <div class="input-group">
-                        <input type="text" class="form-control" placeholder="Tìm kiếm...">
+                        <input type="text" class="form-control" placeholder="Search...">
                         <button class="btn btn-primary" type="button">
                             <i class="bi bi-search"></i>
                         </button>
@@ -77,14 +88,14 @@
                         <thead>
                         <tr>
                             <th>ID</th>
-                            <th>Tên đăng nhập</th>
-                            <th>Họ tên</th>
+                            <th>Username</th>
+                            <th>Full name</th>
                             <th>Email</th>
-                            <th>Giới tính</th>
-                            <th>Ngày sinh</th>
-                            <th>Địa chỉ</th>
-                            <th>Trạng thái</th>
-                            <th>Hành động</th>
+                            <th>Gender</th>
+                            <th>Date of birth</th>
+                            <th>Address</th>
+                            <th>Status</th>
+                            <th>Action</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -98,14 +109,14 @@
                             <td th:text="${user.address}"></td>
                             <td>
                   <span th:class="'badge ' + (${user.account.suspended} ? 'bg-danger' : 'bg-success')"
-                        th:text="${user.account.suspended} ? 'Đã khóa' : 'Hoạt động'"></span>
+                        th:text="${user.account.suspended} ? 'Suspended' : 'Active'"></span>
                             </td>
                             <td>
                                 <form th:if="${!user.account.suspended}" th:action="@{/admin/suspend/{id}(id=${user.id})}" method="post" class="d-inline">
-                                    <button type="submit" class="btn btn-warning btn-sm">Khóa</button>
+                                    <button type="submit" class="btn btn-warning btn-sm">Suspended</button>
                                 </form>
                                 <form th:if="${user.account.suspended}" th:action="@{/admin/unsuspend/{id}(id=${user.id})}" method="post" class="d-inline">
-                                    <button type="submit" class="btn btn-success btn-sm">Mở khóa</button>
+                                    <button type="submit" class="btn btn-success btn-sm">Unsuspend</button>
                                 </form>
                             </td>
                         </tr>

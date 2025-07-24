@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý báo cáo - Healthy Forum</title>
+    <title>Manage Report - Healthy Forum</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -12,34 +12,45 @@
 <body>
 <div class="d-flex">
     <!-- Sidebar -->
+    <!-- Sidebar -->
     <nav class="admin-sidebar d-flex flex-column">
         <div class="logo">
             <span class="logo-text">Healthy Forum</span>
         </div>
         <div class="px-3 py-2">
-            <small class="text-uppercase text-muted fw-bold">Quản trị</small>
+            <small class="text-uppercase text-muted fw-bold">Administrator</small>
         </div>
         <ul class="nav flex-column mb-auto px-2">
             <li class="nav-item">
-                <a href="/admin" class="nav-link">
-                    <i class="bi bi-speedometer2"></i> Tổng quan
+                <a href="/admin" class="nav-link active">
+                    <i class="bi bi-speedometer2"></i> Overview
                 </a>
             </li>
             <li class="nav-item">
                 <a href="/admin/users" class="nav-link">
-                    <i class="bi bi-people"></i> Người dùng
+                    <i class="bi bi-people"></i> User
                 </a>
             </li>
             <li class="nav-item">
-                <a href="/admin/reports" class="nav-link active">
-                    <i class="bi bi-flag"></i> Báo cáo
+                <a href="/admin/reports" class="nav-link">
+                    <i class="bi bi-flag"></i> Report
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/admin/personal-challenge" class="nav-link">
+                    <i class="bi bi-flag"></i> Personal challenge
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/admin/keywords" class="nav-link">
+                    <i class="bi bi-flag"></i> Keyword Filtering
                 </a>
             </li>
         </ul>
         <div class="divider"></div>
         <div class="sidebar-footer">
             <a href="/" class="btn btn-light btn-sm w-100">
-                <i class="bi bi-house-door"></i> Về trang chủ
+                <i class="bi bi-house-door"></i> Back to home page
             </a>
         </div>
     </nav>
@@ -47,10 +58,10 @@
     <!-- Main Content -->
     <div class="admin-content">
         <div class="admin-topbar">
-            <h4 class="mb-0">Quản lý báo cáo</h4>
+            <h4 class="mb-0">Manage Report</h4>
             <div>
                 <a href="/admin/reports/all" class="btn btn-outline-primary me-2">
-                    <i class="bi bi-list-ul"></i> Xem tất cả báo cáo
+                    <i class="bi bi-list-ul"></i> View All Reports
                 </a>
                 <button class="btn btn-light sidebar-toggle d-lg-none">
                     <i class="bi bi-list"></i>
@@ -60,23 +71,23 @@
 
         <div class="admin-card admin-tabs">
             <div class="card-header border-bottom-0">
-                <h6 class="m-0 font-weight-bold">Báo cáo theo trạng thái</h6>
+                <h6 class="m-0 font-weight-bold">Report by status</h6>
             </div>
             <div class="card-body">
                 <ul class="nav nav-tabs" role="tablist">
                     <li class="nav-item" role="presentation">
                         <a class="nav-link active" data-bs-toggle="tab" href="#pending" role="tab">
-                            Đang chờ xử lý <span class="badge bg-danger ms-1" th:text="${pendingReports.size()}">0</span>
+                            Pending <span class="badge bg-danger ms-1" th:text="${pendingReports.size()}">0</span>
                         </a>
                     </li>
                     <li class="nav-item" role="presentation">
                         <a class="nav-link" data-bs-toggle="tab" href="#resolved" role="tab">
-                            Đã xử lý <span class="badge bg-success ms-1" th:text="${resolvedReports.size()}">0</span>
+                            Resolved<span class="badge bg-success ms-1" th:text="${resolvedReports.size()}">0</span>
                         </a>
                     </li>
                     <li class="nav-item" role="presentation">
                         <a class="nav-link" data-bs-toggle="tab" href="#rejected" role="tab">
-                            Đã từ chối <span class="badge bg-secondary ms-1" th:text="${rejectedReports.size()}">0</span>
+                            Rejected <span class="badge bg-secondary ms-1" th:text="${rejectedReports.size()}">0</span>
                         </a>
                     </li>
                 </ul>
@@ -87,8 +98,8 @@
                         <!-- Empty state -->
                         <div th:if="${#lists.isEmpty(pendingReports)}" class="text-center py-5">
                             <i class="bi bi-check-circle" style="font-size: 4rem; color: #ccc;"></i>
-                            <h3 class="mt-3">Không có báo cáo nào đang chờ xử lý</h3>
-                            <p class="text-muted">Tất cả báo cáo đã được xử lý!</p>
+                            <h3 class="mt-3">There are no pending reports.</h3>
+                            <p class="text-muted">All reports have been processed!</p>
                         </div>
 
                         <!-- Report cards -->
@@ -98,45 +109,45 @@
                                     <h5 class="card-title">
                                         <span th:if="${report.reportedPost != null}">
                                             Báo cáo bài viết: <span th:text="${report.reportedPost.title}"></span>
-                                            <span th:if="${report.reportedPost.banned}" class="badge bg-danger ms-2">Đã cấm</span>
+                                            <span th:if="${report.reportedPost.banned}" class="badge bg-danger ms-2">Banned</span>
                                         </span>
                                     </h5>
-                                    <span class="badge bg-danger">Đang chờ xử lý</span>
+                                    <span class="badge bg-danger">Pending</span>
                                 </div>
 
                                 <!-- Reported user information -->
                                 <div class="mt-2 mb-2">
                                     <p class="mb-1" th:if="${report.reportedUser != null}">
-                                        <strong>Người dùng bị báo cáo:</strong>
-                                        <span th:text="${report.reportedUser.fullName}">Người dùng</span>
+                                        <strong>Reported user:</strong>
+                                        <span th:text="${report.reportedUser.fullName}">User</span>
                                         (<span th:text="${report.reportedUser.username}">username</span>)
                                     </p>
                                 </div>
 
                                 <!-- Post content -->
                                 <div class="mt-2 mb-3 p-2 bg-light rounded" th:if="${report.reportedPost != null}">
-                                    <p class="mb-1"><strong>Nội dung bài viết:</strong></p>
-                                    <p class="mb-0" th:text="${#strings.abbreviate(report.reportedPost.content, 250)}">Nội dung bài viết</p>
-                                    <a th:href="@{/post/{id}(id=${report.reportedPost.id})}" class="btn btn-sm btn-outline-primary mt-2">Xem bài viết</a>
+                                    <p class="mb-1"><strong>Content post:</strong></p>
+                                    <p class="mb-0" th:text="${#strings.abbreviate(report.reportedPost.content, 250)}">Content post</p>
+                                    <a th:href="@{/posts/{id}(id=${report.reportedPost.id})}" class="btn btn-sm btn-outline-primary mt-2">View post</a>
                                 </div>
 
                                 <p class="card-text mt-2">
-                                    <strong>Lý do báo cáo:</strong> <span th:text="${report.reason}"></span>
+                                    <strong>Reason for reporting:</strong> <span th:text="${report.reason}"></span>
                                 </p>
 
                                 <div class="d-flex justify-content-between align-items-center mt-3">
                                     <div>
                                         <small class="text-muted">
-                                            <i class="bi bi-person"></i> Báo cáo bởi: <span th:text="${report.reporter.username}"></span>
+                                            <i class="bi bi-person"></i> Reported by: <span th:text="${report.reporter.username}"></span>
                                             <span class="ms-3"><i class="bi bi-clock"></i> <span th:text="${#dates.format(report.createdAt, 'dd/MM/yyyy HH:mm')}"></span></span>
                                         </small>
                                     </div>
                                     <div>
                                         <button class="btn btn-success" data-bs-toggle="modal" th:data-bs-target="'#resolveModal-' + ${report.reportId}">
-                                            <i class="bi bi-check-circle"></i> Xử lý
+                                            <i class="bi bi-check-circle"></i> Resolve
                                         </button>
                                         <button class="btn btn-danger ms-2" data-bs-toggle="modal" th:data-bs-target="'#rejectModal-' + ${report.reportId}">
-                                            <i class="bi bi-x-circle"></i> Từ chối
+                                            <i class="bi bi-x-circle"></i> Reject
                                         </button>
                                     </div>
                                 </div>
@@ -149,8 +160,8 @@
                         <!-- Empty state -->
                         <div th:if="${#lists.isEmpty(resolvedReports)}" class="text-center py-5">
                             <i class="bi bi-emoji-neutral" style="font-size: 4rem; color: #ccc;"></i>
-                            <h3 class="mt-3">Chưa có báo cáo nào được xử lý</h3>
-                            <p class="text-muted">Các báo cáo đã xử lý sẽ hiển thị ở đây</p>
+                            <h3 class="mt-3">No reports have been processed yet.</h3>
+                            <p class="text-muted">Processed reports will be displayed here.</p>
                         </div>
 
                         <!-- Resolved report cards -->
@@ -160,38 +171,38 @@
                                     <h5 class="card-title">
                                         <span th:if="${report.reportedPost != null}">
                                             Báo cáo bài viết: <span th:text="${report.reportedPost.title}"></span>
-                                            <span th:if="${report.reportedPost.banned}" class="badge bg-danger ms-2">Đã cấm</span>
+                                            <span th:if="${report.reportedPost.banned}" class="badge bg-danger ms-2">Banned</span>
                                         </span>
                                     </h5>
-                                    <span class="badge bg-success">Đã xử lý</span>
+                                    <span class="badge bg-success">Resolve</span>
                                 </div>
 
                                 <!-- Reported user information -->
                                 <div class="mt-2 mb-2">
                                     <p class="mb-1" th:if="${report.reportedUser != null}">
-                                        <strong>Người dùng bị báo cáo:</strong>
-                                        <span th:text="${report.reportedUser.fullName}">Người dùng</span>
+                                        <strong>Reported user:</strong>
+                                        <span th:text="${report.reportedUser.fullName}">User</span>
                                         (<span th:text="${report.reportedUser.username}">username</span>)
                                     </p>
                                 </div>
 
                                 <!-- Post content -->
                                 <div class="mt-2 mb-3 p-2 bg-light rounded" th:if="${report.reportedPost != null}">
-                                    <p class="mb-1"><strong>Nội dung bài viết:</strong></p>
-                                    <p class="mb-0" th:text="${#strings.abbreviate(report.reportedPost.content, 250)}">Nội dung bài viết</p>
-                                    <a th:href="@{/post/{id}(id=${report.reportedPost.id})}" class="btn btn-sm btn-outline-primary mt-2">Xem bài viết</a>
+                                    <p class="mb-1"><strong>Content post:</strong></p>
+                                    <p class="mb-0" th:text="${#strings.abbreviate(report.reportedPost.content, 250)}">Content post</p>
+                                    <a th:href="@{/posts/{id}(id=${report.reportedPost.id})}" class="btn btn-sm btn-outline-primary mt-2">View post</a>
                                 </div>
 
                                 <p class="card-text mt-2">
-                                    <strong>Lý do báo cáo:</strong> <span th:text="${report.reason}"></span>
+                                    <strong>Reason report:</strong> <span th:text="${report.reason}"></span>
                                 </p>
                                 <p class="card-text">
-                                    <strong>Cách xử lý:</strong> <span th:text="${report.resolution}"></span>
+                                    <strong>Resolution:</strong> <span th:text="${report.resolution}"></span>
                                 </p>
                                 <div class="d-flex justify-content-between align-items-center mt-3">
                                     <div>
                                         <small class="text-muted">
-                                            <i class="bi bi-person"></i> Báo cáo bởi: <span th:text="${report.reporter.username}"></span>
+                                            <i class="bi bi-person"></i> Reported by: <span th:text="${report.reporter.username}"></span>
                                             <span class="ms-3"><i class="bi bi-clock"></i> <span th:text="${#dates.format(report.createdAt, 'dd/MM/yyyy HH:mm')}"></span></span>
                                         </small>
                                     </div>
@@ -205,8 +216,8 @@
                         <!-- Empty state -->
                         <div th:if="${#lists.isEmpty(rejectedReports)}" class="text-center py-5">
                             <i class="bi bi-emoji-neutral" style="font-size: 4rem; color: #ccc;"></i>
-                            <h3 class="mt-3">Chưa có báo cáo nào bị từ chối</h3>
-                            <p class="text-muted">Các báo cáo đã từ chối sẽ hiển thị ở đây</p>
+                            <h3 class="mt-3">No reports have been rejected yet.</h3>
+                            <p class="text-muted">Rejected reports will be displayed here.</p>
                         </div>
 
                         <!-- Rejected report cards -->
@@ -215,39 +226,39 @@
                                 <div class="d-flex justify-content-between">
                                     <h5 class="card-title">
                                         <span th:if="${report.reportedPost != null}">
-                                            Báo cáo bài viết: <span th:text="${report.reportedPost.title}"></span>
-                                            <span th:if="${report.reportedPost.banned}" class="badge bg-danger ms-2">Đã cấm</span>
+                                            Report post: <span th:text="${report.reportedPost.title}"></span>
+                                            <span th:if="${report.reportedPost.banned}" class="badge bg-danger ms-2">Banned</span>
                                         </span>
                                     </h5>
-                                    <span class="badge bg-secondary">Đã từ chối</span>
+                                    <span class="badge bg-secondary">Rejected</span>
                                 </div>
 
                                 <!-- Reported user information -->
                                 <div class="mt-2 mb-2">
                                     <p class="mb-1" th:if="${report.reportedUser != null}">
-                                        <strong>Người dùng bị báo cáo:</strong>
-                                        <span th:text="${report.reportedUser.fullName}">Người dùng</span>
+                                        <strong>Reported user:</strong>
+                                        <span th:text="${report.reportedUser.fullName}">User</span>
                                         (<span th:text="${report.reportedUser.username}">username</span>)
                                     </p>
                                 </div>
 
                                 <!-- Post content -->
                                 <div class="mt-2 mb-3 p-2 bg-light rounded" th:if="${report.reportedPost != null}">
-                                    <p class="mb-1"><strong>Nội dung bài viết:</strong></p>
-                                    <p class="mb-0" th:text="${#strings.abbreviate(report.reportedPost.content, 250)}">Nội dung bài viết</p>
-                                    <a th:href="@{/post/{id}(id=${report.reportedPost.id})}" class="btn btn-sm btn-outline-primary mt-2">Xem bài viết</a>
+                                    <p class="mb-1"><strong>Content post:</strong></p>
+                                    <p class="mb-0" th:text="${#strings.abbreviate(report.reportedPost.content, 250)}">Content post</p>
+                                    <a th:href="@{/posts/{id}(id=${report.reportedPost.id})}" class="btn btn-sm btn-outline-primary mt-2">View post</a>
                                 </div>
 
                                 <p class="card-text mt-2">
-                                    <strong>Lý do báo cáo:</strong> <span th:text="${report.reason}"></span>
+                                    <strong>Reason:</strong> <span th:text="${report.reason}"></span>
                                 </p>
                                 <p class="card-text">
-                                    <strong>Lý do từ chối:</strong> <span th:text="${report.resolution}"></span>
+                                    <strong>Reason for reject:</strong> <span th:text="${report.resolution}"></span>
                                 </p>
                                 <div class="d-flex justify-content-between align-items-center mt-3">
                                     <div>
                                         <small class="text-muted">
-                                            <i class="bi bi-person"></i> Báo cáo bởi: <span th:text="${report.reporter.username}"></span>
+                                            <i class="bi bi-person"></i> Reported by: <span th:text="${report.reporter.username}"></span>
                                             <span class="ms-3"><i class="bi bi-clock"></i> <span th:text="${#dates.format(report.createdAt, 'dd/MM/yyyy HH:mm')}"></span></span>
                                         </small>
                                     </div>
@@ -266,34 +277,28 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Xử lý báo cáo</h5>
+                <h5 class="modal-title">Report resolve</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form th:action="@{/admin/reports/{id}/resolve(id=${report.reportId})}" method="post">
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="resolution" class="form-label">Cách xử lý <span class="text-danger">*</span></label>
+                        <label for="resolution" class="form-label">Resolution <span class="text-danger">*</span></label>
                         <textarea class="form-control" id="resolution" name="resolution" rows="4" required
-                                  placeholder="Nhập cách xử lý báo cáo này..."></textarea>
+                                  placeholder="Resolution report..."></textarea>
                     </div>
 
-                    <div th:if="${report.reportedPost != null}" class="form-check mb-3">
-                        <input class="form-check-input" type="checkbox" id="banPost" name="banPost" value="true">
-                        <label class="form-check-label" for="banPost">
-                            <span class="text-danger">Cấm bài viết này</span> - Bài viết sẽ không hiển thị công khai
-                        </label>
-                    </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                    <button type="submit" class="btn btn-success">Xác nhận xử lý</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">Confirm resolve</button>
 
                     <!-- Add separate ban button for immediate ban -->
                     <a th:if="${report.reportedPost != null}"
                        th:href="@{/admin/reports/{id}/ban-post(id=${report.reportId})}"
                        onclick="return confirm('Bạn có chắc chắn muốn cấm bài viết này?')"
                        class="btn btn-danger">
-                        Cấm bài viết
+                        Ban Post
                     </a>
                 </div>
             </form>
@@ -306,20 +311,20 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Từ chối báo cáo</h5>
+                <h5 class="modal-title">Reject report</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form th:action="@{/admin/reports/{id}/reject(id=${report.reportId})}" method="post">
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="rejectReason" class="form-label">Lý do từ chối <span class="text-danger">*</span></label>
+                        <label for="rejectReason" class="form-label">Reason reject <span class="text-danger">*</span></label>
                         <textarea class="form-control" id="rejectReason" name="resolution" rows="4" required
-                                  placeholder="Nhập lý do từ chối báo cáo này..."></textarea>
+                                  placeholder="Reason reject ..."></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                    <button type="submit" class="btn btn-danger">Xác nhận từ chối</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Confirmed reject</button>
                 </div>
             </form>
         </div>
