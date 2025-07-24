@@ -68,33 +68,58 @@
     </span>
             </div>
 
-            <!-- Bình luận -->
-            <div class="mt-5">
-                <h5 class="mb-3">Bình luận</h5>
+            <!-- Danh sách bình luận -->
+            <ul class="list-group mb-3" th:if="${commentPage != null}">
+                <li class="list-group-item" th:each="comment : ${commentPage.content}">
+                    <strong th:text="${comment.user.fullName}">User</strong>:
 
-                <!-- Danh sách bình luận -->
-                <ul class="list-group mb-3" th:if="${commentPage != null}">
-                    <li class="list-group-item" th:each="comment : ${commentPage.content}">
-                        <strong th:text="${comment.user.fullName}">User</strong>:
+                    <!-- Nếu đang sửa bình luận -->
+                    <div th:if="${editingCommentIds != null and editingCommentIds.contains(comment.id)}">
+                        <form th:action="@{'/posts/comments/' + ${comment.id} + '/edit'}" method="post" class="mt-2">
+                            <div class="mb-2">
+                                <textarea name="content" rows="3" class="form-control" th:text="${comment.content}"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-sm btn-primary">
+                                <i class="bi bi-save"></i> Cập nhật
+                            </button>
+                            <a th:href="@{'/posts/' + ${post.id}}" class="btn btn-sm btn-secondary ms-2">Hủy</a>
+                        </form>
+                    </div>
+
+                    <!-- Nếu không phải comment đang sửa -->
+                    <div th:if="${editingCommentIds == null or !editingCommentIds.contains(comment.id)}">
                         <span th:text="${comment.content}">Comment content</span><br>
-                        <small class="text-muted" th:text="${#temporals.format(comment.createdAt, 'dd/MM/yyyy HH:mm')}">Date</small>
-                    </li>
-                </ul>
+                        <small class="text-muted"
+                               th:text="${#temporals.format(comment.createdAt, 'dd/MM/yyyy HH:mm')}">Date</small>
+
+                        <!-- Nút chỉnh sửa chỉ hiển thị nếu là chủ comment -->
+                        <div th:if="${currentUserId != null and comment.user != null and currentUserId == comment.user.id}" class="mt-1">
+                            <a th:href="@{'/posts/' + ${post.id} + '/comments/' + ${comment.id} + '/edit'}"
+                               class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-pencil"></i> Sửa
+                            </a>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+
+
+
 
                 <!-- Nút xem thêm -->
                 <div class="text-center" th:if="${commentPage.hasNext()}">
                     <a th:href="@{'/posts/' + ${post.id} + '?page=' + ${currentPage + 1}}" class="btn btn-outline-primary">
-                        <i class="bi bi-chat-left-text"></i> Xem thêm bình luận
+                        <i class="bi bi-chat-left-text"></i> More comment
                     </a>
                 </div>
 
                 <!-- Form bình luận -->
                 <form th:action="@{'/posts/' + ${post.id} + '/comment'}" method="post">
                     <div class="mb-3">
-                        <textarea name="content" class="form-control" rows="3" placeholder="Nhập bình luận..." required></textarea>
+                        <textarea name="content" class="form-control" rows="3" placeholder="Enter comment..." required></textarea>
                     </div>
                     <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-send"></i> Gửi bình luận
+                        <i class="bi bi-send"></i> Send comment
                     </button>
                 </form>
             </div>
@@ -140,9 +165,9 @@
             </form>
         </div>
         <!-- Report button - only show if user is not the author -->
-        <div th:if="${!isOwner}" class="ms-auto">
+        <div th:if="${isOwner != null and !isOwner}" class="ms-auto">
             <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#reportModal">
-                <i class="bi bi-flag"></i> Báo Cáo
+                <i class="bi bi-flag"></i> Report
             </button>
         </div>
     </div>
@@ -153,7 +178,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="reportModalLabel">Báo cáo bài viết</h5>
+                <h5 class="modal-title" id="reportModalLabel">Report post</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form th:action="@{/posts/{id}/report(id=${post.id})}" method="post">
@@ -161,12 +186,12 @@
                     <div class="mb-3">
                         <label for="reportReason" class="form-label">Lý do báo cáo <span class="text-danger">*</span></label>
                         <textarea class="form-control" id="reportReason" name="reason" rows="4" required
-                                  placeholder="Vui lòng cho biết lý do bạn báo cáo bài viết này..."></textarea>
+                                  placeholder="Please let us know why you report this post"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                    <button type="submit" class="btn btn-warning">Gửi Báo Cáo</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-warning">Send report</button>
                 </div>
             </form>
         </div>

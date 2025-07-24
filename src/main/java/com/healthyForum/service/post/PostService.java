@@ -1,8 +1,11 @@
 package com.healthyForum.service.post;
 
+import com.healthyForum.model.Enum.ReactionType;
 import com.healthyForum.model.Enum.Visibility;
+import com.healthyForum.model.Post.Comment;
 import com.healthyForum.model.Post.Post;
 import com.healthyForum.model.User;
+import com.healthyForum.repository.Post.CommentRepository;
 import com.healthyForum.repository.Post.PostRepository;
 import com.healthyForum.repository.UserRepository;
 import com.healthyForum.repository.UserAccountRepository;
@@ -19,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Optional;
 
 @Service
 public class PostService {
@@ -28,7 +32,7 @@ public class PostService {
 
     @Autowired
     private UserRepository userRepository;
-    
+
     @Autowired
     private UserAccountRepository userAccountRepository;
 
@@ -40,6 +44,9 @@ public class PostService {
 
     @Autowired
     private PostReactionRepository postReactionRepository;
+
+    @Autowired
+    private CommentRepository commentRepository;
 
     // Save a post (new or edited) with user from Principal
     public void savePost(Post post, Principal principal) {
@@ -116,9 +123,11 @@ public class PostService {
         postRepository.save(existingPost);
     }
 
+
+
     public Post unbanPost(Long postId) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy bài viết với ID: " + postId));
+                .orElseThrow(() -> new RuntimeException("Can't find post with ID: " + postId));
         post.setBanned(false);
         post.setUpdatedAt(LocalDateTime.now());
         return postRepository.save(post);
@@ -176,7 +185,7 @@ public class PostService {
     public Map<Long, Long> getLikeCounts(List<Post> posts) {
         Map<Long, Long> likeCounts = new HashMap<>();
         for (Post post : posts) {
-            likeCounts.put(post.getId(), postReactionRepository.countByPostAndLiked(post, true));
+            likeCounts.put(post.getId(), postReactionRepository.countByPostAndType(post, ReactionType.LIKE));
         }
         return likeCounts;
     }
@@ -184,7 +193,7 @@ public class PostService {
     public Map<Long, Long> getDislikeCounts(List<Post> posts) {
         Map<Long, Long> dislikeCounts = new HashMap<>();
         for (Post post : posts) {
-            dislikeCounts.put(post.getId(), postReactionRepository.countByPostAndLiked(post, false));
+            dislikeCounts.put(post.getId(), postReactionRepository.countByPostAndType(post, ReactionType.DISLIKE));
         }
         return dislikeCounts;
     }

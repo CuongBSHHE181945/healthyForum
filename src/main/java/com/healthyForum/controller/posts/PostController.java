@@ -1,5 +1,6 @@
 package com.healthyForum.controller.posts;
 
+import com.healthyForum.model.Enum.ReactionType;
 import com.healthyForum.model.Post.Comment;
 import com.healthyForum.model.Post.Post;
 import com.healthyForum.model.Post.PostReaction;
@@ -18,7 +19,6 @@ import com.healthyForum.service.ReportService;
 import com.healthyForum.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.repository.query.Param;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -26,9 +26,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Paths;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -288,12 +285,12 @@ public class PostController {
             return "redirect:/posts";
         }
 
-        long likeCount = postReactionRepository.countByPostAndLiked(post, true);
-        long dislikeCount = postReactionRepository.countByPostAndLiked(post, false);
+        long likeCount = postReactionRepository.countByPostAndType(post, ReactionType.LIKE);
+        long dislikeCount = postReactionRepository.countByPostAndType(post, ReactionType.DISLIKE);
 
         Optional<PostReaction> userReaction = postReactionRepository.findByUserAndPost(viewer, post);
-        boolean likedByUser = userReaction.map(PostReaction::isLiked).orElse(false);
-        boolean dislikedByUser = userReaction.map(r -> !r.isLiked()).orElse(false);
+        boolean likedByUser = userReaction.map(r -> r.getType() == ReactionType.LIKE).orElse(false);
+        boolean dislikedByUser = userReaction.map(r -> r.getType() == ReactionType.DISLIKE).orElse(false);
 
         // Phân trang bình luận với PAGE_SIZE = 10
         Page<Comment> commentPage = commentService.getCommentsByPostId(post.getId(), page, 10);
@@ -304,9 +301,11 @@ public class PostController {
         model.addAttribute("dislikeCount", dislikeCount);
         model.addAttribute("likedByUser", likedByUser);
         model.addAttribute("dislikedByUser", dislikedByUser);
-
         model.addAttribute("commentPage", commentPage);
         model.addAttribute("currentPage", page);
+        model.addAttribute("editingCommentIds", Set.of());
+        model.addAttribute("currentUserId", viewer.getId());
+
 
         return "posts/post_detail";
     }
@@ -319,19 +318,24 @@ public class PostController {
         Post post = postService.getPostById(id);
 
         if (user != null && post != null) {
-            PostReaction reaction = postReactionRepository.findByUserAndPost(user, post).orElse(null);
-
-            if (reaction == null) {
-                reaction = new PostReaction();
-                reaction.setUser(user);
-                reaction.setPost(post);
-                reaction.setLiked(true);
-                postReactionRepository.save(reaction);
-            } else if (!reaction.isLiked()) {
-                reaction.setLiked(true);
-                postReactionRepository.save(reaction);
+            Optional<PostReaction> optional = postReactionRepository.findByUserAndPost(user, post);
+            if (optional.isPresent()) {
+                PostReaction existing = optional.get();
+                if (existing.getType() == ReactionType.LIKE) {
+                    postReactionRepository.delete(existing); // Toggle off
+                } else {
+                    existing.setType(ReactionType.LIKE);
+                    postReactionRepository.save(existing); // Switch from DISLIKE
+                }
+            } else {
+                PostReaction newReaction = new PostReaction();
+                newReaction.setUser(user);
+                newReaction.setPost(post);
+                newReaction.setType(ReactionType.LIKE);
+                postReactionRepository.save(newReaction);
             }
         }
+
         return "redirect:/posts/" + id;
     }
 
@@ -341,19 +345,24 @@ public class PostController {
         Post post = postService.getPostById(id);
 
         if (user != null && post != null) {
-            PostReaction reactions = postReactionRepository.findByUserAndPost(user, post).orElse(null);
-
-            if (reactions == null) {
-                reactions = new PostReaction();
-                reactions.setUser(user);
-                reactions.setPost(post);
-                reactions.setLiked(false);
-                postReactionRepository.save(reactions);
-            } else if (reactions.isLiked()) {
-                reactions.setLiked(false);
-                postReactionRepository.save(reactions);
+            Optional<PostReaction> optional = postReactionRepository.findByUserAndPost(user, post);
+            if (optional.isPresent()) {
+                PostReaction existing = optional.get();
+                if (existing.getType() == ReactionType.DISLIKE) {
+                    postReactionRepository.delete(existing); // Toggle off
+                } else {
+                    existing.setType(ReactionType.DISLIKE);
+                    postReactionRepository.save(existing); // Switch from LIKE
+                }
+            } else {
+                PostReaction newReaction = new PostReaction();
+                newReaction.setUser(user);
+                newReaction.setPost(post);
+                newReaction.setType(ReactionType.DISLIKE);
+                postReactionRepository.save(newReaction);
             }
         }
+
         return "redirect:/posts/" + id;
     }
 
@@ -387,5 +396,62 @@ public class PostController {
         return "redirect:/posts/" + id;
     }
 
+    @GetMapping("/{postId}/comments/{commentId}/edit")
+    public String showEditCommentForm(@PathVariable Long postId,
+                                      @PathVariable Long commentId,
+                                      Principal principal,
+                                      Model model,
+                                      RedirectAttributes redirectAttributes) {
+
+        User user = userService.getCurrentUser(principal);
+        if (user == null) {
+            redirectAttributes.addFlashAttribute("error", "Bạn cần đăng nhập để chỉnh sửa bình luận.");
+            return "redirect:/login";
+        }
+
+        Optional<Comment> optionalComment = commentService.findById(commentId);
+        if (optionalComment.isEmpty() || !optionalComment.get().getUser().getId().equals(user.getId())) {
+            redirectAttributes.addFlashAttribute("error", "Bạn không có quyền chỉnh sửa bình luận này.");
+            return "redirect:/posts/" + postId;
+        }
+
+        // Lấy lại bài viết để hiển thị chi tiết
+        Post post = postService.getPostById(postId);
+        Page<Comment> commentPage = commentService.getCommentsByPostId(postId, 0, 10);
+
+        model.addAttribute("post", post);
+        model.addAttribute("commentPage", commentPage);
+        model.addAttribute("currentUserId", user.getId());
+        model.addAttribute("editingCommentIds", Set.of(commentId));
+
+
+        return "posts/post_detail";
+
+    }
+
+
+    @PostMapping("/comments/{commentId}/edit")
+    public String updateComment(@PathVariable("commentId") Long commentId,
+                                @RequestParam("content") String content,
+                                Principal principal,
+                                RedirectAttributes redirectAttributes) {
+
+        if (principal == null) {
+            redirectAttributes.addFlashAttribute("error", "Bạn cần đăng nhập để chỉnh sửa bình luận.");
+            return "redirect:/login";
+        }
+
+        try {
+            String username = principal.getName();
+            commentService.updateComment(commentId, content, username);
+            redirectAttributes.addFlashAttribute("success", "Bình luận đã được cập nhật.");
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+
+        // Redirect về bài viết gốc sau khi sửa comment
+        Long postId = commentService.getPostIdByCommentId(commentId);
+        return "redirect:/posts/" + postId;
+    }
 
 }

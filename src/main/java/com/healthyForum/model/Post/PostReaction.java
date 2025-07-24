@@ -1,5 +1,6 @@
 package com.healthyForum.model.Post;
 
+import com.healthyForum.model.Enum.ReactionType;
 import com.healthyForum.model.User;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -13,7 +14,9 @@ public class PostReaction {
     @Column(name="id")
     private Long id;
 
-    private boolean liked; // true = like, false = dislike
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ReactionType type;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
