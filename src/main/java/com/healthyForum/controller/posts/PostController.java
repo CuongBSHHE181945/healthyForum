@@ -18,6 +18,7 @@ import com.healthyForum.service.ReportService;
 import com.healthyForum.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.repository.query.Param;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -110,6 +111,7 @@ public class PostController {
     public String showCreateForm(Model model) {
         model.addAttribute("post", new Post());
         model.addAttribute("visibilityOptions", Visibility.values());
+        model.addAttribute("mode", "create");
         return "posts/post_form";
     }
 
@@ -119,19 +121,14 @@ public class PostController {
     @PostMapping("/create")
     public String createPost(@ModelAttribute("post") Post post,
                              @RequestParam("imageFile") MultipartFile imageFile,
-//                             @RequestParam("videoFile") MultipartFile videoFile,
                              Principal principal,
                              RedirectAttributes redirectAttributes) {
-//        try {
+
             if (!imageFile.isEmpty()) {
                 post.setImageUrl(fileStorageService.save(imageFile));
             }
 
-//            if (!videoFile.isEmpty()) {
-//                String videoName = UUID.randomUUID() + "_" + videoFile.getOriginalFilename();
-//                videoFile.transferTo(Paths.get(uploadDir + videoName));
-//                post.setVideoUrl("/uploads/" + videoName);
-//            }
+
 
             postService.savePost(post, principal);
 
@@ -143,10 +140,7 @@ public class PostController {
             redirectAttributes.addFlashAttribute("success", "Post created successfully!");
             return "redirect:/posts";
 
-//        } catch (IOException e) {
-//            redirectAttributes.addFlashAttribute("error", "File upload failed: " + e.getMessage());
-//            return "redirect:/posts/create";
-//        }
+
     }
 
 
@@ -162,12 +156,20 @@ public class PostController {
         }
         model.addAttribute("post", post);
         model.addAttribute("visibilityOptions", Visibility.values());
+        model.addAttribute("mode", "edit");
         return "posts/post_form";
     }
 
     @PostMapping("/{id}/edit")
-    public String updatePost(@PathVariable Long id, @ModelAttribute("post") Post updatedPost, Principal principal, RedirectAttributes redirectAttributes) {
+    public String updatePost(@PathVariable Long id, @RequestParam("imageFile") MultipartFile imageFile, @ModelAttribute("post") Post updatedPost, Principal principal, RedirectAttributes redirectAttributes) {
         Post existingPost = postService.getPostById(id);
+        if (imageFile != null && !imageFile.isEmpty()) {
+            String newImageUrl = fileStorageService.save(imageFile);
+            updatedPost.setImageUrl(newImageUrl);
+        } else {
+            updatedPost.setImageUrl(existingPost.getImageUrl());
+        }
+
         if (existingPost == null || !postService.isOwner(existingPost, principal)) {
             redirectAttributes.addFlashAttribute("error", "You do not have permission to update this post.");
             return "redirect:/posts";
@@ -187,12 +189,21 @@ public class PostController {
         }
         model.addAttribute("post", post);
         model.addAttribute("visibilityOptions", Visibility.values());
+        model.addAttribute("mode", "drafts");
         return "posts/post_form";
     }
 
     @PostMapping("/{id}/draft-edit")
-    public String updateDraftForm(@PathVariable Long id, @ModelAttribute("post") Post updatedPost, Principal principal, RedirectAttributes redirectAttributes) {
+    public String updateDraftForm(@PathVariable Long id, @RequestParam("imageFile") MultipartFile imageFile, @ModelAttribute("post") Post updatedPost, Principal principal, RedirectAttributes redirectAttributes) {
         Post existingPost = postService.getPostById(id);
+
+        if (imageFile != null && !imageFile.isEmpty()) {
+            String newImageUrl = fileStorageService.save(imageFile);
+            updatedPost.setImageUrl(newImageUrl);
+        } else {
+            updatedPost.setImageUrl(existingPost.getImageUrl());
+        }
+
         if (existingPost == null || !postService.isOwner(existingPost, principal)) {
             redirectAttributes.addFlashAttribute("error", "You do not have permission to update this post.");
             return "redirect:/posts";
