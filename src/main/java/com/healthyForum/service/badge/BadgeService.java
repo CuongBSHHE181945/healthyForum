@@ -16,6 +16,9 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.swing.text.html.Option;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -65,12 +68,13 @@ public class BadgeService {
         badge.setDescription(badgeDescription);
 
         // 🎖 File Upload Setup
-        String unlockedDir = new File("src/main/resources/static/uploads/badges/unlocked/").getAbsolutePath();
-        String lockedDir   = new File("src/main/resources/static/uploads/badges/locked/").getAbsolutePath();
+        Path projectRoot = Paths.get("").toAbsolutePath(); // current working dir
+        Path unlockedDir = projectRoot.resolve("uploads").resolve("badges").resolve("unlocked");
+        Path lockedDir = projectRoot.resolve("uploads").resolve("badges").resolve("locked");
 
         // Ensure directories exist
-        new File(unlockedDir).mkdirs();
-        new File(lockedDir).mkdirs();
+        Files.createDirectories(unlockedDir);
+        Files.createDirectories(lockedDir);
 
         String iconFileName;
         String lockedFileName;
@@ -80,10 +84,11 @@ public class BadgeService {
         iconFileName = username + "_" + timestamp + "_" + badgeIconFile.getOriginalFilename();
         lockedFileName = username + "_" + timestamp + "_" + lockedIconFile.getOriginalFilename();
 
-        File iconFile = new File(unlockedDir + "/" + iconFileName);
-        File lockedFile = new File(lockedDir + "/" + lockedFileName);
-        badgeIconFile.transferTo(iconFile);
-        lockedIconFile.transferTo(lockedFile);
+        Path UnlockTargetFile = unlockedDir.resolve(iconFileName);
+        badgeIconFile.transferTo(UnlockTargetFile.toFile());
+
+        Path locTargetFile = lockedDir.resolve(lockedFileName);
+        lockedIconFile.transferTo(locTargetFile.toFile());
 
         badge.setIcon("/uploads/badges/unlocked/" + iconFileName);
         badge.setLockedIcon("/uploads/badges/locked/" + lockedFileName);

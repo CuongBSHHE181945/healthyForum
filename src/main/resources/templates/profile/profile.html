@@ -91,23 +91,30 @@
         <a th:if="${isOwner}" th:href="@{/badge-display}" class="btn btn-outline-primary mb-3">
           <i class="fas fa-cog"></i> Edit Displayed Badges
         </a>
-        <h3 class="mb-2"><i class="fas fa-medal"></i> Unlocked Badges</h3>
-        <div id="unlocked-badges" class="badge-list d-flex flex-wrap gap-1 mb-3" style="min-height: 44px;">
-          <div th:if="${#lists.isEmpty(unlockedBadges)}" class="text-muted fst-italic w-100">
-            No badges unlocked yet. Start completing challenges to earn badges!
-          </div>
-          <div th:each="badge : ${unlockedBadges}" th:title="${badge.name}">
-            <a th:href="@{'/badges/' + ${badge.id}}">
-              <img th:src="@{${badge.icon}}" class="badge-icon" style="width: 32px; height: 32px; object-fit: contain; margin: 1px;"/>
-            </a>
+        <!-- Unlocked Badges Section -->
+        <div th:if="${isOwner}">
+          <h3 class="mb-2"><i class="fas fa-medal"></i> Unlocked Badges</h3>
+          <div id="unlocked-badges" class="badge-list d-flex flex-wrap gap-1 mb-3" style="min-height: 44px;">
+            <div th:if="${#lists.isEmpty(unlockedBadges)}" class="text-muted fst-italic w-100">
+              No badges unlocked yet. Start completing challenges to earn badges!
+            </div>
+            <div th:each="badge : ${unlockedBadges}" th:title="${badge.name}">
+              <a th:href="@{'/badges/' + ${badge.id}}">
+                <img th:src="@{${badge.icon}}" class="badge-icon" style="width: 32px; height: 32px; object-fit: contain; margin: 1px;"/>
+              </a>
+            </div>
           </div>
         </div>
-        <h3 class="mb-2"><i class="fas fa-lock"></i> Locked Badges</h3>
-        <div id="locked-badges" class="badge-list locked d-flex flex-wrap gap-1" style="min-height: 44px;">
-          <div th:each="badge : ${lockedBadges}" th:title="${badge.name}">
-            <a th:href="@{'/badges/' + ${badge.id}}">
-              <img th:src="@{${badge.lockedIcon}}" class="badge-icon grayscale" style="width: 32px; height: 32px; object-fit: contain; margin: 1px;"/>
-            </a>
+
+        <!-- Locked Badges Section -->
+        <div th:if="${isOwner}">
+          <h3 class="mb-2"><i class="fas fa-lock"></i> Locked Badges</h3>
+          <div id="locked-badges" class="badge-list locked d-flex flex-wrap gap-1" style="min-height: 44px;">
+            <div th:each="badge : ${lockedBadges}" th:title="${badge.name}">
+              <a th:href="@{'/badges/' + ${badge.id}}">
+                <img th:src="@{${badge.lockedIcon}}" class="badge-icon grayscale" style="width: 32px; height: 32px; object-fit: contain; margin: 1px;"/>
+              </a>
+            </div>
           </div>
         </div>
       </div>

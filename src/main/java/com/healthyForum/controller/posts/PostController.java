@@ -145,13 +145,10 @@ public class PostController {
 
             if (post.isBanned()) {
                 redirectAttributes.addFlashAttribute("error", "Your post contains inappropriate language and has been banned.");
-                return "redirect:/posts/my-post";
             }
 
             redirectAttributes.addFlashAttribute("success", "Post created successfully!");
-            return "redirect:/posts";
-
-
+            return "redirect:/posts/my-post";
     }
 
 

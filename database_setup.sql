@@ -135,28 +135,17 @@ CREATE TABLE IF NOT EXISTS `report` (
     FOREIGN KEY (`reported_user_id`) REFERENCES `user`(`id`)
 );
 
--- Create Blog table
-CREATE TABLE IF NOT EXISTS `blog` (
-    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
-    `title` VARCHAR(255) NOT NULL,
-    `content` TEXT,
-    `created_at` DATETIME,
-    `author_username` VARCHAR(255),
-    `suspended` BOOLEAN DEFAULT FALSE,
-    CONSTRAINT `fk_author_username` FOREIGN KEY (`author_username`) REFERENCES `user_accounts`(`username`)
-);
-
 -- Create Messages table
-CREATE TABLE IF NOT EXISTS `messages` (
-    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
-    `sender_id` BIGINT NOT NULL,
-    `receiver_id` BIGINT NOT NULL,
-    `content` TEXT NOT NULL,
-    `timestamp` DATETIME DEFAULT CURRENT_TIMESTAMP,
-    `is_read` BOOLEAN DEFAULT FALSE,
-    FOREIGN KEY (`sender_id`) REFERENCES `user`(`id`),
-    FOREIGN KEY (`receiver_id`) REFERENCES `user`(`id`)
-);
+-- CREATE TABLE IF NOT EXISTS `messages` (
+--     `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
+--     `sender_id` BIGINT NOT NULL,
+--     `receiver_id` BIGINT NOT NULL,
+--     `content` TEXT NOT NULL,
+--     `timestamp` DATETIME DEFAULT CURRENT_TIMESTAMP,
+--     `is_read` BOOLEAN DEFAULT FALSE,
+--     FOREIGN KEY (`sender_id`) REFERENCES `user`(`id`),
+--     FOREIGN KEY (`receiver_id`) REFERENCES `user`(`id`)
+-- );
 
 -- Create Health Assessment table
 CREATE TABLE IF NOT EXISTS `health_assessment` (
@@ -275,22 +264,22 @@ CREATE TABLE IF NOT EXISTS evidence_post (
 );
 
 -- Create evidence_react table (references evidence_post)
-CREATE TABLE IF NOT EXISTS evidence_react (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id BIGINT NOT NULL,
-    evidence_post_id INT NOT NULL,
-    reaction_type ENUM('LIKE', 'DISLIKE') NOT NULL,
-    UNIQUE KEY user_post_reaction (user_id, evidence_post_id),
-    FOREIGN KEY (user_id) REFERENCES user(id),
-    FOREIGN KEY (evidence_post_id) REFERENCES evidence_post(evidence_post_id)
-);
+-- CREATE TABLE IF NOT EXISTS evidence_react (
+--     id INT AUTO_INCREMENT PRIMARY KEY,
+--     user_id BIGINT NOT NULL,
+--     evidence_post_id INT NOT NULL,
+--     reaction_type ENUM('LIKE', 'DISLIKE') NOT NULL,
+--     UNIQUE KEY user_post_reaction (user_id, evidence_post_id),
+--     FOREIGN KEY (user_id) REFERENCES user(id),
+--     FOREIGN KEY (evidence_post_id) REFERENCES evidence_post(evidence_post_id)
+-- );
 
 -- Create Post Reaction table
 CREATE TABLE IF NOT EXISTS post_reaction (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     post_id BIGINT NOT NULL,
     user_id BIGINT NOT NULL,
-    liked BOOLEAN NOT NULL,
+	reaction_type ENUM('LIKE', 'DISLIKE') NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (post_id) REFERENCES post(post_id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE,
@@ -304,7 +293,7 @@ CREATE TABLE IF NOT EXISTS comment (
     user_id BIGINT NOT NULL,
     content TEXT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP ,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP UPDATE ON CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (post_id) REFERENCES post(post_id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
 );
@@ -430,18 +419,18 @@ VALUES
 (6, 'Evening Walk', 'Beautiful sunset during my walk.', FALSE, 'PUBLIC', '2025-06-04 19:30:00', '2025-06-04 19:30:00', FALSE);
 
 -- Sample post reactions (likes/dislikes)
-INSERT INTO post_reaction (post_id, user_id, liked)
+INSERT INTO post_reaction (post_id, user_id, reaction_type)
 VALUES
-(1, 2, TRUE),
-(1, 3, TRUE),
-(2, 1, TRUE),
-(2, 3, FALSE),
-(3, 1, TRUE),
-(3, 2, FALSE),
-(5, 1, TRUE),
-(5, 2, TRUE),
-(5, 3, TRUE),
-(6, 1, FALSE);
+(1, 2, "LIKE"),
+(1, 3, "LIKE"),
+(2, 1, "LIKE"),
+(2, 3, "DISLIKE"),
+(3, 1, "LIKE"),
+(3, 2, "DISLIKE"),
+(5, 1, "LIKE"),
+(5, 2, "LIKE"),
+(5, 3, "LIKE"),
+(6, 1, "DISLIKE");
 
 -- Sample comments
 INSERT INTO comment (post_id, user_id, content, created_at)
@@ -495,26 +484,10 @@ INSERT INTO `meal_ingredient` (`ingredient_id`, `ingredient_name`, `ingredient_q
 (15, 'Potato', 150, 'grams', 6),
 (16, 'Butter', 1, 'tablespoons', 6);
 
-
--- Insert sample blog posts
-INSERT INTO `blog` (`title`, `content`, `created_at`, `author_username`, `suspended`) VALUES
-('Healthy Eating Tips', 'Eat more vegetables and fruits every day.', NOW(), 'user1', FALSE),
-('Workout Routines', 'Try HIIT for better results.', NOW(), 'user2', FALSE),
-('Mental Health Matters', 'Meditation helps reduce stress.', NOW(), 'user1', TRUE);
-
 -- Insert sample feedbacks
 INSERT INTO `feedback` (`user_id`, `message`, `submitted_at`, `response`) VALUES
 (2, 'Great site, very helpful!', '2025-06-01 10:15:00', NULL),
 (3, 'I found a bug in the forum.', '2025-06-02 14:30:00', NULL);
-
--- Insert sample messages
-INSERT INTO `messages` (`sender_id`, `receiver_id`, `content`, `is_read`) VALUES
-(1, 2, 'Hi Bob, how are you?', FALSE),
-(2, 1, 'Hi Alice, I am good. You?', TRUE),
-(1, 3, 'Hey Charlie, long time no see!', FALSE),
-(3, 1, 'Hi Alice! Yes, indeed.', TRUE),
-(2, 3, 'Charlie, are you coming to the meeting?', FALSE),
-(3, 2, 'Yes, I will be there!', TRUE);
 
 -- Insert sample health assessments
 INSERT INTO `health_assessment` (`bmi`, `sleep_score`, `nutrition_score`, `exercise_score`, `overall_score`, `risk_level`, `recommendations`, `user_id`) VALUES
@@ -1218,17 +1191,17 @@ INSERT INTO comment (post_id, user_id, content, created_at) VALUES
 
 -- Engagement (likes/dislikes) on controversial posts
 -- "Is Keto Diet Overrated?" (post_id 7)
-INSERT INTO post_reaction (post_id, user_id, liked) VALUES
-(7, 9, TRUE),  -- David Lee likes his own post
-(7, 10, FALSE), -- Emily Chen dislikes
-(7, 11, TRUE),  -- Frank Miller likes
-(7, 12, FALSE), -- Grace Kim dislikes
-(7, 13, TRUE);  -- Henry Nguyen likes
+INSERT INTO post_reaction (post_id, user_id, reaction_type) VALUES
+(7, 9, "LIKE"),  -- David Lee likes his own post
+(7, 10, "LIKE"), -- Emily Chen dislikes
+(7, 11, "LIKE"),  -- Frank Miller likes
+(7, 12,"LIKE"), -- Grace Kim dislikes
+(7, 13, "LIKE");  -- Henry Nguyen likes
 
 -- "Why Cardio is Overrated" (post_id 11)
-INSERT INTO post_reaction (post_id, user_id, liked) VALUES
-(11, 9, FALSE), -- David Lee dislikes
-(11, 10, TRUE), -- Emily Chen likes
-(11, 11, TRUE), -- Frank Miller likes his own post
-(11, 12, FALSE), -- Grace Kim dislikes
-(11, 13, TRUE); -- Henry Nguyen likes
+INSERT INTO post_reaction (post_id, user_id, reaction_type) VALUES
+(11, 9, "DISLIKE"), -- David Lee dislikes
+(11, 10, "LIKE"), -- Emily Chen likes
+(11, 11, "LIKE"), -- Frank Miller likes his own post
+(11, 12, "LIKE"), -- Grace Kim dislikes
+(11, 13, "LIKE"); -- Henry Nguyen likes
