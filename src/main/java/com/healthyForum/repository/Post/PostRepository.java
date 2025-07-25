@@ -26,7 +26,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     List<Post> findByUserIdAndVisibilityNot(Long userId, Visibility excludedVisibility);
 
     @Query(value = "SELECT p.* FROM post p " +
-           "LEFT JOIN post_reaction r ON r.post_id = p.post_id AND r.liked = TRUE " +
+           "LEFT JOIN post_reaction r ON r.post_id = p.post_id AND r.reaction_type = 'LIKE' " +
            "LEFT JOIN comment c ON c.post_id = p.post_id " +
            "WHERE p.created_at >= NOW() - INTERVAL :days DAY " +
            "AND p.visibility = 'PUBLIC' " +
@@ -38,7 +38,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     List<Post> findTrendingPosts(@Param("days") int days, Pageable pageable);
 
     @Query(value = "SELECT p.* FROM post p " +
-           "LEFT JOIN post_reaction r ON r.post_id = p.post_id AND r.liked = TRUE " +
+           "LEFT JOIN post_reaction r ON r.post_id = p.post_id AND r.reaction_type = 'LIKE' " +
            "LEFT JOIN comment c ON c.post_id = p.post_id " +
            "WHERE p.visibility = 'PUBLIC' " +
            "AND p.banned = FALSE " +
