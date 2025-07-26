@@ -76,7 +76,7 @@ public class AdminChallengeController {
             String username = user.getUsername();
 
             Badge badge = badgeService.handleBadgeIconUpload(badgeName,badgeDescription,badgeIconFile,lockedIconFile,username);
-
+            challenge.setCreator(user);
             // Save both challenge and badge (you can wrap this in a service)
             challengeService.createChallengeWithBadge(challenge, badge);
 
