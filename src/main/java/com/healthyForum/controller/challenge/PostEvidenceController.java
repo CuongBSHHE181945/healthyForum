@@ -91,12 +91,13 @@ public class PostEvidenceController {
     }
 
     @PostMapping("/react/{evidenceId}")
-    public String approveEvidence(@PathVariable Integer evidenceId, @RequestParam String reactionType, Principal principal) {
+    public String approveEvidence(@PathVariable Integer evidenceId, @RequestParam String reactionType, Principal principal, Model model,
+                                    @RequestParam Integer userChallengeId) {
         User user = userService.getCurrentUser(principal);
         EvidencePost post = evidencePostRepository.findById(evidenceId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         evidenceService.reactToEvidence(user, evidenceId, reactionType);
-        return "redirect:/evidence/review/" + post.getUserChallenge().getId();
+        return "redirect:/evidence/review/" + userChallengeId;
     }
 
     @GetMapping("/create")

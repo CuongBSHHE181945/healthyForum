@@ -80,7 +80,7 @@
         <h2 class="mb-3"><i class="fas fa-trophy"></i> Displayed Badges</h2>
         <div id="display-zone" class="drop-zone mb-3 d-flex flex-wrap gap-2 justify-content-center">
           <div th:if="${#lists.isEmpty(displayedBadges)}" class="text-muted fst-italic">
-            No badges displayed yet. <a th:if="${isOwner}" th:href="@{/badge-display}" class="text-primary">Configure your badges</a>
+            No badges displayed yet.
           </div>
           <div th:each="badge : ${displayedBadges}">
             <a th:href="@{'/badges/' + ${badge.id}}">

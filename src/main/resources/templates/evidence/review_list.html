@@ -29,6 +29,7 @@
     </video>
 
     <form th:action="@{'/evidence/react/' + ${evidence.id}}" method="post">
+      <input type="hidden" name = "userChallengeId" th:value = "${userChallengeId}">
       <button type="submit" name="reactionType" value="LIKE"
               th:classappend="${userReactions[evidence.post.id]?.name() == 'LIKE'} ? 'highlight' : ''">
         👍 <span th:text="${likeCounts[evidence.post.id]}"></span>
